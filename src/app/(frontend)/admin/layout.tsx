@@ -1,3 +1,5 @@
+// src/app/(frontend)/admin/layout.tsx:1
+
 import {Sidebar} from "@/components/dashboard/Sidebar"
 import {Topbar} from "@/components/dashboard/Topbar"
 import React from "react";

@@ -1,3 +1,5 @@
+// src/components/dashboard/ContentArea.tsx:1
+
 "use client"
 
 import {ReactNode} from "react"

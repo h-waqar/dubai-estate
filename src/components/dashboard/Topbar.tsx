@@ -1,3 +1,5 @@
+// src/components/dashboard/Topbar.tsx:1
+
 "use client"
 
 import {Avatar} from "@/components/ui/avatar"
