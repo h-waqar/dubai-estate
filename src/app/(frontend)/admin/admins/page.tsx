@@ -2,7 +2,7 @@
 
 import {Card} from "@/components/ui/card"
 
-export default function AdminHome() {
+export default function AdminsPage() {
     return (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <Card className="p-4">Users: 1024</Card>
