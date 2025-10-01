@@ -97,7 +97,7 @@ export function Sidebar({isCollapsed, onToggleCollapse}: SidebarProps) {
                 </button>
             </div>
 
-            <div className="flex flex-col flex-1 p-3 overflow-y-auto">
+            <div className="flex flex-col flex-1 p-3 overflow-y-auto overflow-x-hidden">
                 <SidebarLinks isCollapsed={isCollapsed}/>
             </div>
         </aside>

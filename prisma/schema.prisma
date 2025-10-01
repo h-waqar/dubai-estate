@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -14,26 +8,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- Users & Auth ---
 model User {
-  id        Int     @id @default(autoincrement())
-  name      String
-  email     String  @unique
-  posts     Post[]
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String? // For credentials login (optional if only OAuth)
+  role      Role     @default(USER) // Role-based access
+  profile   Profile?
+  admin     Admin?
+  posts     Post[] // Relation: user can write many posts
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
+model Profile {
+  id     Int     @id @default(autoincrement())
+  userId Int     @unique
+  bio    String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Admin {
+  id     Int @id @default(autoincrement())
+  userId Int @unique
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  WRITER
+  MANAGER
+  SUPPORT
+  USER
+}
+
+// --- Posts ---
 model Post {
   id         Int      @id @default(autoincrement())
   title      String
-  slug       String   @unique                 // human-friendly unique key for URL and lookup
-  excerpt    String?                           // short summary for lists
-  content    String                            // store article body (Markdown)
-  coverImage String?                           // path or external URL for the banner image
-  category   String?                           // flexible text category (easier than enum)
-  tags       String[]  @default([])            // Postgres text[] for simple tags
-  published  Boolean   @default(true)
-  author     User?     @relation(fields: [authorId], references: [id])
-  authorId   Int?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  slug       String   @unique // SEO-friendly URL
+  excerpt    String? // short summary
+  content    String // markdown/html
+  coverImage String? // path or external URL
+  category   String? // flexible for now (can enum later)
+  tags       String[] @default([]) // Postgres text[] for tags
+  published  Boolean  @default(true)
+
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
