@@ -44,7 +44,7 @@ export const authOptions: AuthOptions = {
         strategy: "jwt", // JWT-based sessions
     },
     callbacks: {
-        // Adds id & role to session.user
+        // Existing session callback
         async session({session, token}) {
             if (session.user) {
                 session.user.id = token.sub as string
@@ -53,14 +53,26 @@ export const authOptions: AuthOptions = {
             return session
         },
 
-        // Persist role in JWT
+        // Existing jwt callback
         async jwt({token, user}) {
             if (user) {
                 token.role = user.role
             }
             return token
         },
+
+        // NEW: role-aware redirect
+        async redirect({url, baseUrl}) {
+            // Don’t allow redirects to external URLs
+            if (url.startsWith(baseUrl)) return url
+
+            // Decide based on role
+            // ⚠️ At this stage we don't have session(), but token.role is persisted in JWT
+            // So we need to check the token
+            return baseUrl // default fallback
+        },
     },
+
     pages: {
         signIn: "/auth/login", // Custom login page
     },

@@ -1,3 +1,4 @@
+// src/app/(frontend)/admin/layout.tsx
 "use client"
 
 import {useSession} from "next-auth/react"
@@ -27,10 +28,13 @@ export default function AdminLayout({children}: { children: React.ReactNode }) {
         return <div className="flex items-center justify-center h-screen">Loading...</div>
     }
 
+
     if (!session) {
-        // Redirect to log in
+        // Not logged in → redirect to log in
         if (typeof window !== "undefined") {
-            window.location.href = "/auth/login"
+            // Append callbackUrl so after login user returns here
+            const returnUrl = encodeURIComponent(window.location.pathname)
+            window.location.href = `/auth/login?callbackUrl=${returnUrl}`
         }
         return null
     }

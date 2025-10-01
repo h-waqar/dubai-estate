@@ -1,6 +1,7 @@
+// src/app/(frontend)/auth/login/page.tsx
 "use client"
 
-import {useState} from "react"
+import React, {useState} from "react"
 import {signIn} from "next-auth/react"
 import {Card, CardHeader, CardContent, CardFooter} from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
@@ -8,21 +9,26 @@ import {Label} from "@/components/ui/label"
 import {Button} from "@/components/ui/button"
 import {toast} from "sonner" // <-- use toast function
 import {Toaster} from "@/components/ui/sonner"
+import {useSearchParams} from "next/navigation";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
 
+    const searchParams = useSearchParams()
+    const callbackUrl = searchParams.get("callbackUrl") || "/"
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
+
 
         const res = await signIn("credentials", {
             redirect: false,
             email,
             password,
-            callbackUrl: "/admin/dashboard"
+            // callbackUrl: "/admin/dashboard"
         })
 
         setLoading(false)
@@ -30,7 +36,7 @@ export default function LoginPage() {
         if (res?.error) toast.error(res.error)
         else {
             toast.success("Login successful!")
-            window.location.href = res?.url || "/admin/dashboard"
+            window.location.href = callbackUrl // go back to the original page
         }
     }
 
