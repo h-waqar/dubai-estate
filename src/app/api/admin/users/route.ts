@@ -1,14 +1,13 @@
 import {NextResponse} from "next/server";
-import {getServerSession} from "next-auth";
+import {getServerSession} from "next-auth/next";
+import {authOptions} from "@/app/api/auth/[...nextauth]/route";
 import {prisma} from "@/lib/prisma";
-import {roleCheck} from "@/lib/roleCheck";
-import {authOptions} from "@/lib/auth"; // adjust if authOptions is elsewhere
 
 export async function GET() {
     const session = await getServerSession(authOptions);
 
-    if (!session || !roleCheck(session, ["ADMIN"])) {
-        return NextResponse.json({error: "Unauthorized"}, {status: 403});
+    if (!session || session.user.role !== "ADMIN") {
+        return NextResponse.json({error: "Unauthorized"}, {status: 401});
     }
 
     try {
@@ -25,7 +24,7 @@ export async function GET() {
 
         return NextResponse.json(users);
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({error: "Failed to fetch users"}, {status: 500});
+        console.error("Error fetching users:", error);
+        return NextResponse.json({error: "Server error"}, {status: 500});
     }
 }
