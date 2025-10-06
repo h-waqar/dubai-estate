@@ -32,4 +32,13 @@ declare module "next/server" {
             token: JWT | null;
         };
     }
+
+
+}
+
+declare module "next-auth/jwt" {
+    interface JWT {
+        id: string;
+        role: string;
+    }
 }
