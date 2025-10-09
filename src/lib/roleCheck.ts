@@ -1,3 +1,5 @@
+// src\lib\roleCheck.ts
+
 import type {JWT} from "next-auth/jwt";
 
 /**
