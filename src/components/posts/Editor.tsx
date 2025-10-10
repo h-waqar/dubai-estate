@@ -1,4 +1,3 @@
-// src\components\posts\Editor.tsx
 "use client";
 
 import React from "react";
@@ -8,36 +7,66 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Placeholder from "@tiptap/extension-placeholder";
+import TextAlign from "@tiptap/extension-text-align";
+import ImageResize from "tiptap-extension-resize-image";
 import { createLowlight } from "lowlight";
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
 import python from "highlight.js/lib/languages/python";
 import "highlight.js/styles/github-dark.css";
+import { Node, mergeAttributes } from "@tiptap/core";
 
 interface BlogEditorProps {
   value: string;
   onChange: (html: string) => void;
 }
 
-// --- Setup syntax highlighting ---
+// --- Syntax Highlighting ---
 const lowlight = createLowlight();
 lowlight.register({ javascript, typescript, python });
+
+// --- TwoColumn node (Grid Layout)
+const TwoColumn = Node.create({
+  name: "twoColumn",
+  group: "block",
+  content: "block+ block+",
+  parseHTML() {
+    return [{ tag: "div[data-type='two-column']" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, {
+        "data-type": "two-column",
+        class: "grid grid-cols-1 md:grid-cols-2 gap-4 my-4",
+      }),
+      0,
+    ];
+  },
+});
 
 export function BlogEditor({ value, onChange }: BlogEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-      }),
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
           class: "text-blue-600 underline hover:text-blue-800",
         },
       }),
-      Image.configure({
-        HTMLAttributes: {
-          class: "max-w-full h-auto rounded-lg my-4",
+      Image.extend({
+        addAttributes() {
+          return {
+            align: { default: "center" },
+            width: { default: "100%" },
+          };
+        },
+      }).configure({ HTMLAttributes: { class: "rounded-lg my-4" } }),
+      ImageResize.configure({
+        // Resizable handles
+        handleClasses: {
+          corner: "bg-blue-500 w-3 h-3 rounded-full",
         },
       }),
       CodeBlockLowlight.configure({
@@ -51,11 +80,11 @@ export function BlogEditor({ value, onChange }: BlogEditorProps) {
         placeholder:
           "Start writing your blog post... Type '/' for commands, or use the toolbar above.",
       }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TwoColumn,
     ],
     content: value || "",
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
+    onUpdate: ({ editor }) => onChange(editor.getHTML()),
     immediatelyRender: false,
     editorProps: {
       attributes: {
@@ -74,7 +103,7 @@ export function BlogEditor({ value, onChange }: BlogEditorProps) {
   );
 }
 
-// --- Toolbar component ---
+// --- Toolbar ---
 function EditorToolbar({ editor }: { editor: Editor }) {
   if (!editor) return null;
 
@@ -88,36 +117,65 @@ function EditorToolbar({ editor }: { editor: Editor }) {
     if (url) editor.chain().focus().setLink({ href: url }).run();
   };
 
+  const insertTwoColumn = () => {
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: "twoColumn",
+        content: [
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Left content" }],
+          },
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: "Right content" }],
+          },
+        ],
+      })
+      .run();
+  };
+
   return (
     <div className="border-b border-border bg-muted p-2 flex flex-wrap gap-1">
-      {/* --- Basic text styles --- */}
+      {/* --- Text styles --- */}
       <ToolbarButton
         label="B"
-        active={editor.isActive("bold")}
         onClick={() => editor.chain().focus().toggleBold().run()}
-        title="Bold (Ctrl+B)"
+        active={editor.isActive("bold")}
       />
       <ToolbarButton
         label="I"
-        active={editor.isActive("italic")}
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        title="Italic (Ctrl+I)"
+        active={editor.isActive("italic")}
         italic
       />
       <ToolbarButton
         label="S"
-        active={editor.isActive("strike")}
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        title="Strikethrough"
+        active={editor.isActive("strike")}
         strike
       />
       <ToolbarButton
         label="</>"
-        active={editor.isActive("code")}
         onClick={() => editor.chain().focus().toggleCode().run()}
-        title="Inline Code"
+        active={editor.isActive("code")}
         mono
       />
+
+      <Separator />
+
+      {/* --- Alignment --- */}
+      {["left", "center", "right", "justify"].map((align) => (
+        <ToolbarButton
+          key={align}
+          label={align.charAt(0).toUpperCase()}
+          onClick={() => editor.chain().focus().setTextAlign(align).run()}
+          active={editor.isActive({ textAlign: align })}
+          title={`Align ${align}`}
+        />
+      ))}
 
       <Separator />
 
@@ -126,29 +184,29 @@ function EditorToolbar({ editor }: { editor: Editor }) {
         <ToolbarButton
           key={level}
           label={`H${level}`}
-          active={editor.isActive("heading", { level })}
           onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
+          active={editor.isActive("heading", { level })}
           title={`Heading ${level}`}
         />
       ))}
 
       <Separator />
 
-      {/* --- Lists --- */}
+      {/* --- Lists & Quote --- */}
       <ToolbarButton
         label="• List"
-        active={editor.isActive("bulletList")}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
+        active={editor.isActive("bulletList")}
       />
       <ToolbarButton
         label="1. List"
-        active={editor.isActive("orderedList")}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        active={editor.isActive("orderedList")}
       />
       <ToolbarButton
         label="❝ Quote"
-        active={editor.isActive("blockquote")}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        active={editor.isActive("blockquote")}
       />
 
       <Separator />
@@ -156,17 +214,22 @@ function EditorToolbar({ editor }: { editor: Editor }) {
       {/* --- Code block --- */}
       <ToolbarButton
         label="{ }"
-        active={editor.isActive("codeBlock")}
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        active={editor.isActive("codeBlock")}
       />
+
+      <Separator />
+
+      {/* --- Grid Layout --- */}
+      <ToolbarButton label="Grid 2" onClick={insertTwoColumn} />
 
       <Separator />
 
       {/* --- Link & Image --- */}
       <ToolbarButton
         label="🔗 Link"
-        active={editor.isActive("link")}
         onClick={setLink}
+        active={editor.isActive("link")}
       />
       <ToolbarButton label="🖼️ Image" onClick={addImage} />
 
@@ -187,6 +250,7 @@ function EditorToolbar({ editor }: { editor: Editor }) {
   );
 }
 
+// --- Toolbar Button ---
 function ToolbarButton({
   label,
   onClick,
