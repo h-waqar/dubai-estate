@@ -381,3 +381,62 @@
 .tiptap {
   min-width: 100% !important;
 }
+
+/* ========================================
+   PROSE STYLES FOR GRID
+   ======================================== */
+
+.ProseMirror [data-type="two-column"] {
+  border: 2px dashed rgba(59, 130, 246, 0.4); /* Tailwind blue-400 with opacity */
+  padding: 0.5rem;
+  position: relative;
+}
+
+.ProseMirror [data-type="two-column"] > * {
+  padding: 0.5rem;
+  border-right: 1px dashed rgba(59, 130, 246, 0.3);
+}
+
+.ProseMirror [data-type="two-column"] > *:last-child {
+  border-right: none;
+}
+
+.ProseMirror [data-type="two-column"] {
+  border: 2px dashed rgba(59, 130, 246, 0.4);
+  padding: 0.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.ProseMirror [data-type="two-column"] > .react-resizable {
+  border-right: 1px dashed rgba(59, 130, 246, 0.3);
+}
+
+.ProseMirror [data-type="two-column"] > .react-resizable:last-child {
+  border-right: none;
+}
+
+/* Resize handle */
+.react-resizable-handle {
+  width: 6px;
+  height: 100%;
+  background: rgba(59, 130, 246, 0.5);
+  cursor: ew-resize;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+/* Handle only visible on hover */
+.ProseMirror [data-type="two-column"]:hover > div:last-child {
+  display: block;
+}
+
+[data-type="two-column"] .drag-handle {
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+[data-type="two-column"] .drag-handle:hover {
+  opacity: 1;
+}

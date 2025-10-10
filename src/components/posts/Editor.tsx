@@ -1,7 +1,13 @@
 "use client";
 
 import React from "react";
-import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import {
+  EditorContent,
+  useEditor,
+  type Editor,
+  NodeViewWrapper,
+  NodeViewContent,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -15,6 +21,8 @@ import typescript from "highlight.js/lib/languages/typescript";
 import python from "highlight.js/lib/languages/python";
 import "highlight.js/styles/github-dark.css";
 import { Node, mergeAttributes } from "@tiptap/core";
+import { ResizableBox } from "react-resizable";
+import "react-resizable/css/styles.css";
 
 interface BlogEditorProps {
   value: string;
@@ -24,6 +32,31 @@ interface BlogEditorProps {
 // --- Syntax Highlighting ---
 const lowlight = createLowlight();
 lowlight.register({ javascript, typescript, python });
+
+// --- TwoColumn NodeView ---
+const TwoColumnView = ({ node }: { node: any }) => {
+  const columnCount = node.content?.length || 2;
+  return (
+    <NodeViewWrapper className="flex gap-4 my-4 border-2 border-dashed border-blue-400 p-2">
+      {Array.from({ length: columnCount }).map((_, index) => (
+        <ResizableBox
+          key={index}
+          width={300}
+          height={Infinity}
+          axis="x"
+          minConstraints={[100, Infinity]}
+          maxConstraints={[600, Infinity]}
+          handle={<span className="resizable-handle" />}
+          className="overflow-hidden"
+        >
+          <div className="flex-1 p-2">
+            <NodeViewContent as="div" />
+          </div>
+        </ResizableBox>
+      ))}
+    </NodeViewWrapper>
+  );
+};
 
 // --- TwoColumn node (Grid Layout)
 const TwoColumn = Node.create({
@@ -43,6 +76,9 @@ const TwoColumn = Node.create({
       0,
     ];
   },
+  addNodeView() {
+    return ({ node }) => <TwoColumnView node={node} />;
+  },
 });
 
 export function BlogEditor({ value, onChange }: BlogEditorProps) {
@@ -52,7 +88,7 @@ export function BlogEditor({ value, onChange }: BlogEditorProps) {
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-blue-600 underline hover:text-blue-800",
+          className: "text-blue-600 underline hover:text-blue-800",
         },
       }),
       Image.extend({
@@ -64,10 +100,7 @@ export function BlogEditor({ value, onChange }: BlogEditorProps) {
         },
       }).configure({ HTMLAttributes: { class: "rounded-lg my-4" } }),
       ImageResize.configure({
-        // Resizable handles
-        handleClasses: {
-          corner: "bg-blue-500 w-3 h-3 rounded-full",
-        },
+        handleClasses: { corner: "bg-blue-500 w-3 h-3 rounded-full" },
       }),
       CodeBlockLowlight.configure({
         lowlight,
@@ -76,10 +109,7 @@ export function BlogEditor({ value, onChange }: BlogEditorProps) {
             "rounded-lg bg-gray-900 text-gray-100 p-4 my-4 overflow-x-auto",
         },
       }),
-      Placeholder.configure({
-        placeholder:
-          "Start writing your blog post... Type '/' for commands, or use the toolbar above.",
-      }),
+      Placeholder.configure({ placeholder: "Start writing your blog post..." }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TwoColumn,
     ],
@@ -139,7 +169,7 @@ function EditorToolbar({ editor }: { editor: Editor }) {
 
   return (
     <div className="border-b border-border bg-muted p-2 flex flex-wrap gap-1">
-      {/* --- Text styles --- */}
+      {/* Text Styles */}
       <ToolbarButton
         label="B"
         onClick={() => editor.chain().focus().toggleBold().run()}
@@ -166,7 +196,7 @@ function EditorToolbar({ editor }: { editor: Editor }) {
 
       <Separator />
 
-      {/* --- Alignment --- */}
+      {/* Alignment */}
       {["left", "center", "right", "justify"].map((align) => (
         <ToolbarButton
           key={align}
@@ -179,20 +209,19 @@ function EditorToolbar({ editor }: { editor: Editor }) {
 
       <Separator />
 
-      {/* --- Headings --- */}
+      {/* Headings */}
       {[1, 2, 3].map((level) => (
         <ToolbarButton
           key={level}
           label={`H${level}`}
           onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
           active={editor.isActive("heading", { level })}
-          title={`Heading ${level}`}
         />
       ))}
 
       <Separator />
 
-      {/* --- Lists & Quote --- */}
+      {/* Lists */}
       <ToolbarButton
         label="• List"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -211,7 +240,7 @@ function EditorToolbar({ editor }: { editor: Editor }) {
 
       <Separator />
 
-      {/* --- Code block --- */}
+      {/* Code Block */}
       <ToolbarButton
         label="{ }"
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
@@ -220,12 +249,12 @@ function EditorToolbar({ editor }: { editor: Editor }) {
 
       <Separator />
 
-      {/* --- Grid Layout --- */}
+      {/* Grid Layout */}
       <ToolbarButton label="Grid 2" onClick={insertTwoColumn} />
 
       <Separator />
 
-      {/* --- Link & Image --- */}
+      {/* Link & Image */}
       <ToolbarButton
         label="🔗 Link"
         onClick={setLink}
@@ -235,7 +264,7 @@ function EditorToolbar({ editor }: { editor: Editor }) {
 
       <Separator />
 
-      {/* --- Undo/Redo --- */}
+      {/* Undo/Redo */}
       <ToolbarButton
         label="↶"
         onClick={() => editor.chain().focus().undo().run()}
