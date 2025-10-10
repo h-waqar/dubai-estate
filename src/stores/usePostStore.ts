@@ -1,12 +1,15 @@
-// src\stores\usePostStore.ts
-
+// src/stores/usePostStore.ts
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { PostFormData } from "@/types/post";
+import {
+  type PostFormData, // Keep this import for the default values type
+  type PartialPostFormData,
+  defaultPostFormData,
+} from "@/types/post";
 
 interface PostStore {
-  post: PostFormData;
+  post: PartialPostFormData;
   loading: boolean;
   error: string | null;
   success: string | null;
@@ -15,7 +18,7 @@ interface PostStore {
   autoSaveEnabled: boolean;
 
   // Actions
-  setPost: (data: Partial<PostFormData>) => void;
+  setPost: (data: PartialPostFormData) => void;
   resetPost: () => void;
   setLoading: (state: boolean) => void;
   setError: (msg: string | null) => void;
@@ -28,21 +31,10 @@ interface PostStore {
   stopSaving: () => void;
 }
 
-const initialState: PostFormData = {
-  title: "",
-  slug: "",
-  content: "",
-  excerpt: "",
-  tags: [],
-  categoryId: "",
-  coverImage: "",
-  published: false,
-};
-
 export const usePostStore = create<PostStore>()(
   persist(
     (set, _get) => ({
-      post: initialState,
+      post: defaultPostFormData,
       loading: false,
       error: null,
       success: null,
@@ -57,7 +49,7 @@ export const usePostStore = create<PostStore>()(
 
       resetPost: () =>
         set({
-          post: initialState,
+          post: defaultPostFormData,
           loading: false,
           error: null,
           success: null,

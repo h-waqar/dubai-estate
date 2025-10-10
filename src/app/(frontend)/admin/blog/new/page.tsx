@@ -1,5 +1,7 @@
 // src\app\(frontend)\admin\blog\new\page.tsx
 
+import { PostForm } from "@/components/posts/PostForm";
+
 export default function CreatePost() {
-  return <div>Admin Blog New Post Page</div>;
+  return <PostForm />;
 }

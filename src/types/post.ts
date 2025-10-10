@@ -3,6 +3,7 @@
 // Shared TypeScript types for posts (client + server)
 import type { PostInput as ZodPostInput } from "@/validators/post";
 import type { PostUpdateInput as ZodPostUpdateInput } from "@/validators/postUpdate";
+import { z } from "zod";
 
 /**
  * Use the zod-derived types for create/update payload shapes so
@@ -12,23 +13,48 @@ export type CreatePostInput = ZodPostInput;
 export type UpdatePostInput = ZodPostUpdateInput;
 
 /**
- * Form-state shape used by the editor + zustand store.
- * Keep this aligned with the zod schema in validators/post.ts
+ * Form schema - single source of truth for form validation
+ * CRITICAL FIX: Remove .optional() and only use .default() to make output types required
  */
-export interface PostFormData {
-  title: string;
-  slug: string;
-  content: string;
-  excerpt?: string;
-  tags: string[]; // simple string tags (chips)
-  categoryId?: string; // category id or name depending on your app
-  coverImage?: string;
-  published: boolean;
+export const postFormSchema = z.object({
+  title: z.string().min(3, "Title must be at least 3 characters").default(""),
+  slug: z.string().min(3, "Slug must be at least 3 characters").default(""),
+  content: z
+    .string()
+    .min(10, "Content must be at least 10 characters")
+    .default(""),
+  excerpt: z.string().default(""),
+  tags: z.array(z.string()).default([]),
+  categoryId: z.string().default(""),
+  coverImage: z.string().default(""),
+  published: z.boolean().default(false),
+  lastSavedAt: z.string().optional(),
+  draftId: z.union([z.string(), z.number()]).optional(),
+});
 
-  // UI / staging metadata
-  lastSavedAt?: string; // ISO timestamp
-  draftId?: number | string; // server-side draft id if created
-}
+/**
+ * Form-state shape inferred from Zod schema - guaranteed type safety!
+ */
+export type PostFormData = z.infer<typeof postFormSchema>;
+
+/**
+ * Helper type for partial form data (used in store)
+ */
+export type PartialPostFormData = Partial<PostFormData>;
+
+/**
+ * Default values for the form
+ */
+export const defaultPostFormData: PostFormData = {
+  title: "",
+  slug: "",
+  content: "",
+  excerpt: "",
+  tags: [],
+  categoryId: "",
+  coverImage: "",
+  published: false,
+};
 
 /**
  * Persisted post shape (what your API returns)
