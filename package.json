@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "db": "npx prisma studio",
-    "lint": "eslint"
+    "lint": "eslint",
+    "all": "concurrently \"npm run dev\" \"npm run db\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -60,6 +61,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-resizable": "^3.0.8",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "prisma": "^6.16.3",

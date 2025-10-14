@@ -1,32 +1,43 @@
-// src\app\(frontend)\admin\blog\page.tsx
-import Link from "next/link";
+// src/app/(frontend)/admin/blog/page.tsx
+import { api } from "@/lib/api";
+import { cookies } from "next/headers";
+import BlogList from "@/components/posts/BlogList";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 async function getPosts() {
-  const res = await fetch("/api/posts");
-  return res.json();
+  const cookieHeader = cookies().toString();
+  try {
+    const res = await api.get("/posts", {
+      headers: {
+        Cookie: cookieHeader,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch posts:", error);
+    return [];
+  }
 }
 
 export default async function BlogsPage() {
+  // Check authentication
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/auth/login");
+  }
+
+  if (!["ADMIN", "EDITOR", "WRITER"].includes(session.user.role)) {
+    redirect("/unauthorized");
+  }
+
   const posts = await getPosts();
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">All Blog Posts</h1>
-      <Link href="/admin/blog/new" className="text-blue-600 underline">
-        + New Post
-      </Link>
-      <ul className="mt-4 space-y-2">
-        {posts.map((p: any) => (
-          <li key={p.id} className="border p-3 rounded">
-            <Link
-              href={`/admin/blog/edit/${p.id}`}
-              className="font-medium hover:underline"
-            >
-              {p.title}
-            </Link>
-            <p className="text-sm text-gray-500">{p.slug}</p>
-          </li>
-        ))}
-      </ul>
+    <div className="container mx-auto py-8 px-4">
+      <BlogList initialPosts={posts} />
     </div>
   );
 }
