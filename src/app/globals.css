@@ -440,3 +440,95 @@
 [data-type="two-column"] .drag-handle:hover {
   opacity: 1;
 }
+
+/* Styles for Blogs */
+
+/* Add this to your globals.css or create a separate print.css */
+
+@media print {
+  /* Hide unnecessary elements when printing */
+  header,
+  footer,
+  aside,
+  nav,
+  .no-print,
+  button,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  /* Optimize main content for printing */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  article {
+    max-width: 100% !important;
+  }
+
+  /* Ensure images fit on page */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+
+  /* Prevent awkward page breaks */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  p,
+  blockquote,
+  pre {
+    page-break-inside: avoid;
+  }
+
+  /* Show URLs for links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Don't show URLs for internal links or images */
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+
+  /* Add page margins */
+  @page {
+    margin: 2cm;
+  }
+
+  /* Style code blocks for print */
+  pre {
+    border: 1px solid #ccc;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Remove shadows and transitions */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+  }
+}
