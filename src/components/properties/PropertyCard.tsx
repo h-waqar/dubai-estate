@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Bed, Bath, Square } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 // Define the type for a single property
 export interface Property {
@@ -34,15 +36,17 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
     <Card className="property-card overflow-hidden group">
       <div className="relative">
-        <a href={`/properties/${property.id}`}>
+        <Link href={`/properties/${property.id}`}>
           <div className="overflow-hidden">
-            <img
+            <Image
               src={property.image}
               alt={property.title}
+              width={500}
+              height={300}
               className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </div>
-        </a>
+        </Link>
         {property.featured && (
           <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
             Featured
@@ -64,12 +68,12 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
       <CardContent className="p-4 md:p-6">
         <div className="mb-4">
           <h3 className="text-lg md:text-xl font-bold mb-2 leading-tight">
-            <a
+            <Link
               href={`/properties/${property.id}`}
               className="hover:text-primary transition-colors"
             >
               {property.title}
-            </a>
+            </Link>
           </h3>
           <div className="flex items-center text-muted-foreground text-sm mb-3">
             <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
