@@ -1,3 +1,5 @@
+// src\components\ui\theme-toggle.tsx
+
 "use client"
 
 import {useTheme} from "next-themes"
@@ -18,3 +20,4 @@ export function ThemeToggle() {
         </Button>
     )
 }
+
