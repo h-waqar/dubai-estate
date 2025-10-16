@@ -1,5 +1,5 @@
 // src\app\api\posts\route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -15,7 +15,7 @@ interface SessionUser {
   image?: string | null;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     let token: SessionUser | null = session?.user ?? null;

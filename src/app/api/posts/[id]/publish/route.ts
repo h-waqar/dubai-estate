@@ -1,15 +1,14 @@
 // src/app/api/posts/[id]/publish/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-interface Params {
-  id: string;
-}
-
 // PATCH toggle publish status
-export async function PATCH(req: Request, { params }: { params: Params }) {
+export async function PATCH(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -20,7 +19,7 @@ export async function PATCH(req: Request, { params }: { params: Params }) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = params;
+  const { id } = await context.params;
 
   try {
     // Get current post

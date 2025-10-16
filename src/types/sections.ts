@@ -14,21 +14,27 @@ export interface CategoriesSectionProps {
   className?: string;
 }
 
-// Featured Properties Types
+// A specific type for status to prevent typos
+export type PropertyStatus = "Offplan" | "Ready";
+
+// The single source of truth for our Property type
 export interface Property {
   id: number;
   image: string;
-  alt: string;
-  featured: boolean;
-  type: string;
+  alt: string; // Kept for accessibility
   title: string;
   location: string;
   price: string;
-  bedrooms: number;
-  bathrooms: number;
-  area: string;
+  bedrooms: number; // Standardized from 'beds'
+  bathrooms: number; // Standardized from 'baths'
+  area: string; // Standardized from 'size'
+  type: string;
+  featured: boolean;
+  ref: string; // Added from PropertyCard.tsx
+  status?: PropertyStatus; // Added from PropertyCard.tsx with the specific type
 }
 
+// This can also be in the central file
 export interface PropertyCardProps {
   property: Property;
 }

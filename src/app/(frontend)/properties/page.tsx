@@ -11,17 +11,22 @@ import property3 from "&/assets/property-3.jpg";
 import PropertyFilters from "@/components/properties/PropertyFilters";
 import PropertyBreadcrumb from "@/components/properties/PropertyBreadcrumb";
 import PropertyHeader from "@/components/properties/PropertyHeader";
+import { Property } from "@/types/sections";
 
-const allProperties = [
+// Sample property data
+// In a real application, this data would come from an API or database
+
+const allProperties: Property[] = [
   {
     id: 1,
     image: property1.src,
+    alt: "Luxury Apartment in Downtown Dubai",
     title: "Luxury Apartment in Downtown Dubai",
     location: "Downtown Dubai",
     price: "AED 2,500,000",
-    beds: 3,
-    baths: 2,
-    size: "1,850 sq ft",
+    bedrooms: 3,
+    bathrooms: 2,
+    area: "1,850 sq ft",
     type: "Apartment",
     featured: true,
     ref: "LP46485",
@@ -30,12 +35,13 @@ const allProperties = [
   {
     id: 2,
     image: property2.src,
+    alt: "Marina View Villa",
     title: "Marina View Villa",
     location: "Dubai Marina",
     price: "AED 8,900,000",
-    beds: 5,
-    baths: 4,
-    size: "4,200 sq ft",
+    bedrooms: 5,
+    bathrooms: 4,
+    area: "4,200 sq ft",
     type: "Villa",
     featured: true,
     ref: "LP46486",
@@ -44,12 +50,13 @@ const allProperties = [
   {
     id: 3,
     image: property3.src,
+    alt: "Penthouse with City View",
     title: "Penthouse with City View",
     location: "Business Bay",
     price: "AED 5,750,000",
-    beds: 4,
-    baths: 3,
-    size: "2,800 sq ft",
+    bedrooms: 4,
+    bathrooms: 3,
+    area: "2,800 sq ft",
     type: "Penthouse",
     featured: false,
     ref: "LP46487",
@@ -58,12 +65,13 @@ const allProperties = [
   {
     id: 4,
     image: property1.src,
+    alt: "Modern Apartment in JBR",
     title: "Modern Apartment in JBR",
     location: "Jumeirah Beach Residence",
     price: "AED 3,200,000",
-    beds: 2,
-    baths: 2,
-    size: "1,400 sq ft",
+    bedrooms: 2,
+    bathrooms: 2,
+    area: "1,400 sq ft",
     type: "Apartment",
     featured: false,
     ref: "LP46488",
@@ -72,12 +80,13 @@ const allProperties = [
   {
     id: 5,
     image: property2.src,
+    alt: "Waterfront Villa in Palm Jumeirah",
     title: "Waterfront Villa in Palm Jumeirah",
     location: "Palm Jumeirah",
     price: "AED 12,500,000",
-    beds: 6,
-    baths: 5,
-    size: "5,200 sq ft",
+    bedrooms: 6,
+    bathrooms: 5,
+    area: "5,200 sq ft",
     type: "Villa",
     featured: true,
     ref: "LP46489",
@@ -86,12 +95,13 @@ const allProperties = [
   {
     id: 6,
     image: property3.src,
+    alt: "Studio Apartment in Dubai Marina",
     title: "Studio Apartment in Dubai Marina",
     location: "Dubai Marina",
     price: "AED 850,000",
-    beds: 1,
-    baths: 1,
-    size: "650 sq ft",
+    bedrooms: 1,
+    bathrooms: 1,
+    area: "650 sq ft",
     type: "Studio",
     featured: false,
     ref: "LP46490",
@@ -126,8 +136,8 @@ const Properties = () => {
       const matchesBeds =
         !bedrooms ||
         (bedrooms === "4+"
-          ? property.beds >= 4
-          : property.beds === parseInt(bedrooms));
+          ? property.bedrooms >= 4
+          : property.bedrooms === parseInt(bedrooms));
 
       // Price Range Filter
       const price = parsePrice(property.price);

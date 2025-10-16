@@ -17,7 +17,7 @@ import { TagsInput } from "@/components/posts/TagsInput";
 import { PreviewModal } from "@/components/posts/PreviewModal";
 import { api } from "@/lib/api";
 
-export function PostForm() {
+export function PostForm({ initialData }: { initialData?: PostFormData }) {
   const {
     post,
     setPost,
@@ -33,14 +33,21 @@ export function PostForm() {
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const formDefaultValues: PostFormData = {
-    ...defaultPostFormData,
-    ...post,
-  };
+  const dataSource = initialData ? initialData : post;
+
+  // const formDefaultValues: PostFormData = {
+  //   ...(initialData ?? defaultPostFormData),
+  //   ...post,
+  // };
+
+  // const form = useForm<PostFormData>({
+  //   resolver: zodResolver(postFormSchema),
+  //   defaultValues: formDefaultValues,
+  // });
 
   const form = useForm<PostFormData>({
     resolver: zodResolver(postFormSchema),
-    defaultValues: formDefaultValues,
+    defaultValues: dataSource,
   });
 
   const { watch, setValue, handleSubmit, formState } = form;

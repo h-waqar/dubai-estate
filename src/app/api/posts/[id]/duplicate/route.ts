@@ -1,16 +1,14 @@
 // src/app/api/posts/[id]/duplicate/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { generateSlug } from "@/utils/slug";
-
-interface Params {
-  id: string;
-}
 
 // POST duplicate a post
-export async function POST(req: Request, { params }: { params: Params }) {
+export async function POST(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> } // Note the Promise here
+) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -21,7 +19,11 @@ export async function POST(req: Request, { params }: { params: Params }) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { id } = params;
+  const { id } = await context.params; // We await the params here
+
+  if (!id || isNaN(Number(id))) {
+    return NextResponse.json({ error: "Invalid post ID" }, { status: 400 });
+  }
 
   try {
     // Get original post
