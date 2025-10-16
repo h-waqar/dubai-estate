@@ -13,6 +13,7 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String?
   email     String   @unique
+  image     String?
   password  String? // For credentials login (optional if only OAuth)
   role      Role     @default(USER) // Role-based access
   profile   Profile?
@@ -62,7 +63,7 @@ model Post {
   authorId Int
   author   User @relation(fields: [authorId], references: [id])
 
-  publishedAt DateTime ?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }

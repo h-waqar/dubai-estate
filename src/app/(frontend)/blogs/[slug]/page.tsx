@@ -1,17 +1,19 @@
 // app/(frontend)/blogs/[slug]/page.tsx
-import { notFound } from "next/navigation";
+import {notFound} from "next/navigation";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, User, Clock, ArrowLeft, Tag, Share2 } from "lucide-react";
-import { TableOfContents } from "@/components/posts/TableOfContents";
-import { CommentsSection } from "@/components/posts/CommentsSection";
-import { LikeSaveShare } from "@/components/posts/LikeSaveShare";
-import { ReadingProgressBar } from "@/components/posts/ReadingProgressBar";
-import { PrintDownload } from "@/components/posts/PrintDownload";
-import { Newsletter } from "@/components/posts/Newsletter";
-import { ShareButtons } from "@/components/posts/ShareButtons";
+import {prisma} from "@/lib/prisma";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {ArrowLeft, Calendar, Clock, Tag, User} from "lucide-react";
+import {TableOfContents} from "@/components/posts/TableOfContents";
+import {CommentsSection} from "@/components/posts/CommentsSection";
+import {LikeSaveShare} from "@/components/posts/LikeSaveShare";
+import {ReadingProgressBar} from "@/components/posts/ReadingProgressBar";
+import {PrintDownload} from "@/components/posts/PrintDownload";
+import {Newsletter} from "@/components/posts/Newsletter";
+import {ShareButtons} from "@/components/posts/ShareButtons";
+import {Metadata} from "next";
+import Image from 'next/image';
 
 interface PageProps {
   params: {
@@ -32,8 +34,7 @@ async function getPost(slug: string) {
       console.error(`Failed to fetch post "${slug}":`, res.status);
       return null;
     }
-    const post = await res.json();
-    return post;
+      return await res.json();
   } catch (error) {
     console.error("Error fetching post:", error);
     return null;
@@ -47,31 +48,30 @@ async function getRelatedPosts(
 ) {
   if (!category) return [];
   try {
-    const posts = await prisma.post.findMany({
-      where: {
-        id: { not: currentPostId },
-        category,
-        published: true,
-      },
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        excerpt: true,
-        coverImage: true,
-        category: true,
-        createdAt: true,
-        author: {
-          select: {
-            name: true,
-            image: true,
-          },
+      return await prisma.post.findMany({
+        where: {
+            id: {not: currentPostId},
+            category,
+            published: true,
         },
-      },
+        take: limit,
+        orderBy: {createdAt: "desc"},
+        select: {
+            id: true,
+            title: true,
+            slug: true,
+            excerpt: true,
+            coverImage: true,
+            category: true,
+            createdAt: true,
+            author: {
+                select: {
+                    name: true,
+                    image: true,
+                },
+            },
+        },
     });
-    return posts;
   } catch (error) {
     console.error("Error fetching related posts:", error);
     return [];
@@ -80,29 +80,28 @@ async function getRelatedPosts(
 
 async function getFeaturedPosts(limit = 4) {
   try {
-    const posts = await prisma.post.findMany({
-      where: {
-        published: true,
-      },
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        coverImage: true,
-        category: true,
-        createdAt: true,
-      },
+      return await prisma.post.findMany({
+        where: {
+            published: true,
+        },
+        take: limit,
+        orderBy: {createdAt: "desc"},
+        select: {
+            id: true,
+            title: true,
+            slug: true,
+            coverImage: true,
+            category: true,
+            createdAt: true,
+        },
     });
-    return posts;
   } catch (error) {
     console.error("Error fetching featured posts:", error);
     return [];
   }
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const post = await getPost(params.slug);
   if (!post) {
     return {
@@ -196,11 +195,18 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b">
                   <div className="flex items-center gap-2">
                     {post.author.image ? (
-                      <img
-                        src={post.author.image}
-                        alt={post.author.name || "Author"}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
+                      // <img
+                      //   src={post.author.image}
+                      //   alt={post.author.name || "Author"}
+                      //   className="w-8 h-8 rounded-full object-cover"
+                      // />
+                        <Image
+                            width={32}
+                            height={32}
+                            src={post.author.image}
+                            alt={post.author.name || "Author"}
+                            className="w-8 h-8 rounded-full object-cover"
+                        />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
@@ -233,13 +239,24 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                 {/* Cover Image */}
                 {post.coverImage && (
-                  <div className="mb-10 rounded-xl overflow-hidden shadow-lg">
-                    <img
-                      src={post.coverImage}
-                      alt={post.title}
-                      className="w-full h-auto object-cover max-h-[500px]"
-                    />
-                  </div>
+                  // <div className="mb-10 rounded-xl overflow-hidden shadow-lg">
+                  //   {/*<img*/}
+                  //   {/*  src={post.coverImage}*/}
+                  //   {/*  alt={post.title}*/}
+                  //   {/*  className="w-full h-auto object-cover max-h-[500px]"*/}
+                  //   {/*/>*/}
+                  // </div>
+
+                    <div className="mb-10 rounded-xl overflow-hidden shadow-lg relative h-[500px]">
+                        <Image
+                            src={post.coverImage}
+                            alt={post.title}
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
+
+
                 )}
 
                 {/* Content */}
@@ -256,7 +273,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                       <span className="text-sm font-medium text-muted-foreground">
                         Tags:
                       </span>
-                      {post.tags.map((tag) => (
+                      {post.tags.map((tag: string) => (
                         <Badge key={tag} variant="outline">
                           {tag}
                         </Badge>
@@ -284,11 +301,19 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <div className="bg-muted/50 rounded-xl p-6 mb-12 border">
                   <div className="flex items-start gap-4">
                     {post.author.image ? (
-                      <img
-                        src={post.author.image}
-                        alt={post.author.name || "Author"}
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
+                      // <img
+                      //   src={post.author.image}
+                      //   alt={post.author.name || "Author"}
+                      //   className="w-16 h-16 rounded-full object-cover"
+                      // />
+
+                        <Image
+                            width={64}
+                            height={64}
+                            src={post.author.image}
+                            alt={post.author.name || "Author"}
+                            className="w-16 h-16 rounded-full object-cover"
+                        />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-8 w-8 text-primary" />
@@ -325,11 +350,19 @@ export default async function BlogPostPage({ params }: PageProps) {
                           <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 bg-card">
                             {relatedPost.coverImage ? (
                               <div className="relative h-40 overflow-hidden">
-                                <img
-                                  src={relatedPost.coverImage}
-                                  alt={relatedPost.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
+                                 {/*<img*/}
+                                 {/*  src={relatedPost.coverImage}*/}
+                                 {/*  alt={relatedPost.title}*/}
+                                 {/*  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"*/}
+                                 {/*/>*/}
+                                    <Image
+                                        src={relatedPost.coverImage}
+                                        alt={relatedPost.title}
+                                        // Use fill to make the image take up the parent's space
+                                        fill
+                                        // Add the styling classes that control how the image scales
+                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
                               </div>
                             ) : (
                               <div className="w-full h-40 bg-muted flex items-center justify-center">
@@ -413,11 +446,18 @@ export default async function BlogPostPage({ params }: PageProps) {
                         >
                           <div className="flex gap-3">
                             {featured.coverImage ? (
-                              <img
-                                src={featured.coverImage}
-                                alt={featured.title}
-                                className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                              />
+                              // <img
+                              //   src={featured.coverImage}
+                              //   alt={featured.title}
+                              //   className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                              // />
+                                <Image
+                                    width={80}
+                                    height={80}
+                                    src={featured.coverImage}
+                                    alt={featured.title}
+                                    className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                                />
                             ) : (
                               <div className="w-20 h-20 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center">
                                 <span className="text-2xl font-bold text-muted-foreground">

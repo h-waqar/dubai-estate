@@ -1,21 +1,28 @@
 // src/app/api/posts/public/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category") || undefined;
     const limitParam = searchParams.get("limit");
-    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+    // const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
-    const where: any = { published: true };
-    if (category) where.category = category;
+      const parsedLimit = limitParam ? parseInt(limitParam, 10) : undefined;
+      const finalLimit = (parsedLimit && !isNaN(parsedLimit) && parsedLimit > 0)
+          ? parsedLimit
+          : undefined;
+
+    // const where: any = { published: true };
+      const where: Prisma.PostWhereInput = { published: true };
+      if (category) where.category = category;
 
     const posts = await prisma.post.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      take: !isNaN(limit) ? limit : undefined,
+      take: finalLimit,
       select: {
         id: true,
         title: true,

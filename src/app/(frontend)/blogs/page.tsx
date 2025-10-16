@@ -1,6 +1,7 @@
 // src/app/blogs/page.tsx
 import Link from "next/link";
 import BlogsClient from "@/components/posts/BlogsClient";
+import {Metadata} from "next";
 
 // Fetch published posts from PUBLIC API (no auth required)
 async function getPublishedPosts() {
@@ -37,14 +38,12 @@ async function getPublishedPosts() {
 
 async function getCategories(posts: any[]) {
   // Extract unique categories from posts
-  const categories = Array.from(
-    new Set(posts.map((p) => p.category).filter(Boolean))
+    return Array.from(
+      new Set(posts.map((p) => p.category).filter(Boolean))
   ) as string[];
-
-  return categories;
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Blog - Dubai Estate",
   description: "Read the latest articles and guides about Dubai real estate",
 };
