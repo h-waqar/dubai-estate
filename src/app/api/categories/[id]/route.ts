@@ -1,7 +1,9 @@
 // ============================================
 // src/app/api/categories/[id]/route.ts
 // ============================================
+import { prisma } from "@/lib/prisma";
 import { categoryUpdateSchema } from "@/validators/category";
+import { NextResponse } from "next/server";
 
 // GET /api/categories/:id
 export async function GET(
@@ -28,7 +30,10 @@ export async function GET(
     return NextResponse.json({ data: category });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch category" },
+      {
+        message: (error as Error).message || "Failed to fetch category",
+        error: error,
+      },
       { status: 500 }
     );
   }
