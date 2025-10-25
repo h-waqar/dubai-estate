@@ -12,7 +12,8 @@ interface TwoColumnViewProps {
 }
 
 export const TwoColumnView = ({ node }: TwoColumnViewProps) => {
-  const columnCount = node.content?.length || 2;
+  // const columnCount = node.content?.length || 2;
+  const columnCount = node.content?.childCount || 2;
   return (
     <NodeViewWrapper className="flex gap-4 my-4 border-2 border-dashed border-blue-400 p-2">
       {Array.from({ length: columnCount }).map((_, index) => (

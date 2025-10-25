@@ -116,8 +116,6 @@ export function PostForm({
     }
   };
 
-
-
   return (
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

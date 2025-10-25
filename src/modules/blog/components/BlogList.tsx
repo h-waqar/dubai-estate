@@ -111,7 +111,7 @@ export default function BlogList({ initialPosts }: BlogListProps) {
       setPosts(posts.filter((p) => p.id !== id));
       toast.success("Post deleted successfully");
       router.refresh();
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Failed to delete post");
       console.error(error);
     }
@@ -131,7 +131,7 @@ export default function BlogList({ initialPosts }: BlogListProps) {
         `Post ${!currentStatus ? "published" : "unpublished"} successfully`
       );
       router.refresh();
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Failed to update post status");
       console.error(error);
     }
@@ -145,7 +145,7 @@ export default function BlogList({ initialPosts }: BlogListProps) {
       setPosts([response.data, ...posts]);
       toast.success("Post duplicated successfully");
       router.refresh();
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Failed to duplicate post");
       console.error(error);
     } finally {

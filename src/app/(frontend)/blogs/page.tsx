@@ -27,7 +27,7 @@ async function getPublishedPosts() {
     const posts = await res.json();
 
     return posts;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("❌ Error fetching published posts:", error);
     return [];
   }
@@ -50,7 +50,7 @@ async function getCategories(): Promise<{ id: number; name: string }[]> {
 
     const categories = await res.json();
     return categories.data;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("❌ Error fetching categories:", error);
     return [];
   }

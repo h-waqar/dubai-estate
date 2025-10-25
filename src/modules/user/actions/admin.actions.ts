@@ -1,3 +1,4 @@
+import { handleApiError } from "@/lib/errorHandler";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/modules/user/routes/auth";
@@ -23,9 +24,8 @@ export async function getAllUsers() {
     });
 
     return NextResponse.json(users);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 }
 
@@ -42,8 +42,7 @@ export async function deleteUser(userId: number) {
     });
 
     return NextResponse.json({ message: "User deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 }

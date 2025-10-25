@@ -35,7 +35,7 @@ async function getPost(slug: string) {
       return null;
     }
       return await res.json();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching post:", error);
     return null;
   }
@@ -72,7 +72,7 @@ async function getRelatedPosts(
             },
         },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching related posts:", error);
     return [];
   }
@@ -95,7 +95,7 @@ async function getFeaturedPosts(limit = 4) {
             createdAt: true,
         },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching featured posts:", error);
     return [];
   }

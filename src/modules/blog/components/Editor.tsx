@@ -7,6 +7,7 @@ import {
   type Editor,
   NodeViewWrapper,
   NodeViewContent,
+  ReactNodeViewRenderer,
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -23,6 +24,7 @@ import "highlight.js/styles/github-dark.css";
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ResizableBox } from "react-resizable";
 import "react-resizable/css/styles.css";
+import type { Level } from "@tiptap/extension-heading"; // ✅ Import Level type
 
 interface BlogEditorProps {
   value: string;
@@ -36,9 +38,8 @@ lowlight.register({ javascript, typescript, python });
 // --- TwoColumn NodeView ---
 import { type Node as ProseMirrorNode } from "@tiptap/pm/model";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TwoColumnView = ({ node }: { node: ProseMirrorNode }) => {
-  const columnCount = node.content?.length || 2;
+  const columnCount = node.content?.childCount || 2;
   return (
     <NodeViewWrapper className="flex gap-4 my-4 border-2 border-dashed border-blue-400 p-2">
       {Array.from({ length: columnCount }).map((_, index) => (
@@ -80,7 +81,7 @@ const TwoColumn = Node.create({
     ];
   },
   addNodeView() {
-    return ({ node }) => <TwoColumnView node={node} />;
+    return ReactNodeViewRenderer(TwoColumnView);
   },
 });
 
@@ -102,9 +103,7 @@ export function BlogEditor({ value, onChange }: BlogEditorProps) {
           };
         },
       }).configure({ HTMLAttributes: { class: "rounded-lg my-4" } }),
-      ImageResize.configure({
-        handleClasses: { corner: "bg-blue-500 w-3 h-3 rounded-full" },
-      }),
+      ImageResize, // ✅ Removed .configure() - just use the extension directly
       CodeBlockLowlight.configure({
         lowlight,
         HTMLAttributes: {
@@ -213,14 +212,20 @@ function EditorToolbar({ editor }: { editor: Editor }) {
       <Separator />
 
       {/* Headings */}
-      {[1, 2, 3].map((level) => (
-        <ToolbarButton
-          key={level}
-          label={`H${level}`}
-          onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
-          active={editor.isActive("heading", { level })}
-        />
-      ))}
+      {([1, 2, 3] as Level[]).map(
+        (
+          level // ✅ Cast array to Level[]
+        ) => (
+          <ToolbarButton
+            key={level}
+            label={`H${level}`}
+            onClick={() =>
+              editor.chain().focus().toggleHeading({ level }).run()
+            }
+            active={editor.isActive("heading", { level })}
+          />
+        )
+      )}
 
       <Separator />
 

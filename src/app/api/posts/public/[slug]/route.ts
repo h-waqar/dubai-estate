@@ -1,4 +1,5 @@
 // app/api/posts/public/[slug]/route.ts
+import { handleApiError } from "@/lib/errorHandler";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -42,11 +43,7 @@ export async function GET(
     });
 
     return NextResponse.json(post);
-  } catch (error) {
-    console.error("Error fetching post:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return handleApiError(error);
   }
 }
