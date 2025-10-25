@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { postUpdateSchema } from "@/validators/postUpdate";
+import { authOptions } from "@/modules/user/routes/auth";
+import { postUpdateSchema } from "@/modules/blog/validators/postUpdate.validator";
 import { generateSlug } from "@/utils/slug";
 
 // GET single post (public, or keep for Admin list)

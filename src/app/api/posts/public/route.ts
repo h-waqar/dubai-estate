@@ -17,7 +17,13 @@ export async function GET(req: NextRequest) {
 
     // const where: any = { published: true };
       const where: Prisma.PostWhereInput = { published: true };
-      if (category) where.category = category;
+      if (category) {
+        where.category = {
+          is: {
+            name: category,
+          },
+        };
+      }
 
     const posts = await prisma.post.findMany({
       where,

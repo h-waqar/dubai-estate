@@ -1,7 +1,7 @@
 // src/app/api/admin/secret/route.ts:1
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/modules/user/routes/auth";
 
 export const runtime = "nodejs";
 

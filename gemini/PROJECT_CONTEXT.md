@@ -1,0 +1,7 @@
+This is a Next.js project for a real estate company in Dubai. The project is built with TypeScript, Next.js, and uses Prisma as an ORM for the PostgreSQL database. Authentication is handled by NextAuth. The frontend is styled with Tailwind CSS and uses Radix UI for components. There is a blog feature that uses a TipTap editor for creating and editing posts. The project also includes property listings. State management is handled by Zustand. The project is configured with ESLint and Prettier for code quality.
+
+**Refactoring Status:**
+
+*   **`user` module:** Refactoring is mostly complete. The module now contains the core authentication and authorization logic, including NextAuth configuration, admin user management actions, and the registration process. The `LoginModal` component has also been moved into this module.
+*   **`blog` module:** Refactoring is in progress to resolve build errors. All blog-specific components from the `posts` subdirectory have been consolidated into the module's main `components` directory. All imports for `authOptions` have been updated to point to the new `user` module.
+*   **Global Error Handler:** A new global error handler (`src/lib/errorHandler.ts`) has been created to centralize error handling for API routes, specifically for Zod validation errors and Prisma client errors.

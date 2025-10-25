@@ -444,8 +444,10 @@ export default function UsersPage() {
                 setUsers(res.data);
                 setFilteredUsers(res.data);
             })
-            .catch((err) => console.error("Failed to load users", err))
-            .finally(() => setLoading(false));
+            .catch((err: unknown) => {
+                console.error("Failed to load users", err);
+                // Optionally, set an error state to display a message to the user
+            })
     }, []);
 
     useEffect(() => {
@@ -509,8 +511,9 @@ export default function UsersPage() {
         try {
             await axios.patch(`/api/admin/users/${userId}`, {role: newRole});
             setUsers(users.map(u => u.id === userId ? {...u, role: newRole} : u));
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Failed to update user role", error);
+            // Optionally, set an error state to display a message to the user
         }
     };
 

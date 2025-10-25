@@ -1,6 +1,8 @@
 // src\app\(frontend)\admin\blog\edit\[id]\page.tsx
 
-import { PostForm } from "@/components/posts/PostForm";
+import { PostForm } from "@/modules/blog/components/PostForm";
+import { Category } from "@/modules/blog/types/category.types";
+import { api } from "@/lib/api";
 
 async function getPost(id: string) {
   const res = await fetch(
@@ -13,7 +15,20 @@ async function getPost(id: string) {
   return res.json();
 }
 
+async function getCategories(): Promise<Category[]> {
+  try {
+    const res = await api.get("/categories");
+    return res.data;
+  } catch (error: unknown) {
+    console.error("Failed to fetch categories:", error);
+    // Since this is a frontend component, we'll just return an empty array
+    // and let the component handle the empty state or display a message.
+    return [];
+  }
+}
+
 export default async function EditPost({ params }: { params: { id: string } }) {
   const post = await getPost(params.id);
-  return <PostForm initialData={post} />;
+  const categories = await getCategories();
+  return <PostForm initialData={post} categories={categories} />;
 }

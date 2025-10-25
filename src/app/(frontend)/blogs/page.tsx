@@ -1,7 +1,9 @@
 // src/app/blogs/page.tsx
 import Link from "next/link";
-import BlogsClient from "@/components/posts/BlogsClient";
+import BlogsClient from "@/modules/blog/components/BlogsClient";
 import {Metadata} from "next";
+
+import { Post } from "@/modules/blog/types/post.types";
 
 // Fetch published posts from PUBLIC API (no auth required)
 async function getPublishedPosts() {
@@ -24,11 +26,6 @@ async function getPublishedPosts() {
 
     const posts = await res.json();
 
-    console.log("========== BLOG DEBUG ==========");
-    console.log("API Response status:", res.status);
-    console.log("Posts fetched:", posts.length);
-    console.log("================================");
-
     return posts;
   } catch (error) {
     console.error("❌ Error fetching published posts:", error);
@@ -36,11 +33,27 @@ async function getPublishedPosts() {
   }
 }
 
-async function getCategories(posts: any[]) {
-  // Extract unique categories from posts
-    return Array.from(
-      new Set(posts.map((p) => p.category).filter(Boolean))
-  ) as string[];
+async function getCategories(): Promise<{ id: number; name: string }[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const res = await fetch(`${baseUrl}/api/categories`, {
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      console.error("Failed to fetch categories:", res.status, res.statusText);
+      return [];
+    }
+
+    const categories = await res.json();
+    return categories.data;
+  } catch (error) {
+    console.error("❌ Error fetching categories:", error);
+    return [];
+  }
 }
 
 export const metadata: Metadata = {
@@ -50,7 +63,7 @@ export const metadata: Metadata = {
 
 export default async function BlogsPage() {
   const posts = await getPublishedPosts();
-  const categories = await getCategories(posts);
+  const categories = await getCategories();
 
   return (
     <div className="min-h-screen bg-background">

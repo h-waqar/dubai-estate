@@ -1,10 +1,10 @@
 // src/app/(frontend)/admin/blog/page.tsx
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import { cookies } from "next/headers";
-import BlogList from "@/components/posts/BlogList";
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import BlogList from "@/modules/blog/components/BlogList";
+import { authOptions } from "@/modules/user/routes/auth";
 
 async function getPosts() {
   const cookieHeader = cookies().toString();
@@ -15,8 +15,10 @@ async function getPosts() {
       },
     });
     return res.data;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to fetch posts:", error);
+    // Since this is a frontend component, we'll just return an empty array
+    // and let the component handle the empty state or display a message.
     return [];
   }
 }

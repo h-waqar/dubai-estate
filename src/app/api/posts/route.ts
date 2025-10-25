@@ -1,9 +1,10 @@
 // src\app\api\posts\route.ts
+import { Prisma } from "@/generated/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { postSchema } from "@/validators/post";
+import { authOptions } from "@/modules/user/routes/auth";
+import { postSchema } from "@/modules/blog/validators/post.validator";
 import { generateSlug } from "@/utils/slug";
 import { decode } from "next-auth/jwt";
 
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
         slug,
         excerpt: data.excerpt,
         coverImage: data.coverImage,
-        category: data.category,
+        categoryId: data.categoryId,
         tags: data.tags ?? [],
         authorId: data.authorId ?? Number(token.id),
       },
@@ -116,8 +117,7 @@ export async function GET(req: Request) {
     const category = searchParams.get("category") || undefined;
     const published = searchParams.get("published");
 
-    // ⚙️ Build Prisma query dynamically
-    const where: any = {};
+    const where: Prisma.PostWhereInput = {};
 
     if (query) {
       where.OR = [
@@ -127,9 +127,10 @@ export async function GET(req: Request) {
     }
 
     if (category) {
-      where.category = category;
+      where.category = {
+        name: category,
+      };
     }
-
     if (published !== null) {
       where.published = published === "true";
     }

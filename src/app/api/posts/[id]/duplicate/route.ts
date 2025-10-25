@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/modules/user/routes/auth";
 
 // POST duplicate a post
 export async function POST(
@@ -54,7 +54,7 @@ export async function POST(
         content: originalPost.content,
         excerpt: originalPost.excerpt,
         coverImage: originalPost.coverImage,
-        category: originalPost.category,
+        categoryId: originalPost.categoryId,
         tags: originalPost.tags,
         published: false, // Always create as draft
         authorId: Number(session.user.id), // Set current user as author

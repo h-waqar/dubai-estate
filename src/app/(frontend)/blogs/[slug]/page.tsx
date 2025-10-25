@@ -5,13 +5,13 @@ import {prisma} from "@/lib/prisma";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft, Calendar, Clock, Tag, User} from "lucide-react";
-import {TableOfContents} from "@/components/posts/TableOfContents";
-import {CommentsSection} from "@/components/posts/CommentsSection";
-import {LikeSaveShare} from "@/components/posts/LikeSaveShare";
-import {ReadingProgressBar} from "@/components/posts/ReadingProgressBar";
-import {PrintDownload} from "@/components/posts/PrintDownload";
-import {Newsletter} from "@/components/posts/Newsletter";
-import {ShareButtons} from "@/components/posts/ShareButtons";
+import {TableOfContents} from "@/modules/blog/components/TableOfContents";
+import {CommentsSection} from "@/modules/blog/components/CommentsSection";
+import {LikeSaveShare} from "@/modules/blog/components/LikeSaveShare";
+import {ReadingProgressBar} from "@/modules/blog/components/ReadingProgressBar";
+import {PrintDownload} from "@/modules/blog/components/PrintDownload";
+import {Newsletter} from "@/modules/blog/components/Newsletter";
+import {ShareButtons} from "@/modules/blog/components/ShareButtons";
 import {Metadata} from "next";
 import Image from 'next/image';
 
@@ -43,15 +43,15 @@ async function getPost(slug: string) {
 
 async function getRelatedPosts(
   currentPostId: number,
-  category: string | null,
+  categoryId: number | null,
   limit = 3
 ) {
-  if (!category) return [];
+  if (!categoryId) return [];
   try {
       return await prisma.post.findMany({
         where: {
             id: {not: currentPostId},
-            category,
+            categoryId,
             published: true,
         },
         take: limit,
@@ -125,7 +125,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!post.published) notFound();
 
   const [relatedPosts, featuredPosts] = await Promise.all([
-    getRelatedPosts(post.id, post.category),
+    getRelatedPosts(post.id, post.categoryId),
     getFeaturedPosts(4),
   ]);
 
@@ -377,7 +377,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                                   variant="secondary"
                                   className="mb-2 text-xs"
                                 >
-                                  {relatedPost.category}
+                                  {relatedPost.category.name}
                                 </Badge>
                               )}
                               <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
