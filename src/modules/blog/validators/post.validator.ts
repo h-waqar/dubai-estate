@@ -1,5 +1,5 @@
 // ============================================
-// src/validators/post.ts
+// src\modules\blog\validators\post.validator.ts
 // ============================================
 import { z } from "zod";
 
