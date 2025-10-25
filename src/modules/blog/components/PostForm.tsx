@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   postFormSchema,
   type PostFormData,
-  defaultPostFormData,
+  // defaultPostFormData,
 } from "@/modules/blog/types/post.types";
 import { usePostStore } from "@/modules/blog/stores/usePostStore";
 import { BlogEditor } from "./Editor";
