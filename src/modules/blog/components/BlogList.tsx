@@ -1,4 +1,4 @@
-// src/components/posts/BlogList.tsx
+// src/modules/blog/components/BlogList.tsx
 "use client";
 
 import { useState } from "react";
@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
+import type { Category } from "@/modules/blog/types/category.types";
 
 interface Author {
   id: number;
@@ -50,7 +51,7 @@ interface Post {
   slug: string;
   excerpt: string | null;
   coverImage: string | null;
-  category: string | null;
+  category: Category | null; // Changed from string | null to Category | null
   tags: string[];
   published: boolean;
   createdAt: string;
@@ -72,9 +73,14 @@ export default function BlogList({ initialPosts }: BlogListProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Extract unique categories from posts
+  // Extract unique categories from posts (returns Category[])
   const categories = Array.from(
-    new Set(posts.map((p) => p.category).filter(Boolean))
+    new Map(
+      posts
+        .map((p) => p.category)
+        .filter((cat): cat is Category => cat !== null)
+        .map((cat) => [cat.id, cat])
+    ).values()
   );
 
   // Filter posts based on search and filters
@@ -84,7 +90,8 @@ export default function BlogList({ initialPosts }: BlogListProps) {
       post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory =
-      categoryFilter === "all" || post.category === categoryFilter;
+      categoryFilter === "all" ||
+      (post.category && post.category.slug === categoryFilter);
 
     const matchesStatus =
       statusFilter === "all" ||
@@ -185,9 +192,9 @@ export default function BlogList({ initialPosts }: BlogListProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat!}>
-                {cat}
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.slug}>
+                {category.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -288,7 +295,7 @@ export default function BlogList({ initialPosts }: BlogListProps) {
                     </td>
                     <td className="p-4">
                       {post.category ? (
-                        <Badge variant="outline">{post.category}</Badge>
+                        <Badge variant="outline">{post.category.name}</Badge>
                       ) : (
                         <span className="text-muted-foreground text-sm">—</span>
                       )}

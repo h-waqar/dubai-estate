@@ -14,6 +14,7 @@ export function handleApiError(error: unknown): NextResponse {
   }
 
   if (error instanceof PrismaClientKnownRequestError) {
+    console.log("Prisma error code:", error.code);
     // Handle specific Prisma errors
     switch (error.code) {
       case "P2025": // Record not found
