@@ -344,6 +344,7 @@ export default function BlogList({ initialPosts }: BlogListProps) {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-end gap-2">
+                        {/* <Link href={`/blogs/${post.slug}`} target="_blank"> */}
                         <Link href={`/blogs/${post.slug}`} target="_blank">
                           <Button variant="ghost" size="icon" title="View Post">
                             <Eye className="h-4 w-4" />
