@@ -9,7 +9,7 @@ import { generateSlug } from "@/utils/slug";
 import { decode } from "next-auth/jwt";
 
 interface SessionUser {
-  id: string;
+  id: number;
   role: string;
   email?: string | null;
   name?: string | null;
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
           secret,
         });
         if (decoded && decoded.sub && decoded.role) {
-          token = { id: decoded.sub, role: decoded.role };
+          token = { id: parseInt(decoded.sub), role: decoded.role as string };
         } else {
           token = null;
         }
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         coverImage: data.coverImage,
         categoryId: data.categoryId,
         tags: data.tags ?? [],
-        authorId: data.authorId ?? Number(token.id),
+        authorId: data.authorId,
       },
     });
 
@@ -95,7 +95,7 @@ export async function GET(req: Request) {
           secret,
         });
         if (decoded && decoded.sub && decoded.role) {
-          token = { id: decoded.sub, role: decoded.role };
+          token = { id: parseInt(decoded.sub), role: decoded.role as string };
         } else {
           token = null;
         }

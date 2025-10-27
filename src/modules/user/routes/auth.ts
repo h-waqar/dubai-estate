@@ -32,7 +32,7 @@ export const authOptions: AuthOptions = {
 
                 // Return a user object with id and role
                 return {
-                    id: user.id.toString(), // string is required by NextAuth
+                    id: user.id,
                     name: user.name ?? null,
                     email: user.email,
                     role: user.role,
@@ -47,7 +47,7 @@ export const authOptions: AuthOptions = {
         // Existing session callback
         async session({session, token}) {
             if (session.user) {
-                session.user.id = token.sub as string
+                session.user.id = token.id
                 session.user.role = token.role
             }
             return session

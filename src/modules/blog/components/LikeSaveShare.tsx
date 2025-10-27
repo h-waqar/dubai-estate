@@ -7,11 +7,7 @@ import { Heart, Bookmark } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-interface LikeSaveShareProps {
-  postId: number;
-}
-
-export function LikeSaveShare({ postId }: LikeSaveShareProps) {
+export function LikeSaveShare() {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(0);

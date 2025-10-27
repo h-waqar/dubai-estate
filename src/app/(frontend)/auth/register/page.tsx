@@ -33,7 +33,7 @@ export default function RegisterPage() {
                 toast.success("Registration successful!")
                 window.location.href = "/auth/login"
             }
-        } catch (_err) {
+        } catch {
             setLoading(false)
             toast.error("Server error")
         }

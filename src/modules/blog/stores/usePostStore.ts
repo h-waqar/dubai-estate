@@ -4,7 +4,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
-  type PostFormData, // Keep this import for the default values type
   type PartialPostFormData,
   defaultPostFormData,
 } from "@/modules/blog/types/post.types";
@@ -34,7 +33,7 @@ interface PostStore {
 
 export const usePostStore = create<PostStore>()(
   persist(
-    (set, _get) => ({
+    (set) => ({
       post: defaultPostFormData,
       loading: false,
       error: null,

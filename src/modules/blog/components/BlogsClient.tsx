@@ -1,11 +1,9 @@
-// src/components/blog/BlogsClient.tsx
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -15,28 +13,10 @@ import {
 } from "@/components/ui/select";
 import { Calendar, Clock, ArrowRight, Search } from "lucide-react";
 import Image from "next/image";
-
-interface Author {
-  id: number;
-  name: string | null;
-  email: string | null;
-  image: string | null;
-}
-
-interface Post {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  coverImage: string | null;
-  categoryId: number | null;
-  tags: string[];
-  createdAt: Date;
-  author: Author;
-}
+import { PostWithRelations } from "@/modules/blog/types/post.types";
 
 interface BlogsClientProps {
-  initialPosts: Post[];
+  initialPosts: PostWithRelations[];
   categories: { id: number; name: string }[];
 }
 

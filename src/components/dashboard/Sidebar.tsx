@@ -1,9 +1,8 @@
 "use client"
 
-import {useState} from "react"
 import Link from "next/link"
 import {usePathname} from "next/navigation"
-import {FaHome, FaUsers, FaUser, FaBoxOpen, FaEnvelope, FaCog, FaChevronLeft, FaChevronRight} from "react-icons/fa"
+import {FaHome, FaUsers, FaUser, FaBoxOpen, FaEnvelope, FaCog, FaChevronLeft, FaChevronRight, FaTags} from "react-icons/fa"
 import {cn} from "@/lib/utils"
 import {
     Sheet,
@@ -18,6 +17,7 @@ const links = [
     {href: "/admin/admins", label: "Admins", icon: FaUser},
     {href: "/admin/products", label: "Products", icon: FaBoxOpen},
     {href: "/admin/blog", label: "Blog Posts", icon: FaEnvelope},
+    {href: "/admin/categories", label: "Categories", icon: FaTags},
     {href: "/admin/settings", label: "Settings", icon: FaCog},
 ]
 

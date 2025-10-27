@@ -1,49 +1,19 @@
-// app/api/posts/public/[slug]/route.ts
-import { handleApiError } from "@/lib/errorHandler";
+// src/app/api/posts/public/[slug]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPostBySlug } from "@/modules/blog/services/post.service";
+import { handleApiError } from "@/lib/errorHandler";
 
 export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ slug: string }> }
+  req: NextRequest,
+  { params }: { params: { slug: string } }
 ) {
   try {
-    const { slug } = await context.params;
-
-    const post = await prisma.post.findUnique({
-      where: { slug },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            // image: true,
-          },
-        },
-      },
-    });
-
+    const post = await getPostBySlug(params.slug);
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
-
-    // Only return published posts for public API
-    if (!post.published) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    }
-
-    // Increment view count (optional)
-    await prisma.post.update({
-      where: { id: post.id },
-      data: {
-        // Add a views field to your schema if you want to track this
-        // views: { increment: 1 }
-      },
-    });
-
-    return NextResponse.json(post);
-  } catch (error: unknown) {
-    return handleApiError(error);
+    return NextResponse.json(post, { status: 200 });
+  } catch (err) {
+    return handleApiError(err);
   }
 }

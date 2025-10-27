@@ -71,7 +71,6 @@ export default function BlogList({ initialPosts }: BlogListProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Extract unique categories from posts
   const categories = Array.from(
@@ -119,7 +118,7 @@ export default function BlogList({ initialPosts }: BlogListProps) {
 
   const handleTogglePublish = async (id: number, currentStatus: boolean) => {
     try {
-      const response = await api.put(`/posts/${id}`, {
+      await api.put(`/posts/${id}`, {
         published: !currentStatus,
       });
       setPosts(
@@ -139,17 +138,14 @@ export default function BlogList({ initialPosts }: BlogListProps) {
 
   const handleDuplicate = async (id: number) => {
     try {
-      setIsLoading(true);
       // Use dedicated duplicate endpoint
-      const response = await api.post(`/posts/${id}/duplicate`);
-      setPosts([response.data, ...posts]);
+      const { data } = await api.post(`/posts/${id}/duplicate`);
+      setPosts([data, ...posts]);
       toast.success("Post duplicated successfully");
       router.refresh();
     } catch (error: unknown) {
       toast.error("Failed to duplicate post");
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

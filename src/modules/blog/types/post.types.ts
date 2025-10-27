@@ -197,9 +197,9 @@ export interface Post {
   tags: string[];
   published: boolean;
   authorId: number;
-  publishedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
+  publishedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**
@@ -212,7 +212,7 @@ export interface PostWithRelations extends Post {
     name: string | null;
     email: string;
     image: string | null;
-  };
+  } | null;
 }
 
 /**

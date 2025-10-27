@@ -3,6 +3,8 @@
 import { PostForm } from "@/modules/blog/components/PostForm";
 import { Category } from "@/modules/blog/types/category.types";
 import { api } from "@/lib/api";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/modules/user/routes/auth";
 
 async function getPost(id: string) {
   const res = await fetch(
@@ -18,7 +20,7 @@ async function getPost(id: string) {
 async function getCategories(): Promise<Category[]> {
   try {
     const res = await api.get("/categories");
-    return res.data;
+    return res.data.data;
   } catch (error: unknown) {
     console.error("Failed to fetch categories:", error);
     // Since this is a frontend component, we'll just return an empty array
@@ -28,7 +30,12 @@ async function getCategories(): Promise<Category[]> {
 }
 
 export default async function EditPost({ params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    // Handle unauthenticated user
+    return null;
+  }
   const post = await getPost(params.id);
   const categories = await getCategories();
-  return <PostForm initialData={post} categories={categories} />;
+  return <PostForm initialData={post} categories={categories} userId={session.user.id} />;
 }

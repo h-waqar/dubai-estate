@@ -1,19 +1,19 @@
 // app/(frontend)/blogs/[slug]/page.tsx
-import {notFound} from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import {prisma} from "@/lib/prisma";
-import {Badge} from "@/components/ui/badge";
-import {Button} from "@/components/ui/button";
-import {ArrowLeft, Calendar, Clock, Tag, User} from "lucide-react";
-import {TableOfContents} from "@/modules/blog/components/TableOfContents";
-import {CommentsSection} from "@/modules/blog/components/CommentsSection";
-import {LikeSaveShare} from "@/modules/blog/components/LikeSaveShare";
-import {ReadingProgressBar} from "@/modules/blog/components/ReadingProgressBar";
-import {PrintDownload} from "@/modules/blog/components/PrintDownload";
-import {Newsletter} from "@/modules/blog/components/Newsletter";
-import {ShareButtons} from "@/modules/blog/components/ShareButtons";
-import {Metadata} from "next";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Calendar, Clock, Tag, User } from "lucide-react";
+import { TableOfContents } from "@/modules/blog/components/TableOfContents";
+import { CommentsSection } from "@/modules/blog/components/CommentsSection";
+import { LikeSaveShare } from "@/modules/blog/components/LikeSaveShare";
+import { ReadingProgressBar } from "@/modules/blog/components/ReadingProgressBar";
+import { PrintDownload } from "@/modules/blog/components/PrintDownload";
+import { Newsletter } from "@/modules/blog/components/Newsletter";
+import { ShareButtons } from "@/modules/blog/components/ShareButtons";
+import { Metadata } from "next";
 import Image from 'next/image';
+import { getPostBySlug, getRelatedPosts, getFeaturedPosts } from "@/modules/blog/services/post.service";
 
 interface PageProps {
   params: {
@@ -21,88 +21,8 @@ interface PageProps {
   };
 }
 
-async function getPost(slug: string) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/posts/public/${slug}`, {
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (!res.ok) {
-      console.error(`Failed to fetch post "${slug}":`, res.status);
-      return null;
-    }
-      return await res.json();
-  } catch (error: unknown) {
-    console.error("Error fetching post:", error);
-    return null;
-  }
-}
-
-async function getRelatedPosts(
-  currentPostId: number,
-  categoryId: number | null,
-  limit = 3
-) {
-  if (!categoryId) return [];
-  try {
-      return await prisma.post.findMany({
-        where: {
-            id: {not: currentPostId},
-            categoryId,
-            published: true,
-        },
-        take: limit,
-        orderBy: {createdAt: "desc"},
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            excerpt: true,
-            coverImage: true,
-            category: true,
-            createdAt: true,
-            author: {
-                select: {
-                    name: true,
-                    image: true,
-                },
-            },
-        },
-    });
-  } catch (error: unknown) {
-    console.error("Error fetching related posts:", error);
-    return [];
-  }
-}
-
-async function getFeaturedPosts(limit = 4) {
-  try {
-      return await prisma.post.findMany({
-        where: {
-            published: true,
-        },
-        take: limit,
-        orderBy: {createdAt: "desc"},
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            coverImage: true,
-            category: true,
-            createdAt: true,
-        },
-    });
-  } catch (error: unknown) {
-    console.error("Error fetching featured posts:", error);
-    return [];
-  }
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const post = await getPost(params.slug);
+  const post = await getPostBySlug(params.slug);
   if (!post) {
     return {
       title: "Post Not Found",
@@ -120,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
-  const post = await getPost(params.slug);
+  const post = await getPostBySlug(params.slug);
   if (!post) notFound();
   if (!post.published) notFound();
 
@@ -133,13 +53,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   // Extract headings for TOC
   const headingRegex = /<h([2-3]) id="([^"]+)">(.+?)<\/h[2-3]>/g;
-  const headings: Array<{ id: string; text: string; level: number }> = [
-    {
-      id: "9",
-      text: "Hello World",
-      level: 0,
-    },
-  ];
+  const headings: Array<{ id: string; text: string; level: number }> = [];
   let match;
   while ((match = headingRegex.exec(post.content))) {
     headings.push({ id: match[2], text: match[3], level: Number(match[1]) });
@@ -175,7 +89,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 {/* Category */}
                 {post.category && (
                   <Badge className="mb-4" variant="secondary">
-                    {post.category}
+                    {post.category.name}
                   </Badge>
                 )}
 
@@ -194,12 +108,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 {/* Meta Info */}
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b">
                   <div className="flex items-center gap-2">
-                    {post.author.image ? (
-                      // <img
-                      //   src={post.author.image}
-                      //   alt={post.author.name || "Author"}
-                      //   className="w-8 h-8 rounded-full object-cover"
-                      // />
+                    {post.author && post.author.image ? (
                         <Image
                             width={32}
                             height={32}
@@ -213,7 +122,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                       </div>
                     )}
                     <span className="font-medium">
-                      {post.author.name || "Anonymous"}
+                      {post.author ? post.author.name || "Anonymous" : "Anonymous"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -234,19 +143,11 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                 {/* Action Buttons */}
                 <div className="mb-8">
-                  <LikeSaveShare postId={post.id} />
+                  <LikeSaveShare />
                 </div>
 
                 {/* Cover Image */}
                 {post.coverImage && (
-                  // <div className="mb-10 rounded-xl overflow-hidden shadow-lg">
-                  //   {/*<img*/}
-                  //   {/*  src={post.coverImage}*/}
-                  //   {/*  alt={post.title}*/}
-                  //   {/*  className="w-full h-auto object-cover max-h-[500px]"*/}
-                  //   {/*/>*/}
-                  // </div>
-
                     <div className="mb-10 rounded-xl overflow-hidden shadow-lg relative h-[500px]">
                         <Image
                             src={post.coverImage}
@@ -255,8 +156,6 @@ export default async function BlogPostPage({ params }: PageProps) {
                             className="object-cover"
                         />
                     </div>
-
-
                 )}
 
                 {/* Content */}
@@ -300,13 +199,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 {/* Author Card */}
                 <div className="bg-muted/50 rounded-xl p-6 mb-12 border">
                   <div className="flex items-start gap-4">
-                    {post.author.image ? (
-                      // <img
-                      //   src={post.author.image}
-                      //   alt={post.author.name || "Author"}
-                      //   className="w-16 h-16 rounded-full object-cover"
-                      // />
-
+                    {post.author && post.author.image ? (
                         <Image
                             width={64}
                             height={64}
@@ -321,7 +214,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     )}
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg mb-1">
-                        {post.author.name || "Anonymous Author"}
+                        {post.author ? post.author.name || "Anonymous Author" : "Anonymous Author"}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-3">
                         Content Writer at Dubai Estate
@@ -350,17 +243,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                           <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 bg-card">
                             {relatedPost.coverImage ? (
                               <div className="relative h-40 overflow-hidden">
-                                 {/*<img*/}
-                                 {/*  src={relatedPost.coverImage}*/}
-                                 {/*  alt={relatedPost.title}*/}
-                                 {/*  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"*/}
-                                 {/*/>*/}
                                     <Image
                                         src={relatedPost.coverImage}
                                         alt={relatedPost.title}
-                                        // Use fill to make the image take up the parent's space
                                         fill
-                                        // Add the styling classes that control how the image scales
                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
                               </div>
@@ -446,11 +332,6 @@ export default async function BlogPostPage({ params }: PageProps) {
                         >
                           <div className="flex gap-3">
                             {featured.coverImage ? (
-                              // <img
-                              //   src={featured.coverImage}
-                              //   alt={featured.title}
-                              //   className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                              // />
                                 <Image
                                     width={80}
                                     height={80}

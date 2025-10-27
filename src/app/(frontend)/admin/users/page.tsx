@@ -389,7 +389,6 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import {
     DropdownMenu,
@@ -448,6 +447,7 @@ export default function UsersPage() {
                 console.error("Failed to load users", err);
                 // Optionally, set an error state to display a message to the user
             })
+            .finally(() => setLoading(false));
     }, []);
 
     useEffect(() => {

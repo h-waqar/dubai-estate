@@ -1,60 +1,9 @@
 // src/app/blogs/page.tsx
 import Link from "next/link";
 import BlogsClient from "@/modules/blog/components/BlogsClient";
-import {Metadata} from "next";
-
-import { Post } from "@/modules/blog/types/post.types";
-
-// Fetch published posts from PUBLIC API (no auth required)
-async function getPublishedPosts() {
-  try {
-    // Use absolute URL in production, relative in dev
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-    // Call the PUBLIC API route (no auth required)
-    const res = await fetch(`${baseUrl}/api/posts/public`, {
-      cache: "no-store", // Always get fresh data
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      console.error("Failed to fetch posts:", res.status, res.statusText);
-      return [];
-    }
-
-    const posts = await res.json();
-
-    return posts;
-  } catch (error: unknown) {
-    console.error("❌ Error fetching published posts:", error);
-    return [];
-  }
-}
-
-async function getCategories(): Promise<{ id: number; name: string }[]> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    const res = await fetch(`${baseUrl}/api/categories`, {
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      console.error("Failed to fetch categories:", res.status, res.statusText);
-      return [];
-    }
-
-    const categories = await res.json();
-    return categories.data;
-  } catch (error: unknown) {
-    console.error("❌ Error fetching categories:", error);
-    return [];
-  }
-}
+import { Metadata } from "next";
+import { getPublishedPosts } from "@/modules/blog/services/post.service";
+import { getAllCategories } from "@/modules/blog/services/category.service";
 
 export const metadata: Metadata = {
   title: "Blog - Dubai Estate",
@@ -63,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function BlogsPage() {
   const posts = await getPublishedPosts();
-  const categories = await getCategories();
+  const categories = await getAllCategories();
 
   return (
     <div className="min-h-screen bg-background">
