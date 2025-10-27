@@ -23,15 +23,16 @@ import { PreviewModal } from "./PreviewModal";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
+import { useAuth } from "@/modules/user/hooks/useAuth";
+
 export function PostForm({
   initialData,
   categories,
-  userId,
 }: {
   initialData?: Partial<PostFormData>; // ✅ Make it Partial
   categories: { id: number; name: string }[];
-  userId: number;
 }) {
+  const { userId } = useAuth();
   const {
     post,
     setPost,

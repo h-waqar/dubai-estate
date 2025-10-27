@@ -19,6 +19,8 @@ interface SessionUser {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    console.log("Session in POST /api/posts:", session);
+    console.log("Session user in POST /api/posts:", session?.user);
     let token: SessionUser | null = session?.user ?? null;
 
     // Dev JWT fallback
@@ -57,6 +59,8 @@ export async function POST(req: NextRequest) {
     const data = parsed.data;
     const slug = data.slug ?? generateSlug(data.title);
 
+    console.log("Token before Prisma create:", token);
+
     const newPost = await prisma.post.create({
       data: {
         title: data.title,
@@ -64,17 +68,26 @@ export async function POST(req: NextRequest) {
         slug,
         excerpt: data.excerpt,
         coverImage: data.coverImage,
-        categoryId: data.categoryId,
         tags: data.tags ?? [],
-        authorId: data.authorId ?? token.id,
+        author: {
+          connect: { id: token.id },
+          // connect: { id: token.id },
+        },
+        category: data.categoryId ? { connect: { id: data.categoryId } } : undefined,
       },
     });
 
     return NextResponse.json(newPost, { status: 201 });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("POST /posts error:", err);
+    let errorMessage = "Failed to create post";
+    if (err instanceof Error) {
+      errorMessage = err.message;
+    }
+    // Log the full error object for debugging
+    console.error("Full error object:", err);
     return NextResponse.json(
-      { error: "Failed to create post" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

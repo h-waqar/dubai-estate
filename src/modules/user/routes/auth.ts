@@ -31,12 +31,14 @@ export const authOptions: AuthOptions = {
                 if (!isValid) return null
 
                 // Return a user object with id and role
-                return {
+                const returnedUser = {
                     id: user.id,
                     name: user.name ?? null,
                     email: user.email,
                     role: user.role,
-                }
+                };
+                console.log("Returned user from authorize:", returnedUser);
+                return returnedUser;
             },
         }),
     ],
@@ -47,17 +49,21 @@ export const authOptions: AuthOptions = {
         // Existing session callback
         async session({session, token}) {
             if (session.user) {
-                session.user.id = token.id
-                session.user.role = token.role
+                session.user.id = token.id as number;
+                session.user.role = token.role as string;
             }
             return session
         },
 
         // Existing jwt callback
         async jwt({token, user}) {
+            console.log("User in JWT callback:", user);
+            console.log("Token in JWT callback (before modification):", token);
             if (user) {
+                token.id = user.id;
                 token.role = user.role
             }
+            console.log("Token in JWT callback (after modification):", token);
             return token
         },
 

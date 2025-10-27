@@ -37,5 +37,5 @@ export default async function EditPost({ params }: { params: { id: string } }) {
   }
   const post = await getPost(params.id);
   const categories = await getCategories();
-  return <PostForm initialData={post} categories={categories} userId={session.user.id} />;
+  return <PostForm initialData={post} categories={categories} />;
 }

@@ -33,7 +33,7 @@ export default async function NewPostPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <PostForm categories={categories} userId={session.user.id} />
+      <PostForm categories={categories} />
     </div>
   );
 }
