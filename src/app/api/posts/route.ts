@@ -7,6 +7,7 @@ import { authOptions } from "@/modules/user/routes/auth";
 import { postSchema } from "@/modules/blog/validators/post.validator";
 import { generateSlug } from "@/utils/slug";
 import { decode } from "next-auth/jwt";
+import { handleApiError } from "@/lib/errorHandler";
 
 interface SessionUser {
   id: number;
@@ -73,23 +74,18 @@ export async function POST(req: NextRequest) {
           connect: { id: token.id },
           // connect: { id: token.id },
         },
-        category: data.categoryId ? { connect: { id: data.categoryId } } : undefined,
+        category: data.categoryId
+          ? { connect: { id: data.categoryId } }
+          : undefined,
       },
     });
 
     return NextResponse.json(newPost, { status: 201 });
   } catch (err: unknown) {
     console.error("POST /posts error:", err);
-    let errorMessage = "Failed to create post";
-    if (err instanceof Error) {
-      errorMessage = err.message;
-    }
     // Log the full error object for debugging
     console.error("Full error object:", err);
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    return handleApiError(err);
   }
 }
 
