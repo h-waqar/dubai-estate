@@ -267,7 +267,8 @@ export default function BlogList({ initialPosts }: BlogListProps) {
                       <div className="flex items-center gap-3">
                         {post.coverImage ? (
                           <Image
-                            src={post.coverImage}
+                            src="https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg"
+                            // src={post.coverImage}
                             alt={post.title}
                             width={60}
                             height={60}
