@@ -6,8 +6,27 @@ import { cookies } from "next/headers";
 import BlogList from "@/modules/blog/components/BlogList";
 import { authOptions } from "@/modules/user/routes/auth";
 
+// async function getPosts() {
+//   const cookieHeader = cookies().toString();
+//   try {
+//     const res = await api.get("/posts", {
+//       headers: {
+//         Cookie: cookieHeader,
+//       },
+//     });
+//     return res.data;
+//   } catch (error: unknown) {
+//     console.error("Failed to fetch posts:", error);
+//     // Since this is a frontend component, we'll just return an empty array
+//     // and let the component handle the empty state or display a message.
+//     return [];
+//   }
+// }
+
 async function getPosts() {
-  const cookieHeader = cookies().toString();
+  const cookieStore = await cookies(); // Await the cookies() function
+  const cookieHeader = cookieStore.toString(); // Convert to string if necessary
+
   try {
     const res = await api.get("/posts", {
       headers: {
@@ -17,8 +36,6 @@ async function getPosts() {
     return res.data;
   } catch (error: unknown) {
     console.error("Failed to fetch posts:", error);
-    // Since this is a frontend component, we'll just return an empty array
-    // and let the component handle the empty state or display a message.
     return [];
   }
 }
