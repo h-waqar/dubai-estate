@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         coverImage: data.coverImage,
         categoryId: data.categoryId,
         tags: data.tags ?? [],
-        authorId: data.authorId,
+        authorId: data.authorId ?? token.id,
       },
     });
 

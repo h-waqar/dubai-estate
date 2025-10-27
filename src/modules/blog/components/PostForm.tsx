@@ -2,7 +2,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm, FormProvider, type SubmitHandler, type SubmitErrorHandler } from "react-hook-form";
+import {
+  useForm,
+  FormProvider,
+  type SubmitHandler,
+  type SubmitErrorHandler,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   postFormSchema,
@@ -81,19 +86,25 @@ export function PostForm({
   }, [post, autoSaveEnabled, startSaving, stopSaving, markSaved, setSuccess]);
 
   const onSubmit: SubmitHandler<PostFormData> = async (data) => {
-    const normalized = {
-      ...data,
-      categoryId: data.categoryId || null,
-      coverImage: data.coverImage || "https://picsum.photos/1200/630",
+    const payload = {
+      title: data.title,
+      slug: data.slug,
+      content: data.content,
       excerpt: data.excerpt || "",
+      coverImage: data.coverImage || "https://picsum.photos/1200/630",
+      categoryId: data.categoryId || null,
+      tags: data.tags,
+      published: data.published,
       authorId: userId,
     };
+
+    console.log("Payload:", payload);
 
     try {
       setLoading(true);
       setError(null);
 
-      const res = await api.post("/posts", normalized);
+      const res = await api.post("/posts", payload);
       const savedPost = res.data;
 
       setSuccess("Post saved successfully!");

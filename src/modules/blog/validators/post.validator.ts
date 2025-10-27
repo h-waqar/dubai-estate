@@ -12,7 +12,7 @@ export const postSchema = z.object({
   categoryId: z.number().int().positive().optional(), // Proper foreign key
   tags: z.array(z.string()).default([]),
   published: z.boolean().default(false),
-  authorId: z.number().int().positive(),
+  authorId: z.number().int().positive().optional(),
 });
 
 export type PostInput = z.infer<typeof postSchema>;

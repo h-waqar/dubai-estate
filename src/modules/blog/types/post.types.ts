@@ -170,6 +170,7 @@ export const postFormSchema = z.object({
   coverImage: z.string().optional(),
   lastSavedAt: z.string().optional(),
   draftId: z.union([z.string(), z.number()]).optional(),
+  authorId: z.number().optional(),
 });
 
 export type PostFormData = z.infer<typeof postFormSchema>;
