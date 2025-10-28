@@ -4,6 +4,9 @@ import BlogsClient from "@/modules/blog/components/BlogsClient";
 import { Metadata } from "next";
 import { getPublishedPosts } from "@/modules/blog/services/post.service";
 import { getAllCategories } from "@/modules/blog/services/category.service";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Blog - Dubai Estate",
@@ -17,7 +20,10 @@ export default async function BlogsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+
+      <Header />
+
+      {/* <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold">
@@ -42,11 +48,38 @@ export default async function BlogsPage() {
             </nav>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-muted/50 to-background py-16 border-b">
-        <div className="container mx-auto px-4 text-center max-w-3xl">
+      {/* <section className="bg-gradient-to-b from-muted/50 to-background py-16 border-b overflow-hidden">
+        <Image
+          src={"/assets/dubai-hero.jpg"}
+          alt="Dubai Estate Blog"
+          fill
+          className="max-h-full object-cover"
+        />
+
+        <div className="container mx-auto px-4 text-center max-w-3xl z-10">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Dubai Estate Blog
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8">
+            Discover insights, guides, and the latest news about Dubai real
+            estate market
+          </p>
+        </div>
+      </section> */}
+
+      <section className="relative bg-gradient-to-b from-muted/50 to-background py-16 border-b overflow-hidden">
+        <Image
+          src={"/assets/dubai-hero.jpg"}
+          alt="Dubai Estate Blog"
+          fill
+          className="object-cover "
+        />
+
+        {/* Make this container relative so its z-index applies correctly */}
+        <div className="relative container mx-auto px-4 text-center max-w-3xl z-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Dubai Estate Blog
           </h1>
@@ -92,11 +125,13 @@ export default async function BlogsPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/50 mt-20">
+      {/* <footer className="border-t bg-muted/50 mt-20">
         <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
           <p>© 2024 Dubai Estate. All rights reserved.</p>
         </div>
-      </footer>
+      </footer> */}
+
+      <Footer />
     </div>
   );
 }

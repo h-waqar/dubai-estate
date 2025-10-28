@@ -31,13 +31,13 @@ export default function AboutPage() {
       icon: <Home className="w-10 h-10 text-yellow-500 dark:text-yellow-400" />,
       title: "Feel at home, wherever life takes you",
       description:
-        "Manzil is here to make your travel experience not only more comfortable, but truly homely.",
+        "Dubai Estate is here to make your travel experience not only more comfortable, but truly homely.",
     },
     {
       icon: <Wind className="w-10 h-10 text-yellow-500 dark:text-yellow-400" />,
       title: "Rest at first sight",
       description:
-        "When you enter a Manzil home, expect an upgrade from your everyday living while still feeling familiar with your surroundings. It's refreshing, and predictable.",
+        "When you enter a Dubai Estate home, expect an upgrade from your everyday living while still feeling familiar with your surroundings. It's refreshing, and predictable.",
     },
   ];
 
@@ -46,7 +46,7 @@ export default function AboutPage() {
       img: "/about-us/aim.png",
       title: "Assertive",
       description:
-        "Manzil says it like it is. No surprises, only expectations met.",
+        "Dubai Estate says it like it is. No surprises, only expectations met.",
     },
     {
       img: "/about-us/reimagine.png",
@@ -58,19 +58,19 @@ export default function AboutPage() {
       img: "/about-us/stays.png",
       title: "Youthful",
       description:
-        "Be it a new restaurant, club or local attraction, Manzil stays on top of the game by offering the latest trends in the city.",
+        "Be it a new restaurant, club or local attraction, Dubai Estate stays on top of the game by offering the latest trends in the city.",
     },
     {
       img: "/about-us/aboutBanner.jpeg",
       title: "Honest",
       description:
-        "With hospitality comes great responsibility. Manzil is transparent about their services, limitations and capabilities.",
+        "With hospitality comes great responsibility. Dubai Estate is transparent about their services, limitations and capabilities.",
     },
     {
       img: "/about-us/quote.png",
       title: "Empathetic",
       description:
-        "There's no one-size-fits-all when it comes to guests. Manzil understands and aims to solve grievances in a meaningful manner.",
+        "There's no one-size-fits-all when it comes to guests. Dubai Estate understands and aims to solve grievances in a meaningful manner.",
     },
     {
       img: "/assets/dubai-hero.jpg",
@@ -97,7 +97,7 @@ export default function AboutPage() {
               className="text-4xl md:text-6xl font-bold tracking-tight"
               style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
             >
-              Get to know Manzil
+              Get to know Dubai Estate
             </h1>
             <p
               className="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-gray-200"
@@ -112,14 +112,7 @@ export default function AboutPage() {
         <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4 text-center">
             <blockquote className="text-xl md:text-2xl font-light text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
-              &ldquo;Inspired by the delicate arabic term Manzil apartments
-              responds to the need for a hassle-free experience, seamless
-              hospitality and appreciation of time; these are intrinsic parts of
-              the manzil lifestyle. Manzil in arabic basically means home for
-              travellers. In a world saturated with adulterated holiday packages
-              and substandard services, we aim to bridge the gap between the
-              initial excitement of visiting a new city and returning home
-              rejuvenated, fulfilled even.&rdquo;
+              &ldquo;At Dubai Estate, we respond to the need for a hassle-free experience, seamless hospitality and appreciation of time. These are intrinsic parts of the Dubai Estate lifestyle. In a world saturated with adulterated holiday packages and substandard services, we aim to bridge the gap between the initial excitement of visiting a new city and returning home rejuvenated, fulfilled even.&rdquo;
             </blockquote>
           </div>
         </section>
@@ -129,7 +122,7 @@ export default function AboutPage() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                Reimagine Your Experience with Manzil
+                Reimagine Your Experience with Dubai Estate
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -175,7 +168,7 @@ export default function AboutPage() {
               <div className="relative order-1 md:order-2 h-80 md:h-[450px]">
                 <Image
                   src="/about-us/stays.png"
-                  alt="Balcony view from a Manzil apartment"
+                  alt="Balcony view from a Dubai Estate apartment"
                   fill
                   className="rounded-xl shadow-lg object-cover w-full h-full"
                 />
@@ -186,7 +179,7 @@ export default function AboutPage() {
               <div className="relative h-80 md:h-[450px]">
                 <Image
                   src="/assets/property-1.jpg"
-                  alt="Modern bathroom in a Manzil apartment"
+                  alt="Modern bathroom in a Dubai Estate apartment"
                   fill
                   className="rounded-xl shadow-lg object-cover w-full h-full"
                 />

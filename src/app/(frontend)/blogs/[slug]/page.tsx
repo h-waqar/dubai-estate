@@ -12,8 +12,14 @@ import { PrintDownload } from "@/modules/blog/components/PrintDownload";
 import { Newsletter } from "@/modules/blog/components/Newsletter";
 import { ShareButtons } from "@/modules/blog/components/ShareButtons";
 import { Metadata } from "next";
-import Image from 'next/image';
-import { getPostBySlug, getRelatedPosts, getFeaturedPosts } from "@/modules/blog/services/post.service";
+import Image from "next/image";
+import {
+  getPostBySlug,
+  getRelatedPosts,
+  getFeaturedPosts,
+} from "@/modules/blog/services/post.service";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 
 interface PageProps {
   params: {
@@ -21,7 +27,9 @@ interface PageProps {
   };
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
   if (!post) {
     return {
@@ -65,7 +73,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
+        {/* <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Link href="/blogs">
@@ -78,7 +86,9 @@ export default async function BlogPostPage({ params }: PageProps) {
               </Link>
             </div>
           </div>
-        </header>
+        </header> */}
+
+        <Header />
 
         <div className="container mx-auto px-4 py-8 lg:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -109,20 +119,22 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b">
                   <div className="flex items-center gap-2">
                     {post.author && post.author.image ? (
-                        <Image
-                            width={32}
-                            height={32}
-                            src={post.author.image}
-                            alt={post.author.name || "Author"}
-                            className="w-8 h-8 rounded-full object-cover"
-                        />
+                      <Image
+                        width={32}
+                        height={32}
+                        src={post.author.image}
+                        alt={post.author.name || "Author"}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-4 w-4 text-primary" />
                       </div>
                     )}
                     <span className="font-medium">
-                      {post.author ? post.author.name || "Anonymous" : "Anonymous"}
+                      {post.author
+                        ? post.author.name || "Anonymous"
+                        : "Anonymous"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -148,14 +160,14 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                 {/* Cover Image */}
                 {post.coverImage && (
-                    <div className="mb-10 rounded-xl overflow-hidden shadow-lg relative h-[500px]">
-                        <Image
-                            src={post.coverImage}
-                            alt={post.title}
-                            fill
-                            className="object-cover"
-                        />
-                    </div>
+                  <div className="mb-10 rounded-xl overflow-hidden shadow-lg relative h-[500px]">
+                    <Image
+                      src={post.coverImage}
+                      alt={post.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 )}
 
                 {/* Content */}
@@ -200,13 +212,13 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <div className="bg-muted/50 rounded-xl p-6 mb-12 border">
                   <div className="flex items-start gap-4">
                     {post.author && post.author.image ? (
-                        <Image
-                            width={64}
-                            height={64}
-                            src={post.author.image}
-                            alt={post.author.name || "Author"}
-                            className="w-16 h-16 rounded-full object-cover"
-                        />
+                      <Image
+                        width={64}
+                        height={64}
+                        src={post.author.image}
+                        alt={post.author.name || "Author"}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                         <User className="h-8 w-8 text-primary" />
@@ -214,7 +226,9 @@ export default async function BlogPostPage({ params }: PageProps) {
                     )}
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg mb-1">
-                        {post.author ? post.author.name || "Anonymous Author" : "Anonymous Author"}
+                        {post.author
+                          ? post.author.name || "Anonymous Author"
+                          : "Anonymous Author"}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-3">
                         Content Writer at Dubai Estate
@@ -243,12 +257,12 @@ export default async function BlogPostPage({ params }: PageProps) {
                           <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 bg-card">
                             {relatedPost.coverImage ? (
                               <div className="relative h-40 overflow-hidden">
-                                    <Image
-                                        src={relatedPost.coverImage}
-                                        alt={relatedPost.title}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                    />
+                                <Image
+                                  src={relatedPost.coverImage}
+                                  alt={relatedPost.title}
+                                  fill
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
                               </div>
                             ) : (
                               <div className="w-full h-40 bg-muted flex items-center justify-center">
@@ -332,13 +346,13 @@ export default async function BlogPostPage({ params }: PageProps) {
                         >
                           <div className="flex gap-3">
                             {featured.coverImage ? (
-                                <Image
-                                    width={80}
-                                    height={80}
-                                    src={featured.coverImage}
-                                    alt={featured.title}
-                                    className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                                />
+                              <Image
+                                width={80}
+                                height={80}
+                                src={featured.coverImage}
+                                alt={featured.title}
+                                className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                              />
                             ) : (
                               <div className="w-20 h-20 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center">
                                 <span className="text-2xl font-bold text-muted-foreground">
@@ -395,7 +409,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
 
         {/* Footer */}
-        <footer className="border-t bg-muted/30 mt-20">
+        {/* <footer className="border-t bg-muted/30 mt-20">
           <div className="container mx-auto px-4 py-8">
             <div className="text-center text-sm text-muted-foreground">
               <p>
@@ -403,7 +417,9 @@ export default async function BlogPostPage({ params }: PageProps) {
               </p>
             </div>
           </div>
-        </footer>
+        </footer> */}
+
+        <Footer />
       </div>
     </>
   );
