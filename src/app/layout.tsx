@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-=======
 // src/app/layout.tsx:1
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -11,7 +6,6 @@ import "./globals.css";
 import { ClientThemeProvider } from "@/components/ClientThemeProvider";
 import { SessionProvider } from "@/components/SessionProvider";
 import React from "react";
->>>>>>> 46f1aedcbd589ab55eb4a507290cde9644981e2f
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,30 +24,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-<<<<<<< HEAD
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-=======
 }: {
   children: React.ReactNode;
 }) {
->>>>>>> 46f1aedcbd589ab55eb4a507290cde9644981e2f
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-<<<<<<< HEAD
-      >
-        {children}
-=======
         suppressHydrationWarning
       >
         {/*<ClientThemeProvider>{children}</ClientThemeProvider>*/}
         <SessionProvider>
           <ClientThemeProvider>{children}</ClientThemeProvider>
         </SessionProvider>
->>>>>>> 46f1aedcbd589ab55eb4a507290cde9644981e2f
       </body>
     </html>
   );
