@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+## PRISMA COMMANDS
+# 1. Update your schema.prisma with the new Category model
+
+# 2. Create migration
+npx prisma migrate dev --name add_category_table
+
+# 3. Generate Prisma client
+npx prisma generate
+
+# 4. Run seed script (add to package.json first)
+npm run seed

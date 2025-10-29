@@ -1,0 +1,126 @@
+@layer utilities {
+  /* Print styles */
+  @media print {
+    header,
+    footer,
+    aside,
+    nav,
+    .no-print,
+    button,
+    [role="navigation"] {
+      display: none !important;
+    }
+
+    body {
+      background: white !important;
+      color: black !important;
+      font-size: 12pt;
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    article {
+      max-width: 100% !important;
+    }
+
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+      page-break-inside: avoid;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      page-break-after: avoid;
+      page-break-inside: avoid;
+    }
+
+    p,
+    blockquote,
+    pre {
+      page-break-inside: avoid;
+    }
+
+    a[href]:after {
+      content: " (" attr(href) ")";
+      font-size: 0.8em;
+      color: #666;
+    }
+
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+      content: "";
+    }
+
+    @page {
+      margin: 2cm;
+    }
+
+    pre {
+      border: 1px solid #ccc;
+      padding: 10px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    * {
+      box-shadow: none !important;
+      text-shadow: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* Custom properties for animations */
+  @property --color-stop-1 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #ff8e63;
+  }
+
+  @property --color-stop-2 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #ff7eb0;
+  }
+
+  @property --color-stop-3 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #4b73ff;
+  }
+
+  /* Golden accent utilities */
+  .golden-accent {
+    color: #d4af37;
+  }
+
+  .text-golden-accent {
+    color: var(--golden-accent);
+  }
+
+  .hover-golden-accent:hover {
+    color: var(--golden-accent);
+  }
+
+  /* Background utilities */
+  .bg-section-light {
+    background-color: var(--design-section-light);
+  }
+
+  .bg-section-dark {
+    background-color: var(--design-section-dark);
+  }
+
+  .bg-section-medium {
+    background-color: var(--design-section-medium);
+  }
+}

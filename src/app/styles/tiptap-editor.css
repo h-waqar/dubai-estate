@@ -1,0 +1,89 @@
+/* TipTap Editor Styles */
+.ProseMirror {
+  outline: none;
+  min-height: 400px;
+  padding: 1.5rem;
+  color: #111827;
+  background-color: #ffffff;
+}
+
+.dark .ProseMirror {
+  color: #f3f4f6;
+  background-color: #030712;
+}
+
+/* Empty state placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.dark .ProseMirror p.is-editor-empty:first-child::before {
+  color: #6b7280;
+}
+
+/* Code blocks */
+.ProseMirror pre {
+  background-color: #111827 !important;
+  color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ProseMirror pre code {
+  background-color: transparent !important;
+  color: inherit;
+  padding: 0;
+  font-family: ui-monospace, monospace;
+}
+
+/* Inline code */
+.ProseMirror code {
+  background-color: #f3f4f6;
+  color: #db2777;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-family: ui-monospace, monospace;
+}
+
+.dark .ProseMirror code {
+  background-color: #1f2937;
+  color: #f472b6;
+}
+
+/* Two-column grid styles */
+.ProseMirror [data-type="two-column"] {
+  border: 2px dashed rgba(59, 130, 246, 0.4);
+  padding: 0.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.ProseMirror [data-type="two-column"] > .react-resizable {
+  border-right: 1px dashed rgba(59, 130, 246, 0.3);
+}
+
+.ProseMirror [data-type="two-column"] > .react-resizable:last-child {
+  border-right: none;
+}
+
+/* Resize handle */
+.react-resizable-handle {
+  width: 6px;
+  height: 100%;
+  background: rgba(59, 130, 246, 0.5);
+  cursor: ew-resize;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.tiptap {
+  min-width: 100% !important;
+}
