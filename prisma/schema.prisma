@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_LOCAL_URL")
+}
+
+// --- Users & Auth ---
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  image     String?
+  password  String? // For credentials login (optional if only OAuth)
+  role      Role     @default(USER)
+  profile   Profile?
+  admin     Admin?
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  userId Int     @unique
+  bio    String?
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Admin {
+  id     Int @id @default(autoincrement())
+  userId Int @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  WRITER
+  MANAGER
+  SUPPORT
+  USER
+}
+
+// --- Categories ---
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  color       String?  // Hex color for UI (#FF5733)
+  icon        String?  // Icon name or emoji
+  posts       Post[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+}
+
+// --- Posts ---
+model Post {
+  id         Int      @id @default(autoincrement())
+  title      String
+  slug       String   @unique
+  excerpt    String?
+  content    String   // markdown/html
+  coverImage String?
+  tags       String[] @default([])
+  published  Boolean  @default(false)
+
+  // Relations
+  authorId   Int
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([published])
+  @@index([createdAt])
+}

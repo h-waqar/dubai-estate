@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import Image from "next/image";
 
 export default function Home() {
@@ -60,6 +61,53 @@ export default function Home() {
           </a>
         </div>
       </main>
+=======
+// import Header from "@/components/layout/Header";
+// import Footer from "@/components/layout/Footer";
+// import Hero from "@/components/sections/Hero";
+// import Categories from "@/components/sections/Categories";
+// import FeaturedProperties from "@/components/sections/FeaturedProperties";
+// import FeaturedArticles from "@/components/sections/FeaturedArticles";
+// import Newsletter from "@/components/sections/Newsletter";
+
+// export default function Home() {
+//   return (
+//     <div className="min-h-screen">
+//       <Header />
+//       <main>
+//         <Hero />
+//         <Categories />
+//         <FeaturedProperties />
+//         <FeaturedArticles />
+//         <Newsletter />
+//       </main>
+//       <Footer />
+//     </div>
+//   );
+// }
+
+// app/(frontend)/page.tsx
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import Hero from "@/components/sections/Hero";
+import Categories from "@/components/sections/Categories";
+import FeaturedProperties from "@/components/sections/FeaturedProperties";
+import FeaturedArticles from "@/components/sections/FeaturedArticles";
+import Newsletter from "@/components/sections/Newsletter";
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <Header />
+      <main className="relative">
+        <Hero />
+        <Categories />
+        <FeaturedProperties />
+        <FeaturedArticles />
+        <Newsletter />
+      </main>
+      <Footer />
+>>>>>>> 46f1aedcbd589ab55eb4a507290cde9644981e2f
     </div>
   );
 }
