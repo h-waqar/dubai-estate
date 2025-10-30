@@ -8,6 +8,29 @@ datasource db {
   url      = env("DATABASE_LOCAL_URL")
 }
 
+model Admin {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  userId Int     @unique
+  bio    String?
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  WRITER
+  MANAGER
+  SUPPORT
+  USER
+}
+
 // --- Users & Auth ---
 model User {
   id        Int      @id @default(autoincrement())
@@ -23,37 +46,14 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-model Profile {
-  id     Int     @id @default(autoincrement())
-  userId Int     @unique
-  bio    String?
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Admin {
-  id     Int @id @default(autoincrement())
-  userId Int @unique
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  EDITOR
-  WRITER
-  MANAGER
-  SUPPORT
-  USER
-}
-
 // --- Categories ---
 model Category {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   slug        String   @unique
   description String?
-  color       String?  // Hex color for UI (#FF5733)
-  icon        String?  // Icon name or emoji
+  color       String? // Hex color for UI (#FF5733)
+  icon        String? // Icon name or emoji
   posts       Post[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -67,15 +67,15 @@ model Post {
   title      String
   slug       String   @unique
   excerpt    String?
-  content    String   // markdown/html
+  content    String // markdown/html
   coverImage String?
   tags       String[] @default([])
   published  Boolean  @default(false)
 
   // Relations
-  authorId   Int
-  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
   categoryId Int?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
@@ -88,4 +88,25 @@ model Post {
   @@index([categoryId])
   @@index([published])
   @@index([createdAt])
+}
+
+// This module si "lead"
+model CallbackRequest {
+  id              Int           @id @default(autoincrement())
+  fullName        String
+  phone           String
+  email           String
+  preferredTime   String?
+  contactMethod   ContactMethod
+  purchasePurpose String?
+  budget          Int?
+  location        String?
+  message         String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum ContactMethod {
+  Phone
+  Email
 }
