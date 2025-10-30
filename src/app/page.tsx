@@ -1,27 +1,3 @@
-// import Header from "@/components/layout/Header";
-// import Footer from "@/components/layout/Footer";
-// import Hero from "@/components/sections/Hero";
-// import Categories from "@/components/sections/Categories";
-// import FeaturedProperties from "@/components/sections/FeaturedProperties";
-// import FeaturedArticles from "@/components/sections/FeaturedArticles";
-// import Newsletter from "@/components/sections/Newsletter";
-
-// export default function Home() {
-//   return (
-//     <div className="min-h-screen">
-//       <Header />
-//       <main>
-//         <Hero />
-//         <Categories />
-//         <FeaturedProperties />
-//         <FeaturedArticles />
-//         <Newsletter />
-//       </main>
-//       <Footer />
-//     </div>
-//   );
-// }
-
 // app/(frontend)/page.tsx
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";

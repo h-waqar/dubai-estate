@@ -75,22 +75,6 @@ export default async function BlogPostPage({ params }: PageProps) {
       <ReadingProgressBar />
 
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        {/* <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <Link href="/blogs">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <ArrowLeft className="h-4 w-4" /> Back to Blog
-                </Button>
-              </Link>
-              <Link href="/" className="font-bold text-lg">
-                Dubai Estate
-              </Link>
-            </div>
-          </div>
-        </header> */}
-
         <Header />
 
         <div className="container mx-auto px-4 py-8 lg:py-12">
@@ -354,10 +338,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                                 height={80}
                                 src={featured.coverImage}
                                 alt={featured.title}
-                                className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                                className="w-20 h-20 object-cover rounded-lg shrink-0"
                               />
                             ) : (
-                              <div className="w-20 h-20 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center">
+                              <div className="w-20 h-20 bg-muted rounded-lg shrink-0 flex items-center justify-center">
                                 <span className="text-2xl font-bold text-muted-foreground">
                                   {index + 1}
                                 </span>

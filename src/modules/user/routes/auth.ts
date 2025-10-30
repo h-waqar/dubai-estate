@@ -60,13 +60,13 @@ export const authOptions: AuthOptions = {
 
     // Existing jwt callback
     async jwt({ token, user }) {
-      console.log("User in JWT callback:", user);
-      console.log("Token in JWT callback (before modification):", token);
+      // console.log("User in JWT callback:", user);
+      // console.log("Token in JWT callback (before modification):", token);
       if (user) {
         token.id = Number(user.id);
         token.role = user.role;
       }
-      console.log("Token in JWT callback (after modification):", token);
+      // console.log("Token in JWT callback (after modification):", token);
       return token;
     },
 
