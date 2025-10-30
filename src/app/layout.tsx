@@ -6,6 +6,7 @@ import "./globals.css";
 import { ClientThemeProvider } from "@/components/ClientThemeProvider";
 import { SessionProvider } from "@/components/SessionProvider";
 import React from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,10 @@ export default function RootLayout({
       >
         {/*<ClientThemeProvider>{children}</ClientThemeProvider>*/}
         <SessionProvider>
-          <ClientThemeProvider>{children}</ClientThemeProvider>
+          <ClientThemeProvider>
+            {children}
+            <Toaster />
+          </ClientThemeProvider>
         </SessionProvider>
       </body>
     </html>

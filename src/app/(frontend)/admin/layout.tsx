@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { Sidebar, MobileSidebar } from "@/components/dashboard/Sidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import React, { useState, useEffect } from "react";
-import { Toaster } from "@/components/ui/sonner";
+// import { Toaster } from "@/components/ui/sonner";
 
 export default function AdminLayout({
   children,
@@ -64,7 +64,7 @@ export default function AdminLayout({
           </main>
         </div>
       </div>
-      <Toaster />
+      {/* <Toaster /> */}
     </>
   );
 }
