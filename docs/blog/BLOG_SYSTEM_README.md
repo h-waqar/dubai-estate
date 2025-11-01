@@ -175,7 +175,7 @@ Example: `/blogs/best-properties-in-dubai-2024`
 const session = await getServerSession(authOptions);
 
 if (!session) {
-  redirect("/auth/login");
+  redirect("/login");
 }
 
 if (!["ADMIN", "EDITOR", "WRITER"].includes(session.user.role)) {
