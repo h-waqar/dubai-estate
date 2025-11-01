@@ -28,7 +28,7 @@ export default async function BlogsPage() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   if (!["ADMIN", "EDITOR", "WRITER"].includes(session.user.role)) {
