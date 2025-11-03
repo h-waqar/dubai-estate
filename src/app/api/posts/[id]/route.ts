@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { postUpdateSchema } from "@/modules/blog/validators/postUpdate.validator";
-import { generateSlug } from "@/utils/slug";
+import { slugify } from "@/utils/slug";
 
 // GET single post (public, or keep for Admin list)
 export async function GET(
@@ -47,8 +47,7 @@ export async function PUT(
     );
 
   const data = parsed.data;
-  if (data.slug === undefined && data.title)
-    data.slug = generateSlug(data.title);
+  if (data.slug === undefined && data.title) data.slug = slugify(data.title);
 
   try {
     const updatedPost = await prisma.post.update({

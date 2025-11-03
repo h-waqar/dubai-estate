@@ -1,7 +1,9 @@
+// src\modules\property\services\service.ts
 import { prisma } from "@/lib/prisma";
 import { CreatePropertyInput } from "../types/property.types";
 import { slugify, generateUniqueSlug } from "@/utils/slug";
 import { PropertyStatus } from "@/generated/prisma";
+import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createProperty(
   input: CreatePropertyInput,
@@ -9,7 +11,7 @@ export async function createProperty(
 ) {
   const slug = await generateUniqueSlug(input.title);
 
-  return prisma.property.create({
+  const res = prisma.property.create({
     data: {
       ...input,
       slug,
@@ -17,6 +19,8 @@ export async function createProperty(
       status: PropertyStatus.DRAFT, // Always default to DRAFT
     },
   });
+  return res;
+  // return serializeDecimals(res);
 }
 
 export async function listProperties() {
@@ -24,4 +28,3 @@ export async function listProperties() {
     orderBy: { createdAt: "desc" },
   });
 }
-

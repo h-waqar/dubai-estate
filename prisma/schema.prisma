@@ -80,9 +80,9 @@ model Post {
   slug         String   @unique
   excerpt      String?
   content      String // markdown/html
-  // coverImage String?
-  coverImageId Int?
-  coverImage   Media?   @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
+  coverImage   String?
+  // coverImageId Int?
+  // coverImage   Media?   @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
   tags         String[] @default([])
   published    Boolean  @default(false)
 
@@ -261,7 +261,7 @@ model Media {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Post      Post[]
+  // Post      Post[]
 
   @@index([type])
   @@index([uploadedById])

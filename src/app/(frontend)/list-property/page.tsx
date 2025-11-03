@@ -1,12 +1,14 @@
+import { prisma } from "@/lib/prisma";
 import { PropertyForm } from "@/modules/property/components/PropertyForm";
-import React from "react";
 
-function ListNewProperty() {
+export default async function ListNewProperty() {
+  const propertyTypes = await prisma.propertyType.findMany({
+    orderBy: { name: "asc" },
+  });
+
   return (
     <>
-      <PropertyForm />
+      <PropertyForm propertyTypes={propertyTypes} />
     </>
   );
 }
-
-export default ListNewProperty;

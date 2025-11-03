@@ -3,6 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  cacheComponents: true,
   images: {
     remotePatterns: [
       {
