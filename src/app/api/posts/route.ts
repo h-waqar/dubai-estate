@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { postSchema } from "@/modules/blog/validators/post.validator";
-import { generateSlug } from "@/utils/slug";
+import { slugify } from "@/utils/slug";
 import { decode } from "next-auth/jwt";
 import { handleApiError } from "@/lib/errorHandler";
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     const data = parsed.data;
-    const slug = data.slug ?? generateSlug(data.title);
+    const slug = data.slug ?? slugify(data.title);
 
     console.log("Token before Prisma create:", token);
 
