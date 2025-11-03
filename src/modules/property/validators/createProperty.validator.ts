@@ -5,7 +5,8 @@ export const createPropertyValidator = z.object({
   title: z.string().min(10, "Title must be at least 10 characters long."),
   price: z
     .number("Price is required")
-    .positive("Price must be a positive number."),
+    .positive("Price must be a positive number.")
+    .max(9999999999.99, "Price too large"),
   propertyTypeId: z.number("Property type is required").int().positive(),
   bedrooms: z.number("Bedrooms is required").int().min(0),
   bathrooms: z.number("Bathrooms is required").int().min(0),
@@ -19,7 +20,10 @@ export const createPropertyValidator = z.object({
 export const createPropertyServerValidator = z.object({
   title: z.string().min(10, "Title must be at least 10 characters long."),
 
-  price: z.coerce.number().positive("Price must be a positive number."),
+  price: z.coerce
+    .number()
+    .positive("Price must be a positive number.")
+    .max(9999999999.99, "Price too large"),
 
   propertyTypeId: z.coerce.number().int().positive(),
 

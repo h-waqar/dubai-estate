@@ -6,6 +6,7 @@ import { createPropertyServerValidator } from "../validators/createProperty.vali
 import * as propertyService from "../services/service";
 import { authOptions } from "@/modules/user/routes/auth";
 import { getServerSession } from "next-auth";
+import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createPropertyAction(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -29,16 +30,20 @@ export async function createPropertyAction(formData: FormData) {
   }
   // 4. Create property in database
   try {
-    const property = await propertyService.createProperty(
+    let property = await propertyService.createProperty(
       validation.data,
       session.user.id
     );
+
+    // property = serializeDecimals(property);
+    property = JSON.parse(JSON.stringify(property));
 
     revalidatePath("/properties");
 
     return { success: true, property };
   } catch (error) {
     console.error("Failed to create property:", error);
-    return { success: false, error: "Failed to create property." };
+    // return { success: false, error: "Failed to create property." };
+    return { success: false, error: String(error) };
   }
 }
