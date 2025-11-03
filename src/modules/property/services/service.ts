@@ -19,8 +19,8 @@ export async function createProperty(
       status: PropertyStatus.DRAFT, // Always default to DRAFT
     },
   });
-  return res;
-  // return serializeDecimals(res);
+  // return res;
+  return serializeDecimals(res);
 }
 
 export async function listProperties() {
