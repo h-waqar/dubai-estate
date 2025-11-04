@@ -132,7 +132,8 @@ const MediaUploader: React.FC = () => {
             <select
               value={type}
               onChange={(e) => setType(e.target.value as MediaType | "AUTO")}
-              className="w-full px-2 py-1 border rounded"
+              className="w-full px-2 py-1 border rounded hidden"
+              disabled
             >
               <option value="AUTO">Auto Detect</option>
               {MEDIA_TYPES.map((t) => (
