@@ -1,10 +1,9 @@
-// src\modules\media\actions\listMedia.ts
 import { listMedia as listMediaService } from "../services/service";
 import { Media } from "../types/media.types";
 
 export const listMedia = async (): Promise<Media[]> => {
   try {
-    const media = await listMediaService();
+    const media: Media[] = await listMediaService();
 
     return media.map((m) => ({
       id: m.id,
@@ -15,8 +14,8 @@ export const listMedia = async (): Promise<Media[]> => {
       mimeType: m.mimeType ?? undefined,
       size: m.size ?? undefined,
       uploadedById: m.uploadedById ?? undefined,
-      createdAt: m.createdAt.toISOString(),
-      updatedAt: m.updatedAt.toISOString(),
+      createdAt: m.createdAt, // ✅ already ISO string
+      updatedAt: m.updatedAt, // ✅ already ISO string
     }));
   } catch (error: any) {
     console.error("Failed to list media:", error);
