@@ -267,7 +267,7 @@ const MediaLibraryModal: React.FC<{
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-auto w-">
           {activeTab === "library" ? (
             <div className="h-full flex flex-col">
               {/* Toolbar */}
@@ -397,6 +397,7 @@ const MediaLibraryModal: React.FC<{
                         }`}
                       >
                         <div className="w-16 h-16 shrink-0">
+                          {/* <div className="w-16 h-16 shrink-0"> */}
                           {renderMediaPreview(
                             media,
                             selectedMedia?.id === media.id
