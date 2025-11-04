@@ -3,7 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  cacheComponents: true,
+  // cacheComponents: true,
   images: {
     remotePatterns: [
       {
@@ -46,6 +46,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizeCss: true,
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
   },
 };
 
