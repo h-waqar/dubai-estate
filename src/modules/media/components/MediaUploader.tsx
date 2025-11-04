@@ -29,9 +29,35 @@ export default function MediaUploader({ userId }: { userId: number }) {
   return (
     <div>
       <input type="file" onChange={handleChange} />
-      {preview && (
+      {/* {preview && (
         <img src={preview} alt="preview" className="w-32 h-32 object-cover" />
-      )}
+      )} */}
+      <div className="mt-2 flex flex-col items-start gap-2">
+        {preview &&
+          file &&
+          (file.type.startsWith("video/") ? (
+            <video
+              src={preview}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="w-48 h-32 object-cover rounded-md border"
+            />
+          ) : (
+            <img
+              src={preview}
+              alt="preview"
+              className="w-48 h-32 object-cover rounded-md border"
+            />
+          ))}
+        {file && (
+          <p className="text-sm text-gray-500">
+            {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+          </p>
+        )}
+      </div>
+
       <button onClick={handleUpload} disabled={!file}>
         Upload
       </button>
