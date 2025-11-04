@@ -18,6 +18,8 @@ export default function MediaUploader({ userId }: { userId: number }) {
     if (!file) return;
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("title", file.name);
+    formData.append("type", file.type.startsWith("video/") ? "VIDEO" : "IMAGE");
     const media = await uploadMediaAction(formData, userId);
     console.log("Uploaded media:", media);
     setFile(null);

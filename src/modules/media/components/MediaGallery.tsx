@@ -13,13 +13,31 @@ export default function MediaGallery() {
 
   return (
     <div className="grid grid-cols-4 gap-4">
-      {media.map((m) => (
+      {/* {media.map((m) => (
         <img
           key={m.id}
           src={m.url}
           alt={m.alt ?? m.title}
           className="w-full h-32 object-cover"
         />
+      ))} */}
+      {media.map((m) => (
+        <div key={m.id}>
+          {m.type === "VIDEO" ? (
+            <video
+              src={m.url}
+              className="w-full h-32 object-cover"
+              controls
+              muted
+            />
+          ) : (
+            <img
+              src={m.url}
+              alt={m.alt ?? m.title}
+              className="w-full h-32 object-cover"
+            />
+          )}
+        </div>
       ))}
     </div>
   );
