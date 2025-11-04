@@ -5,7 +5,7 @@ export const mediaUploadSchema = z.object({
   file: z
     .any()
     .refine((file) => file instanceof File, "Invalid file")
-    .refine((file) => file.size <= 10_485_760, "File is too large (max 10MB)")
+    .refine((file) => file.size <= 50_000_000, "File is too large (max 50MB)")
     .refine(
       (file) =>
         [
