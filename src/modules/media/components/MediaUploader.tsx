@@ -1,66 +1,51 @@
-// src/modules/media/components/MediaUploader.tsx
-"use client";
+// src\modules\media\components\MediaUploader.tsx
+import React, { useState } from "react";
+import { useMedia } from "../hooks/useMedia";
 
-import { useState } from "react";
-import { uploadMediaAction } from "../actions/uploadMedia";
+const MediaUploader: React.FC = () => {
+  const { handleUpload, loading, error } = useMedia();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-export default function MediaUploader({ userId }: { userId: number }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string>("");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
-    if (f) setPreview(URL.createObjectURL(f));
+  const getMediaType = (
+    file: File
+  ): "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER" => {
+    if (file.type.startsWith("image/")) return "IMAGE";
+    if (file.type.startsWith("video/")) return "VIDEO";
+    if (file.type === "application/pdf") return "DOCUMENT";
+    return "OTHER";
   };
 
-  const handleUpload = async () => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", file.name);
-    formData.append("type", file.type.startsWith("video/") ? "VIDEO" : "IMAGE");
-    const media = await uploadMediaAction(formData, userId);
-    console.log("Uploaded media:", media);
-    setFile(null);
-    setPreview("");
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) setSelectedFile(e.target.files[0]);
+  };
+
+  const onUpload = async () => {
+    if (!selectedFile) return;
+    try {
+      // await handleUpload(selectedFile);
+      await handleUpload({
+        file: selectedFile,
+        title: selectedFile.name,
+        alt: selectedFile.name,
+        type: getMediaType(selectedFile),
+      });
+      setSelectedFile(null);
+    } catch {}
   };
 
   return (
-    <div>
-      <input type="file" onChange={handleChange} />
-      {/* {preview && (
-        <img src={preview} alt="preview" className="w-32 h-32 object-cover" />
-      )} */}
-      <div className="mt-2 flex flex-col items-start gap-2">
-        {preview &&
-          file &&
-          (file.type.startsWith("video/") ? (
-            <video
-              src={preview}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-48 h-32 object-cover rounded-md border"
-            />
-          ) : (
-            <img
-              src={preview}
-              alt="preview"
-              className="w-48 h-32 object-cover rounded-md border"
-            />
-          ))}
-        {file && (
-          <p className="text-sm text-gray-500">
-            {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-          </p>
-        )}
-      </div>
-
-      <button onClick={handleUpload} disabled={!file}>
+    <div className="space-y-2">
+      <input type="file" onChange={onFileChange} />
+      {selectedFile && <p>Selected: {selectedFile.name}</p>}
+      <button
+        onClick={onUpload}
+        disabled={!selectedFile || loading}
+        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+      >
         Upload
       </button>
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   );
-}
+};
+export default MediaUploader;
