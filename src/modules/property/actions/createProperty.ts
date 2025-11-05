@@ -6,7 +6,7 @@ import { createPropertyServerValidator } from "../validators/createProperty.vali
 import * as propertyService from "../services/service";
 import { authOptions } from "@/modules/user/routes/auth";
 import { getServerSession } from "next-auth";
-import { serializeDecimals } from "@/lib/serializeDecimal";
+// import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createPropertyAction(formData: FormData) {
   const session = await getServerSession(authOptions);

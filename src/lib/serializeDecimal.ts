@@ -9,7 +9,7 @@ export function serializeDecimals<T>(obj: T): T {
   }
 
   if (typeof obj === "object") {
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       if (value instanceof Prisma.Decimal) {
         result[key] = Number(value); // or value.toString() if you want exact precision

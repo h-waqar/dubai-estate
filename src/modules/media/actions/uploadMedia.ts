@@ -2,6 +2,8 @@
 import { mediaUploadSchema } from "../validators/media.validator";
 import { saveMedia } from "../services/service";
 import { Media } from "../types/media.types";
+// import { handleActionError } from "@/lib/handleActionError";
+import { handleServerError } from "@/lib/handleServerError";
 
 export const uploadMedia = async ({
   file,
@@ -38,8 +40,8 @@ export const uploadMedia = async ({
       createdAt: media.createdAt.toISOString(),
       updatedAt: media.updatedAt.toISOString(),
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Upload failed:", error);
-    throw new Error(error.message || "Upload failed");
+    throw handleServerError(error);
   }
 };

@@ -1,7 +1,8 @@
 // src\modules\property\services\service.ts
 import { prisma } from "@/lib/prisma";
 import { CreatePropertyInput } from "../types/property.types";
-import { slugify, generateUniqueSlug } from "@/utils/slug";
+// import { slugify, generateUniqueSlug } from "@/utils/slug";
+import { generateUniqueSlug } from "@/utils/slug";
 import { PropertyStatus } from "@/generated/prisma";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 

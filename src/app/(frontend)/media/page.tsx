@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { useMedia } from "@/modules/media/hooks/useMedia";
 import { Media, MediaType } from "@/modules/media/types/media.types";
+// import { handleActionError } from "@/lib/handleActionError";
+import { handleClientError } from "@/lib/handleClientError";
 
 // MediaLibraryModal Component
 const MediaLibraryModal: React.FC<{
@@ -118,8 +120,9 @@ const MediaLibraryModal: React.FC<{
       setAlt("");
       setUploadType("AUTO");
       setActiveTab("library");
-    } catch (err: any) {
-      setUploadError(err.message || "Upload failed");
+    } catch (err: unknown) {
+      const normalizedError = handleClientError(err);
+      setUploadError(normalizedError.message);
     } finally {
       setIsUploading(false);
     }

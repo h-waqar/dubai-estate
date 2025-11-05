@@ -80,7 +80,7 @@
   }
 
   /* Custom properties for animations */
-  @property --color-stop-1 {
+  /* @property --color-stop-1 {
     syntax: "<color>";
     inherits: false;
     initial-value: #ff8e63;
@@ -96,7 +96,7 @@
     syntax: "<color>";
     inherits: false;
     initial-value: #4b73ff;
-  }
+  } */
 
   /* Golden accent utilities */
   .golden-accent {
