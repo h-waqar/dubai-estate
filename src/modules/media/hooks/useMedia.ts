@@ -1,4 +1,4 @@
-"use server";
+"use client";
 // src/modules/media/hooks/useMedia.ts
 import { useCallback } from "react";
 import { useMediaStore } from "../stores/store";
@@ -73,9 +73,12 @@ export const useMedia = () => {
         setLoading(true);
         await deleteMedia(id);
         removeMedia(id);
-      } catch (err: any) {
-        setError(err.message || "Delete failed");
-        throw err;
+      } catch (err: unknown) {
+        console.error("Failed to fetch media");
+        // const error = handleServerError(err);
+        const error = handleClientError(err);
+        // setError(error.message);
+        throw error;
       } finally {
         setLoading(false);
       }
