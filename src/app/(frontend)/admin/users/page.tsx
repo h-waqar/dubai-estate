@@ -305,7 +305,7 @@ export default function UsersPage() {
               {/* Date Range Filters */}
               <div
                 id="date-filters"
-                className="hidden grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+                className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
               >
                 <div className="space-y-2">
                   <Label htmlFor="date-from" className="text-xs">
@@ -624,7 +624,7 @@ export default function UsersPage() {
                 <div className="col-span-1 text-sm font-medium text-muted-foreground">
                   User ID
                 </div>
-                <div className="col-span-2 text-sm font-mono text-xs">
+                <div className="col-span-2 text-sm font-mono ">
                   {selectedUser.id}
                 </div>
               </div>
