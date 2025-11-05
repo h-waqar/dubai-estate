@@ -24,7 +24,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 import { useAuth } from "@/modules/user/hooks/useAuth";
-import { AxiosError } from "axios";
+// import { AxiosError } from "axios";
 // import { handleActionError } from "@/lib/handleActionError";
 // import { handleServerError } from "@/lib/handleServerError";
 import { handleClientError } from "@/lib/handleClientError";
