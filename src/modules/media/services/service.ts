@@ -6,6 +6,8 @@ import fs from "fs";
 import path from "path";
 import { Media } from "../types/media.types";
 import { v4 as uuidv4 } from "uuid";
+// import { handleActionError } from "@/lib/handleActionError";
+import { handleServerError } from "@/lib/handleServerError";
 
 const ALLOWED_MIME_TYPES = [
   "image/png",
@@ -44,7 +46,6 @@ export const saveMedia = async ({
   const safeFileName = `${Date.now()}-${uuidv4()}-${path.basename(file.name)}`;
   const filePath = path.join(uploadsDir, safeFileName);
 
-  // @ts-ignore
   const arrayBuffer = await file.arrayBuffer();
   fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
 
@@ -95,7 +96,8 @@ export const listMedia = async (): Promise<Media[]> => {
           ? m.updatedAt.toISOString()
           : new Date(m.updatedAt).toISOString(),
     }));
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = handleServerError(err);
     console.error("Failed to list media:", error);
     throw new Error(error.message || "Failed to list media");
   }

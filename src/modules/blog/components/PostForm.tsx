@@ -25,6 +25,9 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/modules/user/hooks/useAuth";
 import { AxiosError } from "axios";
+// import { handleActionError } from "@/lib/handleActionError";
+// import { handleServerError } from "@/lib/handleServerError";
+import { handleClientError } from "@/lib/handleClientError";
 
 export function PostForm({
   initialData,
@@ -113,24 +116,10 @@ export function PostForm({
       markSaved();
       console.log("✅ Saved Post:", savedPost);
     } catch (err: unknown) {
-      let message = "Something went wrong while saving";
-      if (err instanceof AxiosError && err.response?.data) {
-        console.error("Axios error response data:", err.response.data);
-        if (typeof err.response.data.error === 'string') {
-          message = err.response.data.error;
-        } else if (err.response.data.error && typeof err.response.data.error.message === 'string') {
-          message = err.response.data.error.message;
-        } else if (err.response.data.error && err.response.data.error.fieldErrors && err.response.data.error.fieldErrors.slug) {
-          message = `Slug error: ${err.response.data.error.fieldErrors.slug[0]}`;
-        } else if (err.response.data.error && err.response.data.error.fieldErrors && err.response.data.error.fieldErrors.authorId) {
-          message = `Author error: ${err.response.data.error.fieldErrors.authorId[0]}`;
-        }
-      } else if (err instanceof Error) {
-        message = err.message;
-      }
-      setError(message);
-      toast.error(message);
-      console.error("❌ Save Post Error:", message, err);
+      const error = handleClientError(err);
+      setError(error.message);
+      toast.error(error.message);
+      console.error("❌ Save Post Error:", error);
     } finally {
       setLoading(false);
     }

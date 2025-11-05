@@ -1,5 +1,7 @@
+// import { handleActionError } from "@/lib/handleActionError";
 import { listMedia as listMediaService } from "../services/service";
 import { Media } from "../types/media.types";
+import { handleServerError } from "@/lib/handleServerError";
 
 export const listMedia = async (): Promise<Media[]> => {
   try {
@@ -17,8 +19,8 @@ export const listMedia = async (): Promise<Media[]> => {
       createdAt: m.createdAt, // ✅ already ISO string
       updatedAt: m.updatedAt, // ✅ already ISO string
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to list media:", error);
-    throw new Error(error.message || "Failed to list media");
+    throw handleServerError(error);
   }
 };
