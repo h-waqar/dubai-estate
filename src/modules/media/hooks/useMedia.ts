@@ -7,8 +7,8 @@ import { listMedia } from "../actions/listMedia";
 import { deleteMedia } from "../actions/deleteMedia";
 import { Media } from "../types/media.types";
 // import { handleActionError } from "@/lib/handleActionError";
+// import { handleServerError } from "@/lib/handleServerError";
 import { handleClientError } from "@/lib/handleClientError";
-import { handleServerError } from "@/lib/handleServerError";
 
 export const useMedia = () => {
   const {
