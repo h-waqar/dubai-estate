@@ -1,3 +1,4 @@
+"use server";
 // src\modules\media\actions\deleteMedia.ts
 import { handleServerError } from "@/lib/handleServerError";
 import { deleteMedia as deleteMediaService } from "../services/service";

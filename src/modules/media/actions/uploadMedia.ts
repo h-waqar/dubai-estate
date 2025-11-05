@@ -1,3 +1,4 @@
+"use server";
 // src\modules\media\actions\uploadMedia.ts
 import { mediaUploadSchema } from "../validators/media.validator";
 import { saveMedia } from "../services/service";

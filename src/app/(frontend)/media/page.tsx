@@ -136,8 +136,11 @@ const MediaLibraryModal: React.FC<{
       if (selectedMedia?.id === id) {
         setSelectedMedia(null);
       }
-    } catch (err: any) {
-      console.error("Delete failed:", err);
+    } catch (err: unknown) {
+      console.error("Failed to fetch media");
+      // const error = handleServerError(err);
+      const error = handleClientError(err);
+      console.error(error.message);
     }
   };
 

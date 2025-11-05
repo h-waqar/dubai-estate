@@ -1,3 +1,4 @@
+"use server";
 // import { handleActionError } from "@/lib/handleActionError";
 import { listMedia as listMediaService } from "../services/service";
 import { Media } from "../types/media.types";
