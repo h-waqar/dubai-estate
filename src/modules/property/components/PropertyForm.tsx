@@ -28,25 +28,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import Image from "next/image";
+import { Media } from "@/modules/media/types/media.types";
+import MediaLibraryButton from "@/modules/media/components/MediaLibraryButton";
+import { Check, File, X } from "lucide-react";
+import { useState } from "react";
+
 interface PropertyFormProps {
   propertyTypes: { id: number; name: string }[];
 }
 
-/**
- * PropertyForm Component - CLEAN & TYPE-SAFE ✅
- *
- * Key Learning Points:
- *
- * 1. NO z.coerce in the client validator = Clean TypeScript types
- * 2. Use valueAsNumber for number inputs = Browser converts for us
- * 3. Use parseInt for Select components = Manual conversion
- * 4. Server action uses DIFFERENT validator with z.coerce for FormData
- *
- * This approach separates concerns:
- * - Client: Works with proper types (numbers)
- * - Server: Handles string conversion from FormData
- */
 export function PropertyForm({ propertyTypes }: PropertyFormProps) {
+  const [coverImage, setCoverImage] = useState<Media | null>(null);
+  const [galleryImages, setGalleryImages] = useState<Media[]>([]);
+
   const form = useForm<CreatePropertyInput>({
     resolver: zodResolver(createPropertyValidator),
     defaultValues: {
@@ -58,15 +53,30 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
       description: "",
       furnishing: "UNFURNISHED",
       propertyTypeId: 0,
+      coverImage: 0,
+      gallery: [],
     },
   });
 
   async function onSubmit(values: CreatePropertyInput) {
+    console.log("onSubmit called");
+
+    if (!coverImage) {
+      toast.error("Please select a cover image");
+      return;
+    }
+
+    const payload = {
+      ...values,
+      coverImage: coverImage.id,
+      gallery: galleryImages.map((img) => img.id),
+    };
+
     // Convert to FormData for server action
     const formData = new FormData();
     console.log(formData);
 
-    Object.entries(values).forEach(([key, value]) => {
+    Object.entries(payload).forEach(([key, value]) => {
       if (value != null) {
         formData.append(key, String(value));
       }
@@ -280,6 +290,100 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
             </FormItem>
           )}
         />
+
+        {/* ================================================ */}
+        {/* Cover Image */}
+        <div>
+          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            Cover Image
+          </label>
+          <MediaLibraryButton
+            onSelect={(media) => setCoverImage(media)}
+            buttonText={coverImage ? "Change Cover" : "Select Cover"}
+            mode="select"
+          />
+          {coverImage && (
+            <div className="mt-4 relative inline-block">
+              <div className="w-48 h-48 relative">
+                <Image
+                  src={coverImage.url}
+                  alt={coverImage.alt || coverImage.title || "Cover image"}
+                  fill
+                  sizes="192px"
+                  className="object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                />
+              </div>
+              <button
+                onClick={() => setCoverImage(null)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                {coverImage.title}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Gallery */}
+        <div>
+          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            Gallery Images ({galleryImages.length})
+          </label>
+          <MediaLibraryButton
+            onSelect={(media) => {
+              if (!galleryImages.find((img) => img.id === media.id)) {
+                setGalleryImages([...galleryImages, media]);
+              }
+            }}
+            buttonText="Add to Gallery"
+            mode="select"
+          />
+
+          {galleryImages.length > 0 && (
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {galleryImages.map((image, index) => (
+                <div key={image.id} className="relative group">
+                  <div className="w-full h-32 relative">
+                    <Image
+                      src={image.url}
+                      alt={image.alt || image.title || "Gallery image"}
+                      fill
+                      sizes="450px"
+                      // sizes="128px"
+                      className="object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      setGalleryImages(
+                        galleryImages.filter((_, i) => i !== index)
+                      );
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg cursor-pointer"
+                    // className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg opacity-0 group-hover:opacity-100 cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 truncate">
+                    {image.title}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {galleryImages.length > 0 && (
+            <button
+              onClick={() => setGalleryImages([])}
+              className="mt-4 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            >
+              Clear All
+            </button>
+          )}
+        </div>
+        {/* ================================================ */}
 
         <Button type="submit" disabled={form.formState.isSubmitting} size="lg">
           {form.formState.isSubmitting

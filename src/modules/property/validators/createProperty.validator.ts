@@ -12,29 +12,27 @@ export const createPropertyValidator = z.object({
   bathrooms: z.number("Bathrooms is required").int().min(0),
   location: z.string().min(5, "Location is required."),
   furnishing: z.enum(FurnishingStatus),
-  // furnishing: z.nativeEnum(FurnishingStatus).default("UNFURNISHED"),
-
   description: z.string().optional(),
+  coverImage: z.number("Cover imgae required").int().min(1),
+  gallery: z
+    .array(z.number().int().positive("Invalid image reference"))
+    .optional(),
 });
 
 export const createPropertyServerValidator = z.object({
   title: z.string().min(10, "Title must be at least 10 characters long."),
-
   price: z.coerce
     .number()
     .positive("Price must be a positive number.")
     .max(9999999999.99, "Price too large"),
-
   propertyTypeId: z.coerce.number().int().positive(),
-
   bedrooms: z.coerce.number().int().min(0),
-
   bathrooms: z.coerce.number().int().min(0),
-
   location: z.string().min(5, "Location is required."),
-
   furnishing: z.enum(FurnishingStatus),
-  // furnishing: z.nativeEnum(FurnishingStatus).default("UNFURNISHED"),
-
   description: z.string().optional(),
+  coverImage: z.number("Cover imgae required").int().min(1),
+  gallery: z
+    .array(z.number().int().positive("Invalid image reference"))
+    .optional(),
 });

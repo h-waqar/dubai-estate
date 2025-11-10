@@ -109,7 +109,7 @@ model CallbackRequest {
   id              Int           @id @default(autoincrement())
   fullName        String
   phone           String
-  
+
   email           String
   preferredTime   String?
   contactMethod   ContactMethod
