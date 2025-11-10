@@ -26,4 +26,6 @@ export interface CreatePropertyFormData {
   location: string;
   furnishing: "FURNISHED" | "SEMI_FURNISHED" | "UNFURNISHED";
   description?: string;
+  coverImage: number;
+  gallery?: number[];
 }
