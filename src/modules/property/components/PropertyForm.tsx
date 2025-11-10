@@ -76,11 +76,26 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
     const formData = new FormData();
     console.log(formData);
 
+    // Object.entries(payload).forEach(([key, value]) => {
+    //   if (value != null) {
+    //     formData.append(key, String(value));
+    //   }
+    // });
+
     Object.entries(payload).forEach(([key, value]) => {
-      if (value != null) {
+      if (value == null) return;
+
+      if (Array.isArray(value)) {
+        value.forEach((v) => formData.append(`${key}[]`, String(v)));
+      } else {
         formData.append(key, String(value));
       }
     });
+
+    // now inspect
+    for (const [key, value] of formData.entries()) {
+      console.log(key, ",", value, "->", typeof value);
+    }
 
     const result = await createPropertyAction(formData);
 
