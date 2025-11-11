@@ -2,12 +2,11 @@
 
 import { Input } from "@/components/ui/input";
 import StepController from "./StepController";
-import { useAdvertiseStore } from "../../../stores/useAdvertiseStore";
+import { useStepStore } from "../../../stores/useStepStore";
 import LocationSelector from "../LocationSelector";
-import Header from "@/components/layout/Header";
 
 function StepOneCreate() {
-  const { data, updateData, next, prev } = useAdvertiseStore();
+  const { next, prev } = useStepStore();
   2;
   return (
     <div className="space-y-6">

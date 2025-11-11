@@ -2,10 +2,10 @@
 
 import { Input } from "@/components/ui/input";
 import StepController from "./StepController";
-import { useAdvertiseStore } from "../../../stores/useAdvertiseStore";
+import { useStepStore } from "../../../stores/useStepStore";
 
 function StepSevenSuccess() {
-  const { data, updateData, next, prev } = useAdvertiseStore();
+  const { data, updateData, next, prev } = useStepStore();
   2;
   return (
     <div className="space-y-6">

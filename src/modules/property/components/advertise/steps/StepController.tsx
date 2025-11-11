@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useAdvertiseStore } from "../../../stores/useAdvertiseStore";
+import { useStepStore } from "../../../stores/useStepStore";
 
 export default function StepController({
   onNext,
@@ -14,7 +14,7 @@ export default function StepController({
   disableNext?: boolean;
   showPrev?: boolean;
 }) {
-  const { next, prev, step, steps } = useAdvertiseStore();
+  const { next, prev, step, steps } = useStepStore();
   const isLast = step === steps.length - 1;
 
   return (

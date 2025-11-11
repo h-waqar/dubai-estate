@@ -18,7 +18,7 @@ interface AdvertiseState {
   reset: () => void;
 }
 
-export const useAdvertiseStore = create<AdvertiseState>()(
+export const useStepStore = create<AdvertiseState>()(
   persist(
     (set, get) => ({
       steps: [
