@@ -47,13 +47,13 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
     defaultValues: {
       title: "",
       price: 0,
+      propertyTypeId: 0,
       bedrooms: 1,
       bathrooms: 1,
       location: "",
-      description: "",
       furnishing: "UNFURNISHED",
-      propertyTypeId: 0,
-      coverImage: 0,
+      description: "",
+      coverImage: undefined,
       gallery: [],
     },
   });
@@ -75,13 +75,7 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
     // Convert to FormData for server action
     const formData = new FormData();
     console.log(formData);
-
-    // Object.entries(payload).forEach(([key, value]) => {
-    //   if (value != null) {
-    //     formData.append(key, String(value));
-    //   }
-    // });
-
+    
     Object.entries(payload).forEach(([key, value]) => {
       if (value == null) return;
 
@@ -91,11 +85,6 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
         formData.append(key, String(value));
       }
     });
-
-    // now inspect
-    for (const [key, value] of formData.entries()) {
-      console.log(key, ",", value, "->", typeof value);
-    }
 
     const result = await createPropertyAction(formData);
 

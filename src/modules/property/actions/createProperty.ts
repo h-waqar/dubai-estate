@@ -1,6 +1,5 @@
 // src/modules/property/actions/createProperty.ts
 "use server";
-
 import { revalidatePath } from "next/cache";
 import { createPropertyServerValidator } from "../validators/createProperty.validator";
 import * as propertyService from "../services/service";
@@ -9,7 +8,7 @@ import { getServerSession } from "next-auth";
 // import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createPropertyAction(formData: FormData) {
-  console.log("🔥 createPropertyAction received:", formData);
+  // console.log("🔥 createPropertyAction received:", formData);
   const session = await getServerSession(authOptions);
 
   if (
@@ -18,10 +17,8 @@ export async function createPropertyAction(formData: FormData) {
   ) {
     return { success: false, error: "Unauthorized" };
   }
-
   // 2. Convert FormData to plain object
   // const data = Object.fromEntries(formData);
-
   const data = {
     title: formData.get("title"),
     price: formData.get("price"),
@@ -34,13 +31,11 @@ export async function createPropertyAction(formData: FormData) {
     coverImage: formData.get("coverImage"),
     gallery: formData.getAll("gallery[]"),
   };
-
-  console.log("Parsed data for Zod:", data);
-
+  // console.log("Parsed data for Zod:", data);
   // 3. Validate using the SERVER validator (with z.coerce)
   const validation = createPropertyServerValidator.safeParse(data);
   if (!validation.success) {
-    console.log("📩 Incoming createProperty data:", data);
+    // console.log("📩 Incoming createProperty data:", data);
     return {
       success: false,
       error: validation.error.flatten().fieldErrors,
@@ -52,12 +47,9 @@ export async function createPropertyAction(formData: FormData) {
       validation.data,
       session.user.id
     );
-
     // property = serializeDecimals(property);
     property = JSON.parse(JSON.stringify(property));
-
     revalidatePath("/properties");
-
     return { success: true, property };
   } catch (error) {
     console.error("Failed to create property:", error);
