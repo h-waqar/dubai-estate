@@ -18,7 +18,7 @@ export default function StepController({
   const isLast = step === steps.length - 1;
 
   return (
-    <div className="flex justify-between mt-6">
+    <div className="flex justify-end gap-4 mt-6">
       {showPrev ? (
         <Button variant="outline" onClick={onPrev || prev}>
           Back
