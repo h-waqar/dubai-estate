@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,27 +18,28 @@ import {
 } from "@/components/ui/select";
 import { Globe, MapPin, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const COUNTRY_OPTIONS = [
-  {
-    code: "AE",
-    name: "UAE",
-    cities: ["Dubai", "Abu Dhabi", "Sharjah"],
-  },
-  {
-    code: "SA",
-    name: "Saudi Arabia",
-    cities: ["Riyadh", "Jeddah", "Dammam"],
-  },
-];
+import { useLocationStore } from "@/stores/useLocationStore";
 
 export default function LocationSelector() {
   const [open, setOpen] = useState(false);
-  const [country, setCountry] = useState<string | null>("UAE");
-  const [city, setCity] = useState<string | null>("Dubai");
+  const [country, setCountry] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
 
-  const [tempCountry, setTempCountry] = useState<string | null>(country);
-  const [tempCity, setTempCity] = useState<string | null>(city);
+  const [tempCountry, setTempCountry] = useState<string | null>(null);
+  const [tempCity, setTempCity] = useState<string | null>(null);
+
+  const { countries, cities, loadCountries, loadCities } = useLocationStore();
+
+  useEffect(() => {
+    loadCountries();
+  }, [loadCountries]);
+
+  useEffect(() => {
+    if (tempCountry) {
+      const countryObj = countries.find((c) => c.name === tempCountry);
+      if (countryObj) loadCities(countryObj.isoCode);
+    }
+  }, [tempCountry]);
 
   const handleSave = () => {
     setCountry(tempCountry);
@@ -46,9 +47,13 @@ export default function LocationSelector() {
     setOpen(false);
   };
 
-  const selectedCountry = COUNTRY_OPTIONS.find((c) => c.name === tempCountry);
-
   const openModal = () => setOpen(true);
+
+  const selectedCountry = countries.find((c) => c.name === tempCountry);
+  const cityList =
+    selectedCountry && cities[selectedCountry.isoCode]
+      ? cities[selectedCountry.isoCode]
+      : [];
 
   return (
     <div className="mt-6">
@@ -89,15 +94,15 @@ export default function LocationSelector() {
                 value={tempCountry || ""}
                 onValueChange={(value) => {
                   setTempCountry(value);
-                  setTempCity(null); // reset city when country changes
+                  setTempCity(null);
                 }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Country" />
                 </SelectTrigger>
                 <SelectContent>
-                  {COUNTRY_OPTIONS.map((c) => (
-                    <SelectItem key={c.code} value={c.name}>
+                  {countries.map((c) => (
+                    <SelectItem key={c.isoCode} value={c.name}>
                       {c.name}
                     </SelectItem>
                   ))}
@@ -116,9 +121,9 @@ export default function LocationSelector() {
                   <SelectValue placeholder="Select City" />
                 </SelectTrigger>
                 <SelectContent>
-                  {selectedCountry?.cities.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city}
+                  {cityList.map((c) => (
+                    <SelectItem key={c.name} value={c.name}>
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
