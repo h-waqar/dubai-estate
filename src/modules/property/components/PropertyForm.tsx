@@ -75,7 +75,7 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
     // Convert to FormData for server action
     const formData = new FormData();
     console.log(formData);
-    
+
     Object.entries(payload).forEach(([key, value]) => {
       if (value == null) return;
 
@@ -366,7 +366,6 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
                       );
                     }}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg cursor-pointer"
-                    // className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg opacity-0 group-hover:opacity-100 cursor-pointer"
                   >
                     <X className="w-3 h-3" />
                   </button>

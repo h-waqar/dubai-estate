@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAdvertiseStore } from "../../stores/useAdvertiseStore";
+import { useStepStore } from "../../stores/useStepStore";
 import StepHeader from "./StepHeader";
 import StepController from "./steps/StepController";
 
@@ -26,7 +26,7 @@ const steps = [
 ];
 
 export default function AdvertiseWizard() {
-  const { step } = useAdvertiseStore();
+  const { step } = useStepStore();
   const StepComponent = steps[step];
   const prevStep = useRef(step);
 

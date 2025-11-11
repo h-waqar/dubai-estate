@@ -1,6 +1,6 @@
 "use client";
 
-import { useAdvertiseStore } from "../../../stores/useAdvertiseStore";
+import { useAdvertiseStore } from "../../../stores/useStepStore";
 
 export default function StepNavigation() {
   const { steps, step, goTo } = useAdvertiseStore();

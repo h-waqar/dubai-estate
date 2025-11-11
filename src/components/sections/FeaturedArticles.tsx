@@ -79,7 +79,7 @@ function ArticleListItem({ article }: ArticleListItemProps) {
   return (
     <Card className="group overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
       <div className="flex">
-        <div className="w-32 flex-shrink-0 relative overflow-hidden">
+        <div className="w-32 shrink-0 relative overflow-hidden">
           <Image
             src={article.image}
             alt={article.alt}

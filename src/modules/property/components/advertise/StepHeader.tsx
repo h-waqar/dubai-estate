@@ -1,11 +1,11 @@
 // src/modules/property/advertise/components/StepHeader.tsx
 "use client";
 
-import { useAdvertiseStore } from "../../stores/useAdvertiseStore";
+import { useStepStore } from "../../stores/useStepStore";
 import { cn } from "@/lib/utils";
 
 export default function StepHeader() {
-  const { steps, step } = useAdvertiseStore();
+  const { steps, step } = useStepStore();
 
   return (
     <div className="flex justify-between items-center mb-8">
