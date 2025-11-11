@@ -11,9 +11,7 @@ export const profileValidator = z.object({
   username: z.string().min(3, "Username must be at least 3 characters."),
   email: z.string().email("Please enter a valid email address."),
   age: z
-    .number({
-      invalid_type_error: "Age is required.",
-    })
+    .number("Age is required.")
     .min(18, "You must be at least 18 years old."),
 
   // --- NEW FIELD ---
