@@ -1,3 +1,4 @@
+// src\modules\property\components\advertise\steps\StepThreeDetails.tsx
 "use client";
 
 import { Input } from "@/components/ui/input";
