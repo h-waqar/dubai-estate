@@ -3,7 +3,7 @@
 import React from "react";
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
 import { ResizableBox } from "react-resizable";
-import "react-resizable/css/styles.css";
+// import "react-resizable/css/styles.css";
 
 import { type Node as ProseMirrorNode } from "@tiptap/pm/model";
 
