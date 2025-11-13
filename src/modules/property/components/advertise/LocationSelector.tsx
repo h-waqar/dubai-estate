@@ -97,7 +97,7 @@ export default function LocationSelector() {
                   setTempCity(null);
                 }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full cursor-pointer">
                   <SelectValue placeholder="Select Country" />
                 </SelectTrigger>
                 <SelectContent>
@@ -117,7 +117,7 @@ export default function LocationSelector() {
                 onValueChange={setTempCity}
                 disabled={!tempCountry}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full cursor-pointer">
                   <SelectValue placeholder="Select City" />
                 </SelectTrigger>
                 <SelectContent>
@@ -161,7 +161,7 @@ function LocationCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center rounded-lg border transition-all h-28 sm:h-32 w-full py-6",
+        "flex flex-col items-center justify-center rounded-lg border transition-all h-28 sm:h-32 w-full py-6 cursor-pointer",
         dashed
           ? "border-dashed border-gray-400 hover:border-brand-500 hover:text-brand-600"
           : "border bg-muted/30 hover:bg-muted/50"
