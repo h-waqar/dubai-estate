@@ -1,10 +1,10 @@
+// src\modules\property\components\advertise\AdvertiseWizard.tsx
 "use client";
 
 import React, { useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStepStore } from "../../stores/useStepStore";
 import StepHeader from "./StepHeader";
-import StepController from "./steps/StepController";
 
 // Import your 7 steps
 import StepOneCreate from "./steps/StepOneCreate";
@@ -14,6 +14,10 @@ import StepFourMedia from "./steps/StepFourMedia";
 import StepFiveAccount from "./steps/StepFiveAccount";
 import StepSixPayment from "./steps/StepSixPayment";
 import StepSevenSuccess from "./steps/StepSevenSuccess";
+
+interface AdvertiseWizardProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+}
 
 const steps = [
   StepOneCreate,
@@ -25,7 +29,9 @@ const steps = [
   StepSevenSuccess,
 ];
 
-export default function AdvertiseWizard() {
+export default function AdvertiseWizard({
+  propertyTypes,
+}: AdvertiseWizardProps) {
   const { step } = useStepStore();
   const StepComponent = steps[step];
   const prevStep = useRef(step);
@@ -49,7 +55,7 @@ export default function AdvertiseWizard() {
             exit={{ opacity: 0, x: -100 * direction }}
             transition={{ duration: 0.3 }}
           >
-            <StepComponent />
+            <StepComponent propertyTypes={propertyTypes} />
           </motion.div>
         </AnimatePresence>
       </div>

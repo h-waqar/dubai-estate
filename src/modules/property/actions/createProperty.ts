@@ -2,7 +2,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { createPropertyServerValidator } from "../validators/createProperty.validator";
-import * as propertyService from "../services/service";
+import * as propertyService from "../services/createProperty";
 import { authOptions } from "@/modules/user/routes/auth";
 import { getServerSession } from "next-auth";
 // import { serializeDecimals } from "@/lib/serializeDecimal";
