@@ -7,8 +7,10 @@ import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import StepController from "./StepController";
 import MediaLibraryButton from "@/modules/media/components/MediaLibraryButton";
-import type { Media } from "@/modules/media/types/media.types"; // Assuming this path from your example
+import type { Media } from "@/modules/media/types/media.types";
 import { cn } from "@/lib/utils";
+import { stepFourSchema } from "../../../validators/advertise-steps.validator";
+import { toast } from "sonner";
 
 // Reusable component for the media item preview (FOR GALLERY)
 function MediaPreview({
@@ -182,7 +184,25 @@ export default function StepFourMedia({}: StepFourMediaProps) {
       </div>
 
       {/* Navigation */}
-      <StepController onNext={next} onPrev={prev} showPrev={true} />
+      <StepController 
+        onNext={() => {
+          const result = stepFourSchema.safeParse({
+            coverImage,
+            gallery,
+          });
+
+          if (!result.success) {
+            const errors = result.error.flatten().fieldErrors;
+            Object.values(errors).forEach((error) => {
+              if (error) toast.error(error[0]);
+            });
+            return;
+          }
+          next();
+        }} 
+        onPrev={prev} 
+        showPrev={true} 
+      />
     </div>
   );
 }

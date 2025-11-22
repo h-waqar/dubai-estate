@@ -13,6 +13,8 @@ import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import { Building2, Bed, Bath, Maximize2, DollarSign, Tag } from "lucide-react";
+import { stepThreeSchema } from "../../../validators/advertise-steps.validator";
+import { toast } from "sonner";
 
 // Enhanced label component with better styling
 const FormLabel = ({
@@ -228,7 +230,28 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
 
       {/* Progress Indicator */}
 
-      <StepController onNext={next} onPrev={prev} showPrev={true} />
+      <StepController 
+        onNext={() => {
+          const result = stepThreeSchema.safeParse({
+            price,
+            bedrooms,
+            bathrooms,
+            propertySize,
+            furnishing: useAdvertiseFormStore.getState().furnishing,
+          });
+
+          if (!result.success) {
+            const errors = result.error.flatten().fieldErrors;
+            Object.values(errors).forEach((error) => {
+              if (error) toast.error(error[0]);
+            });
+            return;
+          }
+          next();
+        }} 
+        onPrev={prev} 
+        showPrev={true} 
+      />
     </div>
   );
 }

@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import StepController from "./StepController";
 import { ClipboardPenLine } from "lucide-react";
+import { stepTwoSchema } from "../../../validators/advertise-steps.validator";
+import { toast } from "sonner";
 interface StepTwoDescriptionProps {
   propertyTypes: { id: number; name: string; slug: string }[];
   serverData: {
@@ -163,7 +165,25 @@ export default function StepDescription({ serverData }: StepTwoDescriptionProps)
           </div>
         </div>
       </div>
-      <StepController onNext={next} onPrev={prev} showPrev={true} />
+      <StepController 
+        onNext={() => {
+          const result = stepTwoSchema.safeParse({
+            description,
+            features,
+          });
+
+          if (!result.success) {
+            const errors = result.error.flatten().fieldErrors;
+            Object.values(errors).forEach((error) => {
+              if (error) toast.error(error[0]);
+            });
+            return;
+          }
+          next();
+        }} 
+        onPrev={prev} 
+        showPrev={true} 
+      />
     </>
   );
 }

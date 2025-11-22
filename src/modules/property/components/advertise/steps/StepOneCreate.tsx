@@ -15,6 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"; // ✅ Use this, not @radix-ui/react-select
+import { stepOneSchema } from "../../../validators/advertise-steps.validator";
+import { toast } from "sonner";
 interface StepOneCreateProps {
   propertyTypes: { id: number; name: string; slug: string }[];
   serverData: {
@@ -100,7 +102,27 @@ function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
 
         <LocationSelector />
       </div>
-      <StepController onNext={next} onPrev={prev} showPrev={false} />
+      <StepController 
+        onNext={() => {
+          const result = stepOneSchema.safeParse({
+            title,
+            propertyStatus,
+            propertyTypeId,
+            location: useAdvertiseFormStore.getState().location, // Access directly to ensure latest
+          });
+
+          if (!result.success) {
+            const errors = result.error.flatten().fieldErrors;
+            Object.values(errors).forEach((error) => {
+              if (error) toast.error(error[0]);
+            });
+            return;
+          }
+          next();
+        }} 
+        onPrev={prev} 
+        showPrev={false} 
+      />
     </div>
   );
 }

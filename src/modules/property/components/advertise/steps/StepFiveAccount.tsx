@@ -18,6 +18,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react"; // <-- Import useSession
 import { FormLabel, FieldWrapper, InputIcon } from "../FormComponents";
+import { stepFiveSchema } from "../../../validators/advertise-steps.validator";
+import { toast } from "sonner";
 
 interface StepFiveAccountProps {
   propertyTypes: { id: number; name: string; slug: string }[];
@@ -209,7 +211,38 @@ function StepFiveAccount({}: StepFiveAccountProps) {
       </div>
 
       {/* Navigation */}
-      <StepController onNext={next} onPrev={prev} showPrev={true} />
+      <StepController 
+        onNext={() => {
+          // If authenticated, we only need to validate the plan (or skip validation if plan is pre-selected)
+          // But the schema handles optional fields. Let's check.
+          // If authenticated, username/email/password are not in the form, so they will be undefined.
+          // The schema makes them optional, so it should pass if we don't provide them.
+          // However, we need to ensure we don't validate them if they are not visible.
+          
+          const dataToValidate = {
+            plan,
+            ...(status === "unauthenticated" ? {
+              username,
+              email,
+              password,
+              repeatPassword,
+            } : {})
+          };
+
+          const result = stepFiveSchema.safeParse(dataToValidate);
+
+          if (!result.success) {
+            const errors = result.error.flatten().fieldErrors;
+            Object.values(errors).forEach((error) => {
+              if (error) toast.error(error[0]);
+            });
+            return;
+          }
+          next();
+        }} 
+        onPrev={prev} 
+        showPrev={true} 
+      />
     </div>
   );
 }

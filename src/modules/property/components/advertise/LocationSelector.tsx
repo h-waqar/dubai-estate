@@ -19,6 +19,7 @@ import {
 import { Globe, MapPin, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocationStore } from "@/stores/useLocationStore";
+import { useAdvertiseFormStore } from "../../stores/useAdvertiseForm";
 
 export default function LocationSelector() {
   const [open, setOpen] = useState(false);
@@ -41,9 +42,28 @@ export default function LocationSelector() {
     }
   }, [tempCountry]);
 
+  const { update, location } = useAdvertiseFormStore();
+  
+  // Initialize from store
+  useEffect(() => {
+    if (location) {
+      const parts = location.split(", ");
+      if (parts.length === 2) {
+        setCity(parts[0]);
+        setCountry(parts[1]);
+      } else if (parts.length === 1) {
+        // Fallback if format is different
+        setCountry(parts[0]); 
+      }
+    }
+  }, [location]);
+
   const handleSave = () => {
     setCountry(tempCountry);
     setCity(tempCity);
+    if (tempCountry && tempCity) {
+      update({ location: `${tempCity}, ${tempCountry}` });
+    }
     setOpen(false);
   };
 
