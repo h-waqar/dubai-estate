@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
+import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import { Building2, Bed, Bath, Maximize2, DollarSign, Tag } from "lucide-react";
 
 // Enhanced label component with better styling
@@ -43,13 +44,30 @@ const InputIcon = ({ icon: Icon }: { icon: any }) => (
   </div>
 );
 
-function StepThreeDetails() {
-  const { data, updateData, next, prev } = useStepStore();
+interface StepThreeDetailsProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
+}
+
+function StepThreeDetails({}: StepThreeDetailsProps) {
+  const { next, prev } = useStepStore();
+  const {
+    price,
+    currency,
+    propertyStatus,
+    propertyTypeId,
+    bedrooms,
+    bathrooms,
+    propertySize,
+    update,
+  } = useAdvertiseFormStore();
 
   const handleNumberChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.valueAsNumber;
-      updateData({ [field]: isNaN(value) ? undefined : value });
+      update({ [field]: isNaN(value) ? undefined : value });
     };
 
   return (
@@ -74,8 +92,8 @@ function StepThreeDetails() {
         <FormLabel>Property Price</FormLabel>
         <div className="flex items-center gap-3 mt-2">
           <Select
-            value={data.currency || "dollar"}
-            onValueChange={(value) => updateData({ currency: value })}
+            value={currency || "dollar"}
+            onValueChange={(value) => update({ currency: value })}
           >
             <SelectTrigger className="shrink-0 min-h-12 border-input bg-background hover:bg-accent/50 transition-colors">
               <SelectValue placeholder="Currency" />
@@ -91,7 +109,7 @@ function StepThreeDetails() {
             <InputIcon icon={DollarSign} />
             <Input
               type="number"
-              value={data.price || ""}
+              value={price || ""}
               onChange={handleNumberChange("price")}
               placeholder="Enter price (e.g., 250000)"
               className="flex-1 h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"
@@ -107,8 +125,8 @@ function StepThreeDetails() {
           <div className="relative">
             <InputIcon icon={Tag} />
             <Select
-              value={data.propertyStatus || ""}
-              onValueChange={(value) => updateData({ propertyStatus: value })}
+              value={propertyStatus || ""}
+              onValueChange={(value) => update({ propertyStatus: value })}
             >
               <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
                 <SelectValue placeholder="Select listing status" />
@@ -127,19 +145,21 @@ function StepThreeDetails() {
           <div className="relative">
             <InputIcon icon={Building2} />
             <Select
-              value={data.propertyType || ""}
-              onValueChange={(value) => updateData({ propertyType: value })}
+              value={propertyTypeId?.toString() || ""}
+              onValueChange={(value) =>
+                update({ propertyTypeId: parseInt(value) })
+              }
             >
               <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
                 <SelectValue placeholder="Select property type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="townhouse">Townhouse</SelectItem>
-                <SelectItem value="apartment">Apartment</SelectItem>
-                <SelectItem value="villa">Villa</SelectItem>
-                <SelectItem value="penthouse">Penthouse</SelectItem>
-                <SelectItem value="office">Office</SelectItem>
-                <SelectItem value="land">Land</SelectItem>
+                <SelectItem value="1">Townhouse</SelectItem>
+                <SelectItem value="2">Apartment</SelectItem>
+                <SelectItem value="3">Villa</SelectItem>
+                <SelectItem value="4">Penthouse</SelectItem>
+                <SelectItem value="5">Office</SelectItem>
+                <SelectItem value="6">Land</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -159,7 +179,7 @@ function StepThreeDetails() {
                 <InputIcon icon={Bed} />
                 <Input
                   type="number"
-                  value={data.bedrooms || ""}
+                  value={bedrooms || ""}
                   onChange={handleNumberChange("bedrooms")}
                   placeholder="0"
                   className="h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"
@@ -176,7 +196,7 @@ function StepThreeDetails() {
                 <InputIcon icon={Bath} />
                 <Input
                   type="number"
-                  value={data.bathrooms || ""}
+                  value={bathrooms || ""}
                   onChange={handleNumberChange("bathrooms")}
                   placeholder="0"
                   className="h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"
@@ -193,7 +213,7 @@ function StepThreeDetails() {
                 <InputIcon icon={Maximize2} />
                 <Input
                   type="number"
-                  value={data.propertySize || ""}
+                  value={propertySize || ""}
                   onChange={handleNumberChange("propertySize")}
                   placeholder="0"
                   className="h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"

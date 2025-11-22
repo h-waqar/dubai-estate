@@ -4,6 +4,7 @@
 import { Input } from "@/components/ui/input";
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
+import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import LocationSelector from "../LocationSelector";
 import { FormLabel, FieldWrapper, InputIcon } from "../FormComponents";
 import { House, PenLine, Tag } from "lucide-react";
@@ -16,13 +17,22 @@ import {
 } from "@/components/ui/select"; // ✅ Use this, not @radix-ui/react-select
 interface StepOneCreateProps {
   propertyTypes: { id: number; name: string; slug: string }[];
-  serverData: {};
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
 }
 function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
-  const { data, updateData, next, prev } = useStepStore();
+  const { next, prev } = useStepStore();
+  const {
+    title,
+    propertyStatus,
+    propertyTypeId,
+    update,
+  } = useAdvertiseFormStore();
+
   // Handler for all text/email/password inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateData({ [e.target.name]: e.target.value });
+    update({ [e.target.name]: e.target.value });
   };
 
   return (
@@ -34,8 +44,8 @@ function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
           <div className="relative">
             <InputIcon icon={Tag} />
             <Select
-              value={data.propertyStatus || ""}
-              onValueChange={(value) => updateData({ propertyStatus: value })}
+              value={propertyStatus || ""}
+              onValueChange={(value) => update({ propertyStatus: value })}
             >
               <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
                 <SelectValue placeholder="Select listing status" />
@@ -54,9 +64,9 @@ function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
           <div className="relative">
             <InputIcon icon={House} />
             <Select
-              value={data.propertyTypeId?.toString() || ""}
+              value={propertyTypeId?.toString() || ""}
               onValueChange={(value) =>
-                updateData({ propertyTypeId: parseInt(value) })
+                update({ propertyTypeId: parseInt(value) })
               }
             >
               <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
@@ -80,7 +90,7 @@ function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
             <InputIcon icon={PenLine} />
             <Input
               name="title"
-              value={data.title || ""}
+              value={title || ""}
               onChange={handleChange}
               placeholder="e.g., luxury_developer_house"
               className="h-12 pl-10 border-input bg-background"

@@ -10,11 +10,9 @@ interface Step {
 interface AdvertiseState {
   steps: Step[];
   step: number;
-  data: Record<string, any>;
   next: () => void;
   prev: () => void;
   goTo: (index: number) => void;
-  updateData: (partial: Record<string, any>) => void;
   reset: () => void;
 }
 
@@ -31,13 +29,11 @@ export const useStepStore = create<AdvertiseState>()(
         { title: "Success", description: "Confirm & submit" },
       ],
       step: 0,
-      data: {},
       next: () =>
         set({ step: Math.min(get().step + 1, get().steps.length - 1) }),
       prev: () => set({ step: Math.max(get().step - 1, 0) }),
       goTo: (index) => set({ step: index }),
-      updateData: (partial) => set({ data: { ...get().data, ...partial } }),
-      reset: () => set({ step: 0, data: {} }),
+      reset: () => set({ step: 0 }),
     }),
     { name: "advertise-property" }
   )

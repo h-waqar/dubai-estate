@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
+import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import {
   User,
   Lock,
@@ -18,18 +19,33 @@ import { cn } from "@/lib/utils";
 import { useSession } from "next-auth/react"; // <-- Import useSession
 import { FormLabel, FieldWrapper, InputIcon } from "../FormComponents";
 
-function StepFiveAccount() {
-  const { data, updateData, next, prev } = useStepStore();
+interface StepFiveAccountProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
+}
+
+function StepFiveAccount({}: StepFiveAccountProps) {
+  const { next, prev } = useStepStore();
+  const {
+    username,
+    password,
+    repeatPassword,
+    email,
+    plan,
+    update,
+  } = useAdvertiseFormStore();
   const { data: session, status } = useSession(); // <-- Get auth status
 
   // Handler for all text/email/password inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateData({ [e.target.name]: e.target.value });
+    update({ [e.target.name]: e.target.value });
   };
 
   // Handler for the plan RadioGroup
   const handlePlanChange = (value: string) => {
-    updateData({ plan: value });
+    update({ plan: value });
   };
 
   // --- Show loader while checking auth status ---
@@ -65,7 +81,7 @@ function StepFiveAccount() {
                 <InputIcon icon={User} />
                 <Input
                   name="username"
-                  value={data.username || ""}
+                  value={username || ""}
                   onChange={handleChange}
                   placeholder="e.g., luxury_developer"
                   className="h-12 pl-10 border-input bg-background"
@@ -82,7 +98,7 @@ function StepFiveAccount() {
                   <Input
                     name="password"
                     type="password"
-                    value={data.password || ""}
+                    value={password || ""}
                     onChange={handleChange}
                     placeholder="••••••••"
                     className="h-12 pl-10 border-input bg-background"
@@ -96,7 +112,7 @@ function StepFiveAccount() {
                   <Input
                     name="repeatPassword"
                     type="password"
-                    value={data.repeatPassword || ""}
+                    value={repeatPassword || ""}
                     onChange={handleChange}
                     placeholder="••••••••"
                     className="h-12 pl-10 border-input bg-background"
@@ -113,7 +129,7 @@ function StepFiveAccount() {
                 <Input
                   name="email"
                   type="email"
-                  value={data.email || ""}
+                  value={email || ""}
                   onChange={handleChange}
                   placeholder="you@example.com"
                   className="h-12 pl-10 border-input bg-background"
@@ -139,7 +155,7 @@ function StepFiveAccount() {
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-2">Plan</h3>
           <RadioGroup
-            value={data.plan || "silver"}
+            value={plan || "silver"}
             onValueChange={handlePlanChange}
           >
             {/* Silver Package Card */}
@@ -147,7 +163,7 @@ function StepFiveAccount() {
               htmlFor="plan-silver"
               className={cn(
                 "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                (data.plan === "silver" || !data.plan) &&
+                (plan === "silver" || !plan) &&
                   "border-primary bg-muted"
               )}
             >
@@ -171,7 +187,7 @@ function StepFiveAccount() {
               htmlFor="plan-gold"
               className={cn(
                 "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                data.plan === "gold" && "border-primary bg-muted"
+                plan === "gold" && "border-primary bg-muted"
               )}
             >
               <div className="flex items-center gap-4">

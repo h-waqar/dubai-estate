@@ -7,11 +7,54 @@ import { Label } from "@/components/ui/label";
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
 import { CreditCard, Lock, Calendar, Shield, CheckCircle2 } from "lucide-react";
+import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
+import { createPropertyAction } from "../../../actions/createProperty";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { FormLabel, FieldWrapper, InputIcon } from "../FormComponents";
 
-function StepSixPayment() {
-  const { data, updateData, next, prev } = useStepStore();
+interface StepSixPaymentProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
+}
+
+function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
+  const { next, prev } = useStepStore();
+  const {
+    plan,
+    paymentMethod,
+    cardholderName,
+    cardNumber,
+    expiryDate,
+    cvv,
+    billingAddress1,
+    billingAddress2,
+    billingCity,
+    billingState,
+    billingPostalCode,
+    update,
+    // Get all data for submission
+    title,
+    propertyStatus,
+    propertyTypeId,
+    description,
+    keywords,
+    features,
+    price,
+    currency,
+    bedrooms,
+    bathrooms,
+    propertySize,
+    furnishing,
+    coverImage,
+    gallery,
+  } = useAdvertiseFormStore();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handler for all input fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,12 +84,57 @@ function StepSixPayment() {
       value = value.replace(/\D/g, "").slice(0, 4);
     }
 
-    updateData({ [name]: value });
+    update({ [name]: value });
   };
 
   // Handler for payment method selection
   const handlePaymentMethodChange = (value: string) => {
-    updateData({ paymentMethod: value });
+    update({ paymentMethod: value });
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("price", price?.toString() || "0");
+
+      if (!propertyTypeId || !propertyTypes.some(t => t.id === propertyTypeId)) {
+        toast.error("Invalid Property Type. Please go back to Step 1 and select a valid type.");
+        return;
+      }
+      formData.append("propertyTypeId", propertyTypeId.toString());
+      formData.append("bedrooms", bedrooms?.toString() || "0");
+      formData.append("bathrooms", bathrooms?.toString() || "0");
+      formData.append("location", "Dubai"); // Hardcoded for now or get from store if available
+      formData.append("furnishing", furnishing || "UNFURNISHED");
+      formData.append("description", description);
+      
+      if (coverImage) {
+        formData.append("coverImage", coverImage.id.toString());
+      }
+      
+      gallery.forEach((img) => {
+        formData.append("gallery[]", img.id.toString());
+      });
+
+      // Add other fields if needed by the action
+      
+      const result = await createPropertyAction(formData);
+      
+      if (result.success) {
+        toast.success("Property created successfully!");
+        next();
+      } else {
+        console.error(result.error);
+        toast.error("Failed to create property: " + JSON.stringify(result.error));
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -67,17 +155,17 @@ function StepSixPayment() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold text-lg">
-                {data.plan === "gold" ? "Gold Package" : "Silver Package"}
+                {plan === "gold" ? "Gold Package" : "Silver Package"}
               </p>
               <p className="text-sm text-muted-foreground">
-                {data.plan === "gold"
+                {plan === "gold"
                   ? "Featured display with premium visibility"
                   : "Standard monthly ad display"}
               </p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold">
-                ${data.plan === "gold" ? "25" : "10"}
+                ${plan === "gold" ? "25" : "10"}
               </p>
               <p className="text-xs text-muted-foreground">/month</p>
             </div>
@@ -88,7 +176,7 @@ function StepSixPayment() {
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-2">Payment Method</h3>
           <RadioGroup
-            value={data.paymentMethod || "card"}
+            value={paymentMethod || "card"}
             onValueChange={handlePaymentMethodChange}
           >
             {/* Credit/Debit Card */}
@@ -96,7 +184,7 @@ function StepSixPayment() {
               htmlFor="payment-card"
               className={cn(
                 "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                (data.paymentMethod === "card" || !data.paymentMethod) &&
+                (paymentMethod === "card" || !paymentMethod) &&
                   "border-primary bg-muted"
               )}
             >
@@ -121,7 +209,7 @@ function StepSixPayment() {
         </div>
 
         {/* Card Details Form */}
-        {(data.paymentMethod === "card" || !data.paymentMethod) && (
+        {(paymentMethod === "card" || !paymentMethod) && (
           <div className="space-y-6 pt-2">
             <h3 className="text-lg font-medium border-b pb-2">Card Details</h3>
 
@@ -131,7 +219,7 @@ function StepSixPayment() {
               <div className="relative">
                 <Input
                   name="cardholderName"
-                  value={data.cardholderName || ""}
+                  value={cardholderName || ""}
                   onChange={handleChange}
                   placeholder="John Doe"
                   className="h-12 border-input bg-background"
@@ -146,7 +234,7 @@ function StepSixPayment() {
                 <InputIcon icon={CreditCard} />
                 <Input
                   name="cardNumber"
-                  value={data.cardNumber || ""}
+                  value={cardNumber || ""}
                   onChange={handleChange}
                   placeholder="1234 5678 9012 3456"
                   className="h-12 pl-10 border-input bg-background font-mono"
@@ -163,7 +251,7 @@ function StepSixPayment() {
                   <InputIcon icon={Calendar} />
                   <Input
                     name="expiryDate"
-                    value={data.expiryDate || ""}
+                    value={expiryDate || ""}
                     onChange={handleChange}
                     placeholder="MM / YY"
                     className="h-12 pl-10 border-input bg-background font-mono"
@@ -178,7 +266,7 @@ function StepSixPayment() {
                   <Input
                     name="cvv"
                     type="password"
-                    value={data.cvv || ""}
+                    value={cvv || ""}
                     onChange={handleChange}
                     placeholder="123"
                     className="h-12 pl-10 border-input bg-background font-mono"
@@ -198,7 +286,7 @@ function StepSixPayment() {
                 <FormLabel required>Address Line 1</FormLabel>
                 <Input
                   name="billingAddress1"
-                  value={data.billingAddress1 || ""}
+                  value={billingAddress1 || ""}
                   onChange={handleChange}
                   placeholder="123 Main Street"
                   className="h-12 border-input bg-background"
@@ -209,7 +297,7 @@ function StepSixPayment() {
                 <FormLabel>Address Line 2 (Optional)</FormLabel>
                 <Input
                   name="billingAddress2"
-                  value={data.billingAddress2 || ""}
+                  value={billingAddress2 || ""}
                   onChange={handleChange}
                   placeholder="Apartment, suite, etc."
                   className="h-12 border-input bg-background"
@@ -221,7 +309,7 @@ function StepSixPayment() {
                   <FormLabel required>City</FormLabel>
                   <Input
                     name="billingCity"
-                    value={data.billingCity || ""}
+                    value={billingCity || ""}
                     onChange={handleChange}
                     placeholder="Dubai"
                     className="h-12 border-input bg-background"
@@ -231,7 +319,7 @@ function StepSixPayment() {
                   <FormLabel required>State / Province</FormLabel>
                   <Input
                     name="billingState"
-                    value={data.billingState || ""}
+                    value={billingState || ""}
                     onChange={handleChange}
                     placeholder="Dubai"
                     className="h-12 border-input bg-background"
@@ -241,7 +329,7 @@ function StepSixPayment() {
                   <FormLabel required>Postal Code</FormLabel>
                   <Input
                     name="billingPostalCode"
-                    value={data.billingPostalCode || ""}
+                    value={billingPostalCode || ""}
                     onChange={handleChange}
                     placeholder="12345"
                     className="h-12 border-input bg-background"
@@ -268,7 +356,32 @@ function StepSixPayment() {
       </div>
 
       {/* Navigation */}
-      <StepController onNext={next} onPrev={prev} showPrev={true} />
+      {/* Navigation */}
+      <div className="flex items-center justify-between pt-6 border-t border-border">
+        <button
+          onClick={prev}
+          className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Back
+        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
+          >
+            Pay Later
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            Submit & Pay
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -11,9 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import StepController from "./StepController";
 import { ClipboardPenLine } from "lucide-react";
-interface StepOneCreateProps {
+interface StepTwoDescriptionProps {
   propertyTypes: { id: number; name: string; slug: string }[];
-  serverData: {};
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
 }
 
 const AVAILABLE_FEATURES = [
@@ -40,12 +42,12 @@ const AVAILABLE_FEATURES = [
   "Air Conditioning",
 ];
 
-export default function StepDescription({ serverData }: StepOneCreateProps) {
+export default function StepDescription({ serverData }: StepTwoDescriptionProps) {
   const { next, prev } = useStepStore();
   const { description, keywords, features, update } = useAdvertiseFormStore();
   const [tempKeyword, setTempKeyword] = useState("");
 
-  const featureList = serverData.features;
+  const featureList = serverData.features || [];
   console.log("featureList -->", featureList);
 
   const handleAddKeyword = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -144,15 +146,15 @@ export default function StepDescription({ serverData }: StepOneCreateProps) {
                 key={feature.id}
                 className={cn(
                   "flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition",
-                  features.includes(feature)
+                  features.includes(feature.name)
                     ? "bg-primary/10 border-primary text-primary"
                     : "hover:bg-muted border-border"
                 )}
               >
                 <input
                   type="checkbox"
-                  checked={features.includes(feature)}
-                  onChange={() => toggleFeature(feature)}
+                  checked={features.includes(feature.name)}
+                  onChange={() => toggleFeature(feature.name)}
                   className="accent-primary"
                 />
                 <span className="text-sm">{feature.name}</span>

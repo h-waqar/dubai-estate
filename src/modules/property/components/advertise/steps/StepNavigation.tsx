@@ -1,9 +1,9 @@
 "use client";
 
-import { useAdvertiseStore } from "../../../stores/useStepStore";
+import { useStepStore } from "../../../stores/useStepStore";
 
 export default function StepNavigation() {
-  const { steps, step, goTo } = useAdvertiseStore();
+  const { steps, step, goTo } = useStepStore();
 
   return (
     <div className="flex justify-between items-center border-b border-border pb-3 mb-6">

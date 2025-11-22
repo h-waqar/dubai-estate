@@ -6,8 +6,8 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import StepController from "./StepController";
 import { useStepStore } from "@/modules/property/stores/useStepStore";
+import { useAdvertiseFormStore } from "@/modules/property/stores/useAdvertiseForm";
 
 // Confetti particle component
 const ConfettiParticle = ({ delay }: { delay: number }) => {
@@ -41,12 +41,21 @@ const ConfettiParticle = ({ delay }: { delay: number }) => {
   );
 };
 
-function StepSixPayment() {
+interface StepSevenSuccessProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
+}
+
+function StepSevenSuccess({}: StepSevenSuccessProps) {
   const router = useRouter();
   const [showConfetti, setShowConfetti] = useState(true);
-  const { data, updateData, next, prev } = useStepStore();
+  const { next, prev } = useStepStore();
 
   const handleGoToDashboard = () => {
+    useStepStore.getState().reset();
+    useAdvertiseFormStore.getState().reset();
     router.push("/dashboard");
   };
 
@@ -168,9 +177,8 @@ function StepSixPayment() {
           </motion.div>
         </motion.div>
       </div>
-      <StepController onNext={next} onPrev={prev} showPrev={true} />
     </>
   );
 }
 
-export default StepSixPayment;
+export default StepSevenSuccess;

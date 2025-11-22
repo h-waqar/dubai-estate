@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { ImagePlus, Upload, X } from "lucide-react";
 import { useStepStore } from "../../../stores/useStepStore";
+import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import StepController from "./StepController";
 import MediaLibraryButton from "@/modules/media/components/MediaLibraryButton";
 import type { Media } from "@/modules/media/types/media.types"; // Assuming this path from your example
@@ -41,33 +42,37 @@ function MediaPreview({
   );
 }
 
-export default function StepFourMedia() {
-  const { data, updateData, next, prev } = useStepStore();
+interface StepFourMediaProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
+}
 
-  // Get media from the store, providing defaults
-  const coverImage = data.coverImage as Media | null;
-  const gallery = (data.gallery || []) as Media[];
+export default function StepFourMedia({}: StepFourMediaProps) {
+  const { next, prev } = useStepStore();
+  const { coverImage, gallery, update } = useAdvertiseFormStore();
 
   // --- Cover Image Handlers ---
   const handleCoverSelect = (media: Media) => {
-    updateData({ coverImage: media });
+    update({ coverImage: media });
   };
 
   const handleCoverRemove = () => {
-    updateData({ coverImage: null });
+    update({ coverImage: null });
   };
 
   // --- Gallery Handlers ---
   const handleGallerySelect = (media: Media) => {
     // Avoid duplicates
     if (!gallery.find((img) => img.id === media.id)) {
-      updateData({ gallery: [...gallery, media] });
+      update({ gallery: [...gallery, media] });
     }
   };
 
   const handleGalleryRemove = (index: number) => {
     const newGallery = gallery.filter((_, i) => i !== index);
-    updateData({ gallery: newGallery });
+    update({ gallery: newGallery });
   };
 
   return (

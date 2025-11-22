@@ -17,7 +17,9 @@ import StepSevenSuccess from "./steps/StepSevenSuccess";
 
 interface AdvertiseWizardProps {
   propertyTypes: { id: number; name: string; slug: string }[];
-  serverData: {};
+  serverData: {
+    features?: { id: number; name: string; slug: string }[];
+  };
 }
 
 const steps = [
