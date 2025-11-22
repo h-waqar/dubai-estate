@@ -16,10 +16,10 @@ import {
 } from "@/components/ui/select"; // ✅ Use this, not @radix-ui/react-select
 interface StepOneCreateProps {
   propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {};
 }
-function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
+function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
   const { data, updateData, next, prev } = useStepStore();
-
   // Handler for all text/email/password inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateData({ [e.target.name]: e.target.value });

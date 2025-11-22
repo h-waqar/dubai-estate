@@ -83,7 +83,7 @@ export const authOptions: AuthOptions = {
   },
 
   pages: {
-    signIn: "/auth/login", // Custom login page
+    signIn: "/login", // Custom login page
   },
   debug: process.env.NODE_ENV === "development",
 };

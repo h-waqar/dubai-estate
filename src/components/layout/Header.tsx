@@ -114,7 +114,7 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <ThemeToggle />
 
-            <Link href="/auth/login" className="hidden md:block">
+            <Link href="/login" className="hidden md:block">
               <Button
                 variant="outline"
                 className="border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -192,7 +192,7 @@ export default function Header() {
                   ))}
 
                   <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                    <Link href="/auth/login" onClick={() => setIsOpen(false)}>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
                       <Button
                         variant="outline"
                         className="w-full border-gray-300 dark:border-gray-600"

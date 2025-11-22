@@ -1,12 +1,21 @@
+"use server";
 import Header from "@/components/layout/Header";
 import AdvertiseWizard from "@/modules/property/components/advertise/AdvertiseWizard";
-import StepHeader from "@/modules/property/components/advertise/StepHeader";
+import { getPropertyTypes } from "@/modules/property/services/listPropertyTypes";
+import { FeatureService } from "@/modules/property/services/feature";
 
-function AdvertisePage() {
+async function AdvertisePage() {
+  const propertyTypes = await getPropertyTypes();
+  const features = await FeatureService.list();
+  const data = {
+    // propertyTypes,
+    features,
+  };
+
   return (
     <>
       <Header />
-      <AdvertiseWizard />
+      <AdvertiseWizard propertyTypes={propertyTypes} serverData={data} />
     </>
   );
 }

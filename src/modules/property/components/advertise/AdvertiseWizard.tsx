@@ -17,6 +17,7 @@ import StepSevenSuccess from "./steps/StepSevenSuccess";
 
 interface AdvertiseWizardProps {
   propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {};
 }
 
 const steps = [
@@ -31,6 +32,7 @@ const steps = [
 
 export default function AdvertiseWizard({
   propertyTypes,
+  serverData,
 }: AdvertiseWizardProps) {
   const { step } = useStepStore();
   const StepComponent = steps[step];
@@ -55,7 +57,10 @@ export default function AdvertiseWizard({
             exit={{ opacity: 0, x: -100 * direction }}
             transition={{ duration: 0.3 }}
           >
-            <StepComponent propertyTypes={propertyTypes} />
+            <StepComponent
+              propertyTypes={propertyTypes}
+              serverData={serverData}
+            />
           </motion.div>
         </AnimatePresence>
       </div>

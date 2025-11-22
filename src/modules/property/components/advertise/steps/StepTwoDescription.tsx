@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import StepController from "./StepController";
 import { ClipboardPenLine } from "lucide-react";
+interface StepOneCreateProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+  serverData: {};
+}
 
 const AVAILABLE_FEATURES = [
   "Pet Friendly",
@@ -36,11 +40,13 @@ const AVAILABLE_FEATURES = [
   "Air Conditioning",
 ];
 
-export default function StepDescription() {
+export default function StepDescription({ serverData }: StepOneCreateProps) {
   const { next, prev } = useStepStore();
   const { description, keywords, features, update } = useAdvertiseFormStore();
-
   const [tempKeyword, setTempKeyword] = useState("");
+
+  const featureList = serverData.features;
+  console.log("featureList -->", featureList);
 
   const handleAddKeyword = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && tempKeyword.trim()) {
@@ -68,9 +74,6 @@ export default function StepDescription() {
   return (
     <>
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
-        {/* <h2 className="text-2xl font-semibold flex items-center gap-2">
-          📝 Add a Description
-        </h2> */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             {/* <Building2 /> */}
@@ -135,9 +138,10 @@ export default function StepDescription() {
         <div>
           <h3 className="font-medium mb-2">Select Features</h3>
           <div className="flex flex-wrap gap-3 select-none">
-            {AVAILABLE_FEATURES.map((feature) => (
+            {/* {AVAILABLE_FEATURES.map((feature) => ( */}
+            {featureList.map((feature) => (
               <label
-                key={feature}
+                key={feature.id}
                 className={cn(
                   "flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition",
                   features.includes(feature)
@@ -151,7 +155,7 @@ export default function StepDescription() {
                   onChange={() => toggleFeature(feature)}
                   className="accent-primary"
                 />
-                <span className="text-sm">{feature}</span>
+                <span className="text-sm">{feature.name}</span>
               </label>
             ))}
           </div>

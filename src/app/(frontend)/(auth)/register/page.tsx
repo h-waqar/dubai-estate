@@ -97,7 +97,7 @@ export default function RegisterPage() {
         <CardFooter className="text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <a href="/auth/login" className="text-primary underline">
+            <a href="/login" className="text-primary underline">
               Login
             </a>
           </p>

@@ -27,7 +27,7 @@ export default function UnauthorizedPage() {
                     <Button variant="default" onClick={() => router.push("/")}>
                         Go Home
                     </Button>
-                    <Button variant="secondary" onClick={() => router.push("/auth/login")}>
+                    <Button variant="secondary" onClick={() => router.push("/login")}>
                         Login as Different User
                     </Button>
                 </CardFooter>

@@ -42,7 +42,7 @@ export default function AdminLayout({
     if (typeof window !== "undefined") {
       // Append callbackUrl so after login user returns here
       const returnUrl = encodeURIComponent(window.location.pathname);
-      window.location.href = `/auth/login?callbackUrl=${returnUrl}`;
+      window.location.href = `/login?callbackUrl=${returnUrl}`;
     }
     return null;
   }

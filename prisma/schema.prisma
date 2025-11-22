@@ -75,16 +75,16 @@ model Category {
 
 // --- Posts ---
 model Post {
-  id           Int      @id @default(autoincrement())
-  title        String
-  slug         String   @unique
-  excerpt      String?
-  content      String // markdown/html
-  coverImage   String?
+  id         Int      @id @default(autoincrement())
+  title      String
+  slug       String   @unique
+  excerpt    String?
+  content    String // markdown/html
+  coverImage String?
   // coverImageId Int?
   // coverImage   Media?   @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
-  tags         String[] @default([])
-  published    Boolean  @default(false)
+  tags       String[] @default([])
+  published  Boolean  @default(false)
 
   // Relations
   authorId Int
@@ -174,7 +174,7 @@ model Property {
   propertyTypeId Int
 
   // Media
-  mediaUsages MediaUsage[] // direct backref, optional helper for queries
+  mediaUsages MediaUsage[] // direct backref, optional helper for queries3
 
   bedrooms     Int?
   bathrooms    Int?
@@ -188,7 +188,10 @@ model Property {
   furnishing   FurnishingStatus     @default(UNFURNISHED)
   availability PropertyAvailability @default(AVAILABLE)
   status       PropertyStatus       @default(DRAFT)
-  features     String[]             @default([])
+  // ❌ old
+  // features     String[]             @default([])
+  // ✅ new relation
+  features     PropertyFeature[]
   images       PropertyImage[]
   videos       PropertyVideo[]
 
@@ -281,4 +284,28 @@ model MediaUsage {
   propertyId Int?
 
   @@index([entityType, entityId])
+}
+
+// --- Features / Anmenities ---
+model Feature {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  icon        String? // optional for UI, e.g. "lucide:home"
+  category    String? // e.g. "Indoor", "Outdoor", "Security"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  properties PropertyFeature[]
+}
+
+// --- Features / Anmenities ---
+model PropertyFeature {
+  propertyId Int
+  featureId  Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  feature    Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, featureId])
 }
