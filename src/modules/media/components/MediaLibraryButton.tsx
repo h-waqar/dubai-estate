@@ -28,6 +28,7 @@ export default function MediaLibraryButton({
   return (
     <>
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className={
           buttonClassName ||

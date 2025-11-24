@@ -1,6 +1,6 @@
-// src\modules\property\components\advertise\steps\StepOneCreate.tsx
-"use client";
-
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
@@ -14,50 +14,103 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // ✅ Use this, not @radix-ui/react-select
+} from "@/components/ui/select";
 import { stepOneSchema } from "../../../validators/advertise-steps.validator";
-import { toast } from "sonner";
+import { z } from "zod";
+
 interface StepOneCreateProps {
   propertyTypes: { id: number; name: string; slug: string }[];
   serverData: {
     features?: { id: number; name: string; slug: string }[];
   };
 }
-function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
+
+type StepOneData = z.infer<typeof stepOneSchema>;
+
+function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
   const { next, prev } = useStepStore();
   const {
     title,
     propertyStatus,
     propertyTypeId,
+    location,
     update,
   } = useAdvertiseFormStore();
 
-  // Handler for all text/email/password inputs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    update({ [e.target.name]: e.target.value });
+  const {
+    control,
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<StepOneData>({
+    resolver: zodResolver(stepOneSchema),
+    defaultValues: {
+      title: title || "",
+      propertyStatus: propertyStatus || "",
+      propertyTypeId: propertyTypeId || undefined,
+      location: location || "",
+    },
+  });
+
+  // Sync form changes to Zustand store
+  useEffect(() => {
+    const subscription = watch((value) => {
+      update({
+        title: value.title,
+        propertyStatus: value.propertyStatus,
+        propertyTypeId: value.propertyTypeId,
+        location: value.location,
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, update]);
+
+  // Sync Store -> Form for location (updated by LocationSelector)
+  useEffect(() => {
+    if (location) {
+      setValue("location", location, { shouldValidate: true });
+    }
+  }, [location, setValue]);
+
+  const onSubmit = () => {
+    next();
   };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
         {/* Property Status (sale/rent) */}
         <FieldWrapper>
           <FormLabel>Property Status</FormLabel>
           <div className="relative">
             <InputIcon icon={Tag} />
-            <Select
-              value={propertyStatus || ""}
-              onValueChange={(value) => update({ propertyStatus: value })}
-            >
-              <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
-                <SelectValue placeholder="Select listing status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sale">For Sale</SelectItem>
-                <SelectItem value="rent">For Rent</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="propertyStatus"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
+                    <SelectValue placeholder="Select listing status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sale">For Sale</SelectItem>
+                    <SelectItem value="rent">For Rent</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
+          {errors.propertyStatus && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.propertyStatus.message}
+            </p>
+          )}
         </FieldWrapper>
 
         {/* Property Type (dynamic from DB) */}
@@ -65,24 +118,33 @@ function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
           <FormLabel>Property Type</FormLabel>
           <div className="relative">
             <InputIcon icon={House} />
-            <Select
-              value={propertyTypeId?.toString() || ""}
-              onValueChange={(value) =>
-                update({ propertyTypeId: parseInt(value) })
-              }
-            >
-              <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
-                <SelectValue placeholder="Select property type" />
-              </SelectTrigger>
-              <SelectContent>
-                {propertyTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id.toString()}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              name="propertyTypeId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value?.toString()}
+                >
+                  <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
+                    <SelectValue placeholder="Select property type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {propertyTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id.toString()}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
+          {errors.propertyTypeId && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.propertyTypeId.message}
+            </p>
+          )}
         </FieldWrapper>
 
         {/* Property Title */}
@@ -91,39 +153,42 @@ function StepOneCreate({ propertyTypes, serverData }: StepOneCreateProps) {
           <div className="relative">
             <InputIcon icon={PenLine} />
             <Input
-              name="title"
-              value={title || ""}
-              onChange={handleChange}
+              {...register("title")}
               placeholder="e.g., luxury_developer_house"
               className="h-12 pl-10 border-input bg-background"
             />
           </div>
+          {errors.title && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.title.message}
+            </p>
+          )}
         </FieldWrapper>
 
+        {/* Location Selector needs to be integrated or synced */}
+        {/* Assuming LocationSelector updates the store directly, we need to sync it back to the form or pass control */}
+        {/* For now, let's assume LocationSelector updates the store and we watch the store to update the form if needed, 
+            BUT here we are doing form -> store. 
+            If LocationSelector is a separate component that updates the store, we might need to register 'location' manually 
+            or pass setValue to it. 
+            Let's look at LocationSelector usage. It was just <LocationSelector />. 
+            I'll check LocationSelector implementation next. For now, I'll keep it as is but register a hidden input for location to validate it.
+        */}
         <LocationSelector />
+        <input type="hidden" {...register("location")} />
+        {errors.location && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.location.message}
+            </p>
+          )}
       </div>
+      
       <StepController 
-        onNext={() => {
-          const result = stepOneSchema.safeParse({
-            title,
-            propertyStatus,
-            propertyTypeId,
-            location: useAdvertiseFormStore.getState().location, // Access directly to ensure latest
-          });
-
-          if (!result.success) {
-            const errors = result.error.flatten().fieldErrors;
-            Object.values(errors).forEach((error) => {
-              if (error) toast.error(error[0]);
-            });
-            return;
-          }
-          next();
-        }} 
+        onNext={handleSubmit(onSubmit)}
         onPrev={prev} 
         showPrev={false} 
       />
-    </div>
+    </form>
   );
 }
 

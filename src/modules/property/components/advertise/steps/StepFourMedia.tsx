@@ -1,6 +1,6 @@
-// src/modules/property/advertise/components/steps/StepFourMedia.tsx
-"use client";
-
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { ImagePlus, Upload, X } from "lucide-react";
 import { useStepStore } from "../../../stores/useStepStore";
@@ -10,7 +10,7 @@ import MediaLibraryButton from "@/modules/media/components/MediaLibraryButton";
 import type { Media } from "@/modules/media/types/media.types";
 import { cn } from "@/lib/utils";
 import { stepFourSchema } from "../../../validators/advertise-steps.validator";
-import { toast } from "sonner";
+import { z } from "zod";
 
 // Reusable component for the media item preview (FOR GALLERY)
 function MediaPreview({
@@ -51,34 +51,80 @@ interface StepFourMediaProps {
   };
 }
 
+type StepFourData = {
+  coverImage: Media | null | undefined;
+  gallery: Media[];
+};
+
 export default function StepFourMedia({}: StepFourMediaProps) {
   const { next, prev } = useStepStore();
   const { coverImage, gallery, update } = useAdvertiseFormStore();
 
+  const {
+    setValue,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<StepFourData>({
+    resolver: zodResolver(stepFourSchema),
+    defaultValues: {
+      coverImage: coverImage || undefined,
+      gallery: gallery || [],
+    },
+  });
+
+  const currentCoverImage = watch("coverImage");
+  const currentGallery = watch("gallery");
+
+  // Sync form -> store
+  useEffect(() => {
+    const subscription = watch((value) => {
+      // We need to cast because react-hook-form might treat them as partials or slightly different types
+      // depending on how Zod schema is defined vs actual Media type.
+      // Assuming Media type matches what's expected.
+      if (value.coverImage !== undefined) {
+         update({ coverImage: value.coverImage as Media | null });
+      }
+      if (value.gallery !== undefined) {
+         update({ gallery: value.gallery as Media[] });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, update]);
+
   // --- Cover Image Handlers ---
   const handleCoverSelect = (media: Media) => {
-    update({ coverImage: media });
+    setValue("coverImage", media, { shouldValidate: true });
   };
 
   const handleCoverRemove = () => {
-    update({ coverImage: null });
+    setValue("coverImage", null as any, { shouldValidate: true }); // Cast to any to allow null if schema permits or just undefined
+    // Schema says: coverImage: z.object({ id: z.number() }, { message: "Cover image is required." })
+    // So it shouldn't be null. But initially it is null/undefined.
+    // If I set it to undefined, it might trigger validation error.
   };
 
   // --- Gallery Handlers ---
   const handleGallerySelect = (media: Media) => {
     // Avoid duplicates
-    if (!gallery.find((img) => img.id === media.id)) {
-      update({ gallery: [...gallery, media] });
+    const current = currentGallery || [];
+    if (!current.find((img) => img.id === media.id)) {
+      setValue("gallery", [...current, media], { shouldValidate: true });
     }
   };
 
   const handleGalleryRemove = (index: number) => {
-    const newGallery = gallery.filter((_, i) => i !== index);
-    update({ gallery: newGallery });
+    const current = currentGallery || [];
+    const newGallery = current.filter((_, i) => i !== index);
+    setValue("gallery", newGallery, { shouldValidate: true });
+  };
+
+  const onSubmit = () => {
+    next();
   };
 
   return (
-    <div className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Card container */}
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
         {/* Header */}
@@ -92,24 +138,23 @@ export default function StepFourMedia({}: StepFourMediaProps) {
             <h3 className="text-lg font-medium">Cover Image</h3>
             <MediaLibraryButton
               onSelect={handleCoverSelect}
-              buttonText={coverImage ? "Change Cover" : "Select Cover"}
+              buttonText={currentCoverImage ? "Change Cover" : "Select Cover"}
               mode="select"
             />
           </div>
           <div
             className={cn(
               "p-4 border border-dashed rounded-lg min-h-[150px] flex items-center justify-center",
-              !coverImage && "bg-muted/30"
+              !currentCoverImage && "bg-muted/30"
             )}
           >
-            {coverImage ? (
-              // --- MODIFICATION START ---
+            {currentCoverImage ? (
               // Use a full-width preview for the cover image
               <div className="relative group w-full">
                 <div className="relative w-full aspect-video overflow-hidden rounded-lg border border-border">
                   <Image
-                    src={coverImage.url}
-                    alt={coverImage.alt || coverImage.title || "Cover image"}
+                    src={currentCoverImage.url}
+                    alt={currentCoverImage.alt || currentCoverImage.title || "Cover image"}
                     fill
                     sizes="100vw"
                     className="object-cover"
@@ -124,17 +169,21 @@ export default function StepFourMedia({}: StepFourMediaProps) {
                   <X className="w-4 h-4" />
                 </button>
                 <p className="text-sm text-muted-foreground mt-2 truncate">
-                  {coverImage.title}
+                  {currentCoverImage.title}
                 </p>
               </div>
             ) : (
-              // --- MODIFICATION END ---
               <div className="text-center text-muted-foreground">
                 <ImagePlus className="w-10 h-10 mx-auto" />
                 <p className="mt-2 text-sm font-medium">Select a cover image</p>
               </div>
             )}
           </div>
+          {errors.coverImage && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.coverImage.message}
+            </p>
+          )}
         </div>
 
         {/* Divider */}
@@ -146,7 +195,7 @@ export default function StepFourMedia({}: StepFourMediaProps) {
             <h3 className="text-lg font-medium">
               Gallery Images{" "}
               <span className="text-sm text-muted-foreground">
-                ({gallery.length} / 20)
+                ({currentGallery?.length || 0} / 20)
               </span>
             </h3>
             <MediaLibraryButton
@@ -158,12 +207,12 @@ export default function StepFourMedia({}: StepFourMediaProps) {
           <div
             className={cn(
               "p-4 border border-dashed rounded-lg min-h-[170px]",
-              gallery.length === 0 && "flex items-center justify-center"
+              (!currentGallery || currentGallery.length === 0) && "flex items-center justify-center"
             )}
           >
-            {gallery.length > 0 ? (
+            {currentGallery && currentGallery.length > 0 ? (
               <div className="flex flex-wrap gap-1">
-                {gallery.map((image, index) => (
+                {currentGallery.map((image, index) => (
                   <MediaPreview
                     key={image.id}
                     media={image}
@@ -180,29 +229,20 @@ export default function StepFourMedia({}: StepFourMediaProps) {
               </div>
             )}
           </div>
+          {errors.gallery && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.gallery.message}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Navigation */}
       <StepController 
-        onNext={() => {
-          const result = stepFourSchema.safeParse({
-            coverImage,
-            gallery,
-          });
-
-          if (!result.success) {
-            const errors = result.error.flatten().fieldErrors;
-            Object.values(errors).forEach((error) => {
-              if (error) toast.error(error[0]);
-            });
-            return;
-          }
-          next();
-        }} 
+        onNext={handleSubmit(onSubmit)}
         onPrev={prev} 
         showPrev={true} 
       />
-    </div>
+    </form>
   );
 }

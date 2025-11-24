@@ -22,7 +22,7 @@ export default function StepController({
   return (
     <div className="flex justify-end gap-4 mt-6">
       {showPrev ? (
-        <Button variant="outline" onClick={onPrev || prev}>
+        <Button type="button" variant="outline" onClick={onPrev || prev}>
           Back
         </Button>
       ) : (

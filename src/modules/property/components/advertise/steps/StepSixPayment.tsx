@@ -1,19 +1,22 @@
 // src\modules\property\components\advertise\steps\StepSixPayment.tsx
 "use client";
 
+import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
-import { CreditCard, Lock, Calendar, Shield, CheckCircle2 } from "lucide-react";
+import { CreditCard, Lock, Calendar, Shield, CheckCircle2, Loader2 } from "lucide-react";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import { createPropertyAction } from "../../../actions/createProperty";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { FormLabel, FieldWrapper, InputIcon } from "../FormComponents";
+import { stepSixSchema } from "../../../validators/advertise-steps.validator";
+import { z } from "zod";
 
 interface StepSixPaymentProps {
   propertyTypes: { id: number; name: string; slug: string }[];
@@ -21,6 +24,8 @@ interface StepSixPaymentProps {
     features?: { id: number; name: string; slug: string }[];
   };
 }
+
+type StepSixData = z.infer<typeof stepSixSchema>;
 
 function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
   const { next, prev } = useStepStore();
@@ -56,43 +61,49 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Handler for all input fields
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    const name = e.target.name;
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<StepSixData>({
+    resolver: zodResolver(stepSixSchema),
+    defaultValues: {
+      paymentMethod: paymentMethod || "card",
+      cardholderName: cardholderName || "",
+      cardNumber: cardNumber || "",
+      expiryDate: expiryDate || "",
+      cvv: cvv || "",
+      billingAddress1: billingAddress1 || "",
+      billingAddress2: billingAddress2 || "",
+      billingCity: billingCity || "",
+      billingState: billingState || "",
+      billingPostalCode: billingPostalCode || "",
+    },
+  });
 
-    // Format card number with spaces
-    if (name === "cardNumber") {
-      value = value
-        .replace(/\s/g, "")
-        .replace(/(\d{4})/g, "$1 ")
-        .trim();
-      if (value.length > 19) return; // Limit to 16 digits + 3 spaces
-    }
+  // Sync form -> store
+  useEffect(() => {
+    const subscription = watch((value) => {
+      update({
+        paymentMethod: value.paymentMethod,
+        cardholderName: value.cardholderName,
+        cardNumber: value.cardNumber,
+        expiryDate: value.expiryDate,
+        cvv: value.cvv,
+        billingAddress1: value.billingAddress1,
+        billingAddress2: value.billingAddress2,
+        billingCity: value.billingCity,
+        billingState: value.billingState,
+        billingPostalCode: value.billingPostalCode,
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, update]);
 
-    // Format expiry date
-    if (name === "expiryDate") {
-      value = value.replace(/\D/g, "");
-      if (value.length >= 2) {
-        value = value.slice(0, 2) + " / " + value.slice(2, 4);
-      }
-      if (value.length > 7) return;
-    }
-
-    // Limit CVV to 3-4 digits
-    if (name === "cvv") {
-      value = value.replace(/\D/g, "").slice(0, 4);
-    }
-
-    update({ [name]: value });
-  };
-
-  // Handler for payment method selection
-  const handlePaymentMethodChange = (value: string) => {
-    update({ paymentMethod: value });
-  };
-
-  const handleSubmit = async () => {
+  const onSubmit = async (data: StepSixData) => {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -137,8 +148,34 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
     }
   };
 
+  // Custom formatting handlers
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+    let value = e.target.value
+      .replace(/\s/g, "")
+      .replace(/(\d{4})/g, "$1 ")
+      .trim();
+    if (value.length <= 19) {
+      onChange(value);
+    }
+  };
+
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length >= 2) {
+      value = value.slice(0, 2) + " / " + value.slice(2, 4);
+    }
+    if (value.length <= 7) {
+      onChange(value);
+    }
+  };
+
+  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+    let value = e.target.value.replace(/\D/g, "").slice(0, 4);
+    onChange(value);
+  };
+
   return (
-    <div className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Card container */}
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
         {/* Header */}
@@ -175,42 +212,53 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
         {/* Payment Method Selection */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-2">Payment Method</h3>
-          <RadioGroup
-            value={paymentMethod || "card"}
-            onValueChange={handlePaymentMethodChange}
-          >
-            {/* Credit/Debit Card */}
-            <Label
-              htmlFor="payment-card"
-              className={cn(
-                "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                (paymentMethod === "card" || !paymentMethod) &&
-                  "border-primary bg-muted"
-              )}
-            >
-              <RadioGroupItem value="card" id="payment-card" />
-              <CreditCard className="w-5 h-5 text-muted-foreground" />
-              <div className="flex-1">
-                <p className="font-semibold">Credit / Debit Card</p>
-                <p className="text-sm text-muted-foreground">
-                  Visa, Mastercard, American Express
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <div className="w-10 h-7 bg-linear-to-br from-blue-600 to-blue-400 rounded flex items-center justify-center text-white text-xs font-bold">
-                  VISA
-                </div>
-                <div className="w-10 h-7 bg-linear-to-br from-red-600 to-orange-400 rounded flex items-center justify-center text-white text-xs font-bold">
-                  MC
-                </div>
-              </div>
-            </Label>
-          </RadioGroup>
+          <Controller
+            name="paymentMethod"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
+                {/* Credit/Debit Card */}
+                <Label
+                  htmlFor="payment-card"
+                  className={cn(
+                    "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
+                    (field.value === "card" || !field.value) &&
+                      "border-primary bg-muted"
+                  )}
+                >
+                  <RadioGroupItem value="card" id="payment-card" />
+                  <CreditCard className="w-5 h-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Credit / Debit Card</p>
+                    <p className="text-sm text-muted-foreground">
+                      Visa, Mastercard, American Express
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-10 h-7 bg-linear-to-br from-blue-600 to-blue-400 rounded flex items-center justify-center text-white text-xs font-bold">
+                      VISA
+                    </div>
+                    <div className="w-10 h-7 bg-linear-to-br from-red-600 to-orange-400 rounded flex items-center justify-center text-white text-xs font-bold">
+                      MC
+                    </div>
+                  </div>
+                </Label>
+              </RadioGroup>
+            )}
+          />
+          {errors.paymentMethod && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.paymentMethod.message}
+            </p>
+          )}
         </div>
 
         {/* Card Details Form */}
-        {(paymentMethod === "card" || !paymentMethod) && (
-          <div className="space-y-6 pt-2">
+        <div className="space-y-6 pt-2">
             <h3 className="text-lg font-medium border-b pb-2">Card Details</h3>
 
             {/* Cardholder Name */}
@@ -218,13 +266,16 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
               <FormLabel required>Cardholder Name</FormLabel>
               <div className="relative">
                 <Input
-                  name="cardholderName"
-                  value={cardholderName || ""}
-                  onChange={handleChange}
+                  {...register("cardholderName")}
                   placeholder="John Doe"
                   className="h-12 border-input bg-background"
                 />
               </div>
+              {errors.cardholderName && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.cardholderName.message}
+                </p>
+              )}
             </FieldWrapper>
 
             {/* Card Number */}
@@ -232,15 +283,25 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
               <FormLabel required>Card Number</FormLabel>
               <div className="relative">
                 <InputIcon icon={CreditCard} />
-                <Input
+                <Controller
                   name="cardNumber"
-                  value={cardNumber || ""}
-                  onChange={handleChange}
-                  placeholder="1234 5678 9012 3456"
-                  className="h-12 pl-10 border-input bg-background font-mono"
-                  maxLength={19}
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      onChange={(e) => handleCardNumberChange(e, field.onChange)}
+                      placeholder="1234 5678 9012 3456"
+                      className="h-12 pl-10 border-input bg-background font-mono"
+                      maxLength={19}
+                    />
+                  )}
                 />
               </div>
+              {errors.cardNumber && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.cardNumber.message}
+                </p>
+              )}
             </FieldWrapper>
 
             {/* Expiry Date and CVV */}
@@ -249,30 +310,50 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
                 <FormLabel required>Expiry Date</FormLabel>
                 <div className="relative">
                   <InputIcon icon={Calendar} />
-                  <Input
+                  <Controller
                     name="expiryDate"
-                    value={expiryDate || ""}
-                    onChange={handleChange}
-                    placeholder="MM / YY"
-                    className="h-12 pl-10 border-input bg-background font-mono"
-                    maxLength={7}
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        onChange={(e) => handleExpiryDateChange(e, field.onChange)}
+                        placeholder="MM / YY"
+                        className="h-12 pl-10 border-input bg-background font-mono"
+                        maxLength={7}
+                      />
+                    )}
                   />
                 </div>
+                {errors.expiryDate && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.expiryDate.message}
+                  </p>
+                )}
               </FieldWrapper>
               <FieldWrapper>
                 <FormLabel required>CVV</FormLabel>
                 <div className="relative">
                   <InputIcon icon={Lock} />
-                  <Input
+                  <Controller
                     name="cvv"
-                    type="password"
-                    value={cvv || ""}
-                    onChange={handleChange}
-                    placeholder="123"
-                    className="h-12 pl-10 border-input bg-background font-mono"
-                    maxLength={4}
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        type="password"
+                        onChange={(e) => handleCvvChange(e, field.onChange)}
+                        placeholder="123"
+                        className="h-12 pl-10 border-input bg-background font-mono"
+                        maxLength={4}
+                      />
+                    )}
                   />
                 </div>
+                {errors.cvv && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.cvv.message}
+                  </p>
+                )}
               </FieldWrapper>
             </div>
 
@@ -285,20 +366,21 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
               <FieldWrapper>
                 <FormLabel required>Address Line 1</FormLabel>
                 <Input
-                  name="billingAddress1"
-                  value={billingAddress1 || ""}
-                  onChange={handleChange}
+                  {...register("billingAddress1")}
                   placeholder="123 Main Street"
                   className="h-12 border-input bg-background"
                 />
+                {errors.billingAddress1 && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.billingAddress1.message}
+                  </p>
+                )}
               </FieldWrapper>
 
               <FieldWrapper>
                 <FormLabel>Address Line 2 (Optional)</FormLabel>
                 <Input
-                  name="billingAddress2"
-                  value={billingAddress2 || ""}
-                  onChange={handleChange}
+                  {...register("billingAddress2")}
                   placeholder="Apartment, suite, etc."
                   className="h-12 border-input bg-background"
                 />
@@ -308,32 +390,41 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
                 <FieldWrapper>
                   <FormLabel required>City</FormLabel>
                   <Input
-                    name="billingCity"
-                    value={billingCity || ""}
-                    onChange={handleChange}
+                    {...register("billingCity")}
                     placeholder="Dubai"
                     className="h-12 border-input bg-background"
                   />
+                  {errors.billingCity && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.billingCity.message}
+                    </p>
+                  )}
                 </FieldWrapper>
                 <FieldWrapper>
                   <FormLabel required>State / Province</FormLabel>
                   <Input
-                    name="billingState"
-                    value={billingState || ""}
-                    onChange={handleChange}
+                    {...register("billingState")}
                     placeholder="Dubai"
                     className="h-12 border-input bg-background"
                   />
+                  {errors.billingState && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.billingState.message}
+                    </p>
+                  )}
                 </FieldWrapper>
                 <FieldWrapper>
                   <FormLabel required>Postal Code</FormLabel>
                   <Input
-                    name="billingPostalCode"
-                    value={billingPostalCode || ""}
-                    onChange={handleChange}
+                    {...register("billingPostalCode")}
                     placeholder="12345"
                     className="h-12 border-input bg-background"
                   />
+                  {errors.billingPostalCode && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.billingPostalCode.message}
+                    </p>
+                  )}
                 </FieldWrapper>
               </div>
             </div>
@@ -352,13 +443,13 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
               <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500" />
             </div>
           </div>
-        )}
+
       </div>
 
       {/* Navigation */}
-      {/* Navigation */}
       <div className="flex items-center justify-between pt-6 border-t border-border">
         <button
+          type="button"
           onClick={prev}
           className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
@@ -366,14 +457,15 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
         </button>
         <div className="flex gap-3">
           <button
-            onClick={handleSubmit}
+            type="button"
+            onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
             className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
           >
             Pay Later
           </button>
           <button
-            onClick={handleSubmit}
+            type="submit"
             disabled={isSubmitting}
             className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
@@ -382,7 +474,7 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
           </button>
         </div>
       </div>
-    </div>
+    </form>
   );
 }
 

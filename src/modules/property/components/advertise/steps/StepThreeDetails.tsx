@@ -1,6 +1,6 @@
-// src\modules\property\components\advertise\steps\StepThreeDetails.tsx
-"use client";
-
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -14,7 +14,7 @@ import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import { Building2, Bed, Bath, Maximize2, DollarSign, Tag } from "lucide-react";
 import { stepThreeSchema } from "../../../validators/advertise-steps.validator";
-import { toast } from "sonner";
+import { z } from "zod";
 
 // Enhanced label component with better styling
 const FormLabel = ({
@@ -53,6 +53,15 @@ interface StepThreeDetailsProps {
   };
 }
 
+// Extend schema to include fields present in UI but not in original validation schema
+const formSchema = stepThreeSchema.extend({
+  currency: z.string(),
+  propertyStatus: z.string(),
+  propertyTypeId: z.number().optional(),
+});
+
+type StepThreeData = z.infer<typeof formSchema>;
+
 function StepThreeDetails({}: StepThreeDetailsProps) {
   const { next, prev } = useStepStore();
   const {
@@ -63,17 +72,53 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
     bedrooms,
     bathrooms,
     propertySize,
+    furnishing,
     update,
   } = useAdvertiseFormStore();
 
-  const handleNumberChange =
-    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.valueAsNumber;
-      update({ [field]: isNaN(value) ? undefined : value });
-    };
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<StepThreeData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      price: price || undefined,
+      currency: currency || "dollar",
+      propertyStatus: propertyStatus || "",
+      propertyTypeId: propertyTypeId || undefined,
+      bedrooms: bedrooms || undefined,
+      bathrooms: bathrooms || undefined,
+      propertySize: propertySize || undefined,
+      furnishing: furnishing || "UNFURNISHED",
+    },
+  });
+
+  // Sync form -> store
+  useEffect(() => {
+    const subscription = watch((value) => {
+      update({
+        price: value.price,
+        currency: value.currency,
+        propertyStatus: value.propertyStatus,
+        propertyTypeId: value.propertyTypeId,
+        bedrooms: value.bedrooms,
+        bathrooms: value.bathrooms,
+        propertySize: value.propertySize,
+        furnishing: value.furnishing,
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, update]);
+
+  const onSubmit = () => {
+    next();
+  };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-5xl mx-auto">
       {/* Enhanced Form Grid */}
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
         <div className="flex items-center gap-3">
@@ -93,26 +138,32 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
         {/* Price - Full Width Priority Field */}
         <FormLabel>Property Price</FormLabel>
         <div className="flex items-center gap-3 mt-2">
-          <Select
-            value={currency || "dollar"}
-            onValueChange={(value) => update({ currency: value })}
-          >
-            <SelectTrigger className="shrink-0 min-h-12 border-input bg-background hover:bg-accent/50 transition-colors">
-              <SelectValue placeholder="Currency" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="dollar">Dollar</SelectItem>
-              <SelectItem value="aed">AED</SelectItem>
-              <SelectItem value="eur">Euro</SelectItem>
-              <SelectItem value="pkr">PKR</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="currency"
+            control={control}
+            render={({ field }) => (
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
+                <SelectTrigger className="shrink-0 min-h-12 border-input bg-background hover:bg-accent/50 transition-colors">
+                  <SelectValue placeholder="Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dollar">Dollar</SelectItem>
+                  <SelectItem value="aed">AED</SelectItem>
+                  <SelectItem value="eur">Euro</SelectItem>
+                  <SelectItem value="pkr">PKR</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
           <FieldWrapper>
             <InputIcon icon={DollarSign} />
             <Input
               type="number"
-              value={price || ""}
-              onChange={handleNumberChange("price")}
+              {...register("price", { valueAsNumber: true })}
               placeholder="Enter price (e.g., 250000)"
               className="flex-1 h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"
               min="0"
@@ -120,24 +171,36 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
             />
           </FieldWrapper>
         </div>
+        {errors.price && (
+          <p className="text-sm text-destructive mt-1">
+            {errors.price.message}
+          </p>
+        )}
 
         {/* Property Status */}
         <FieldWrapper>
           <FormLabel>Property Status</FormLabel>
           <div className="relative">
             <InputIcon icon={Tag} />
-            <Select
-              value={propertyStatus || ""}
-              onValueChange={(value) => update({ propertyStatus: value })}
-            >
-              <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
-                <SelectValue placeholder="Select listing status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sale">For Sale</SelectItem>
-                <SelectItem value="rent">For Rent</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="propertyStatus"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
+                    <SelectValue placeholder="Select listing status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sale">For Sale</SelectItem>
+                    <SelectItem value="rent">For Rent</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
         </FieldWrapper>
 
@@ -146,24 +209,28 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
           <FormLabel>Property Type</FormLabel>
           <div className="relative">
             <InputIcon icon={Building2} />
-            <Select
-              value={propertyTypeId?.toString() || ""}
-              onValueChange={(value) =>
-                update({ propertyTypeId: parseInt(value) })
-              }
-            >
-              <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
-                <SelectValue placeholder="Select property type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Townhouse</SelectItem>
-                <SelectItem value="2">Apartment</SelectItem>
-                <SelectItem value="3">Villa</SelectItem>
-                <SelectItem value="4">Penthouse</SelectItem>
-                <SelectItem value="5">Office</SelectItem>
-                <SelectItem value="6">Land</SelectItem>
-              </SelectContent>
-            </Select>
+            <Controller
+              name="propertyTypeId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  onValueChange={(val) => field.onChange(Number(val))}
+                  value={field.value?.toString()}
+                >
+                  <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
+                    <SelectValue placeholder="Select property type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Townhouse</SelectItem>
+                    <SelectItem value="2">Apartment</SelectItem>
+                    <SelectItem value="3">Villa</SelectItem>
+                    <SelectItem value="4">Penthouse</SelectItem>
+                    <SelectItem value="5">Office</SelectItem>
+                    <SelectItem value="6">Land</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
         </FieldWrapper>
 
@@ -181,14 +248,18 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
                 <InputIcon icon={Bed} />
                 <Input
                   type="number"
-                  value={bedrooms || ""}
-                  onChange={handleNumberChange("bedrooms")}
+                  {...register("bedrooms", { valueAsNumber: true })}
                   placeholder="0"
                   className="h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"
                   min="0"
                   max="20"
                 />
               </div>
+              {errors.bedrooms && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bedrooms.message}
+                </p>
+              )}
             </FieldWrapper>
 
             {/* Bathrooms */}
@@ -198,14 +269,18 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
                 <InputIcon icon={Bath} />
                 <Input
                   type="number"
-                  value={bathrooms || ""}
-                  onChange={handleNumberChange("bathrooms")}
+                  {...register("bathrooms", { valueAsNumber: true })}
                   placeholder="0"
                   className="h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"
                   min="0"
                   max="20"
                 />
               </div>
+              {errors.bathrooms && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bathrooms.message}
+                </p>
+              )}
             </FieldWrapper>
 
             {/* Property Size */}
@@ -215,44 +290,29 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
                 <InputIcon icon={Maximize2} />
                 <Input
                   type="number"
-                  value={propertySize || ""}
-                  onChange={handleNumberChange("propertySize")}
+                  {...register("propertySize", { valueAsNumber: true })}
                   placeholder="0"
                   className="h-12 pl-10 border-input bg-background hover:border-primary/50 focus:border-primary transition-colors"
                   min="0"
                   step="50"
                 />
               </div>
+              {errors.propertySize && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.propertySize.message}
+                </p>
+              )}
             </FieldWrapper>
           </div>
         </div>
       </div>
 
-      {/* Progress Indicator */}
-
       <StepController 
-        onNext={() => {
-          const result = stepThreeSchema.safeParse({
-            price,
-            bedrooms,
-            bathrooms,
-            propertySize,
-            furnishing: useAdvertiseFormStore.getState().furnishing,
-          });
-
-          if (!result.success) {
-            const errors = result.error.flatten().fieldErrors;
-            Object.values(errors).forEach((error) => {
-              if (error) toast.error(error[0]);
-            });
-            return;
-          }
-          next();
-        }} 
+        onNext={handleSubmit(onSubmit)}
         onPrev={prev} 
         showPrev={true} 
       />
-    </div>
+    </form>
   );
 }
 

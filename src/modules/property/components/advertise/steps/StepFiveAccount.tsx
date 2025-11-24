@@ -1,6 +1,6 @@
-// src/modules/property/advertise/components/steps/StepFiveAccount.tsx
-"use client";
-
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -13,13 +13,13 @@ import {
   Mail,
   Info,
   Clock,
-  Loader2, // Added for loading state
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSession } from "next-auth/react"; // <-- Import useSession
+import { useSession } from "next-auth/react";
 import { FormLabel, FieldWrapper, InputIcon } from "../FormComponents";
-import { stepFiveSchema } from "../../../validators/advertise-steps.validator";
-import { toast } from "sonner";
+import { stepFiveGuestSchema, stepFiveAuthSchema } from "../../../validators/advertise-steps.validator";
+import { z } from "zod";
 
 interface StepFiveAccountProps {
   propertyTypes: { id: number; name: string; slug: string }[];
@@ -27,6 +27,9 @@ interface StepFiveAccountProps {
     features?: { id: number; name: string; slug: string }[];
   };
 }
+
+// We use the Auth schema for the type as it allows optional fields (compatible with both)
+type StepFiveData = z.infer<typeof stepFiveAuthSchema>;
 
 function StepFiveAccount({}: StepFiveAccountProps) {
   const { next, prev } = useStepStore();
@@ -38,16 +41,44 @@ function StepFiveAccount({}: StepFiveAccountProps) {
     plan,
     update,
   } = useAdvertiseFormStore();
-  const { data: session, status } = useSession(); // <-- Get auth status
+  const { data: session, status } = useSession();
 
-  // Handler for all text/email/password inputs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    update({ [e.target.name]: e.target.value });
-  };
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<StepFiveData>({
+    resolver: (values, context, options) => {
+      const schema = status === "authenticated" ? stepFiveAuthSchema : stepFiveGuestSchema;
+      return zodResolver(schema)(values, context, options);
+    },
+    defaultValues: {
+      username: username || "",
+      password: password || "",
+      repeatPassword: repeatPassword || "",
+      email: email || "",
+      plan: plan || "silver",
+    },
+  });
 
-  // Handler for the plan RadioGroup
-  const handlePlanChange = (value: string) => {
-    update({ plan: value });
+  // Sync form -> store
+  useEffect(() => {
+    const subscription = watch((value) => {
+      update({
+        username: value.username,
+        password: value.password,
+        repeatPassword: value.repeatPassword,
+        email: value.email,
+        plan: value.plan,
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, update]);
+
+  const onSubmit = () => {
+    next();
   };
 
   // --- Show loader while checking auth status ---
@@ -61,7 +92,7 @@ function StepFiveAccount({}: StepFiveAccountProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Card container */}
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
         {/* Header */}
@@ -82,13 +113,16 @@ function StepFiveAccount({}: StepFiveAccountProps) {
               <div className="relative">
                 <InputIcon icon={User} />
                 <Input
-                  name="username"
-                  value={username || ""}
-                  onChange={handleChange}
+                  {...register("username")}
                   placeholder="e.g., luxury_developer"
                   className="h-12 pl-10 border-input bg-background"
                 />
               </div>
+              {errors.username && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.username.message}
+                </p>
+              )}
             </FieldWrapper>
 
             {/* Password Fields */}
@@ -98,28 +132,34 @@ function StepFiveAccount({}: StepFiveAccountProps) {
                 <div className="relative">
                   <InputIcon icon={Lock} />
                   <Input
-                    name="password"
                     type="password"
-                    value={password || ""}
-                    onChange={handleChange}
+                    {...register("password")}
                     placeholder="••••••••"
                     className="h-12 pl-10 border-input bg-background"
                   />
                 </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
               </FieldWrapper>
               <FieldWrapper>
                 <FormLabel required>Repeat Password</FormLabel>
                 <div className="relative">
                   <InputIcon icon={Lock} />
                   <Input
-                    name="repeatPassword"
                     type="password"
-                    value={repeatPassword || ""}
-                    onChange={handleChange}
+                    {...register("repeatPassword")}
                     placeholder="••••••••"
                     className="h-12 pl-10 border-input bg-background"
                   />
                 </div>
+                {errors.repeatPassword && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.repeatPassword.message}
+                  </p>
+                )}
               </FieldWrapper>
             </div>
 
@@ -129,14 +169,17 @@ function StepFiveAccount({}: StepFiveAccountProps) {
               <div className="relative">
                 <InputIcon icon={Mail} />
                 <Input
-                  name="email"
                   type="email"
-                  value={email || ""}
-                  onChange={handleChange}
+                  {...register("email")}
                   placeholder="you@example.com"
                   className="h-12 pl-10 border-input bg-background"
                 />
               </div>
+              {errors.email && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </FieldWrapper>
           </div>
         )}
@@ -156,94 +199,79 @@ function StepFiveAccount({}: StepFiveAccountProps) {
         {/* --- Plan Section (Always shows) --- */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-2">Plan</h3>
-          <RadioGroup
-            value={plan || "silver"}
-            onValueChange={handlePlanChange}
-          >
-            {/* Silver Package Card */}
-            <Label
-              htmlFor="plan-silver"
-              className={cn(
-                "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                (plan === "silver" || !plan) &&
-                  "border-primary bg-muted"
-              )}
-            >
-              <div className="flex items-center gap-4">
-                <RadioGroupItem value="silver" id="plan-silver" />
-                <div>
-                  <p className="font-semibold">Silver Package</p>
-                  <p className="text-sm text-muted-foreground">
-                    $10 monthly ad display.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold">$10</span>
-                <Clock className="w-4 h-4 text-muted-foreground" />
-              </div>
-            </Label>
+          <Controller
+            name="plan"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
+                {/* Silver Package Card */}
+                <Label
+                  htmlFor="plan-silver"
+                  className={cn(
+                    "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
+                    (field.value === "silver" || !field.value) &&
+                      "border-primary bg-muted"
+                  )}
+                >
+                  <div className="flex items-center gap-4">
+                    <RadioGroupItem value="silver" id="plan-silver" />
+                    <div>
+                      <p className="font-semibold">Silver Package</p>
+                      <p className="text-sm text-muted-foreground">
+                        $10 monthly ad display.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold">$10</span>
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </Label>
 
-            {/* Gold Package Card */}
-            <Label
-              htmlFor="plan-gold"
-              className={cn(
-                "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                plan === "gold" && "border-primary bg-muted"
-              )}
-            >
-              <div className="flex items-center gap-4">
-                <RadioGroupItem value="gold" id="plan-gold" />
-                <div>
-                  <p className="font-semibold">Gold Package</p>
-                  <p className="text-sm text-muted-foreground">
-                    $25 monthly featured display.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold">$25</span>
-                <Clock className="w-4 h-4 text-muted-foreground" />
-              </div>
-            </Label>
-          </RadioGroup>
+                {/* Gold Package Card */}
+                <Label
+                  htmlFor="plan-gold"
+                  className={cn(
+                    "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
+                    field.value === "gold" && "border-primary bg-muted"
+                  )}
+                >
+                  <div className="flex items-center gap-4">
+                    <RadioGroupItem value="gold" id="plan-gold" />
+                    <div>
+                      <p className="font-semibold">Gold Package</p>
+                      <p className="text-sm text-muted-foreground">
+                        $25 monthly featured display.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold">$25</span>
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </Label>
+              </RadioGroup>
+            )}
+          />
+          {errors.plan && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.plan.message}
+            </p>
+          )}
         </div>
       </div>
 
       {/* Navigation */}
       <StepController 
-        onNext={() => {
-          // If authenticated, we only need to validate the plan (or skip validation if plan is pre-selected)
-          // But the schema handles optional fields. Let's check.
-          // If authenticated, username/email/password are not in the form, so they will be undefined.
-          // The schema makes them optional, so it should pass if we don't provide them.
-          // However, we need to ensure we don't validate them if they are not visible.
-          
-          const dataToValidate = {
-            plan,
-            ...(status === "unauthenticated" ? {
-              username,
-              email,
-              password,
-              repeatPassword,
-            } : {})
-          };
-
-          const result = stepFiveSchema.safeParse(dataToValidate);
-
-          if (!result.success) {
-            const errors = result.error.flatten().fieldErrors;
-            Object.values(errors).forEach((error) => {
-              if (error) toast.error(error[0]);
-            });
-            return;
-          }
-          next();
-        }} 
+        onNext={handleSubmit(onSubmit)}
         onPrev={prev} 
         showPrev={true} 
       />
-    </div>
+    </form>
   );
 }
 

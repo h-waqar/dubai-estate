@@ -1,6 +1,6 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 
@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 import StepController from "./StepController";
 import { ClipboardPenLine } from "lucide-react";
 import { stepTwoSchema } from "../../../validators/advertise-steps.validator";
-import { toast } from "sonner";
+import { z } from "zod";
+
 interface StepTwoDescriptionProps {
   propertyTypes: { id: number; name: string; slug: string }[];
   serverData: {
@@ -20,29 +21,7 @@ interface StepTwoDescriptionProps {
   };
 }
 
-const AVAILABLE_FEATURES = [
-  "Pet Friendly",
-  "Good Mobile Coverage",
-  "Nearby Public Transport",
-  "24/7 Building Security Staff",
-  "Meeting Rooms",
-  "Large Public Spaces",
-  "Bike Storage",
-  "Nearby Shops & Restaurants",
-  "Car Park",
-  "Swimming Pool",
-  "Fitness Center/Gym",
-  "Modern Fittings",
-  "Wireless Internet",
-  "Walk-in Closets",
-  "Stunning Views",
-  "Dishwasher",
-  "Hardwood Floors",
-  "Patio/Balcony",
-  "Furniture",
-  "Washer/Dryer Hookups",
-  "Air Conditioning",
-];
+type StepTwoData = z.infer<typeof stepTwoSchema>;
 
 export default function StepDescription({ serverData }: StepTwoDescriptionProps) {
   const { next, prev } = useStepStore();
@@ -50,7 +29,32 @@ export default function StepDescription({ serverData }: StepTwoDescriptionProps)
   const [tempKeyword, setTempKeyword] = useState("");
 
   const featureList = serverData.features || [];
-  console.log("featureList -->", featureList);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<StepTwoData>({
+    resolver: zodResolver(stepTwoSchema),
+    defaultValues: {
+      description: description || "",
+      features: features || [],
+    },
+  });
+
+  // Sync form -> store
+  useEffect(() => {
+    const subscription = watch((value) => {
+      update({
+        description: value.description,
+        features: value.features as string[],
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, update]);
 
   const handleAddKeyword = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && tempKeyword.trim()) {
@@ -67,20 +71,15 @@ export default function StepDescription({ serverData }: StepTwoDescriptionProps)
     update({ keywords: keywords.filter((k) => k !== kw) });
   };
 
-  const toggleFeature = (feature: string) => {
-    if (features.includes(feature)) {
-      update({ features: features.filter((f) => f !== feature) });
-    } else {
-      update({ features: [...features, feature] });
-    }
+  const onSubmit = () => {
+    next();
   };
 
   return (
-    <>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            {/* <Building2 /> */}
             <ClipboardPenLine className="w-5 h-5 text-primary" />
           </div>
           <div>
@@ -99,15 +98,19 @@ export default function StepDescription({ serverData }: StepTwoDescriptionProps)
             Property Description
           </label>
           <Textarea
-            value={description}
-            onChange={(e) => update({ description: e.target.value })}
+            {...register("description")}
             rows={6}
             placeholder="Describe your property in detail..."
             className="resize-none"
           />
+          {errors.description && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.description.message}
+            </p>
+          )}
         </div>
 
-        {/* Keywords */}
+        {/* Keywords (Managed by Store directly as it's not in schema validation) */}
         <div>
           <label className="block text-sm font-medium mb-2">Keywords</label>
           <div className="flex flex-wrap gap-2 border rounded-md p-2 min-h-12">
@@ -121,7 +124,6 @@ export default function StepDescription({ serverData }: StepTwoDescriptionProps)
                 <button
                   type="button"
                   onClick={() => handleRemoveKeyword(kw)}
-                  // className="text-muted-foreground hover:text-foreground"
                   className="text-red-400 hover:text-red-600 scale-200 cursor-pointer -mt-1"
                 >
                   ×
@@ -142,48 +144,56 @@ export default function StepDescription({ serverData }: StepTwoDescriptionProps)
         <div>
           <h3 className="font-medium mb-2">Select Features</h3>
           <div className="flex flex-wrap gap-3 select-none">
-            {/* {AVAILABLE_FEATURES.map((feature) => ( */}
-            {featureList.map((feature) => (
-              <label
-                key={feature.id}
-                className={cn(
-                  "flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition",
-                  features.includes(feature.name)
-                    ? "bg-primary/10 border-primary text-primary"
-                    : "hover:bg-muted border-border"
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={features.includes(feature.name)}
-                  onChange={() => toggleFeature(feature.name)}
-                  className="accent-primary"
-                />
-                <span className="text-sm">{feature.name}</span>
-              </label>
-            ))}
+            <Controller
+              name="features"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {featureList.map((feature) => (
+                    <label
+                      key={feature.id}
+                      className={cn(
+                        "flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition",
+                        field.value?.includes(feature.name)
+                          ? "bg-primary/10 border-primary text-primary"
+                          : "hover:bg-muted border-border"
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={field.value?.includes(feature.name)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          const currentFeatures = field.value || [];
+                          if (checked) {
+                            field.onChange([...currentFeatures, feature.name]);
+                          } else {
+                            field.onChange(
+                              currentFeatures.filter((f) => f !== feature.name)
+                            );
+                          }
+                        }}
+                        className="accent-primary"
+                      />
+                      <span className="text-sm">{feature.name}</span>
+                    </label>
+                  ))}
+                </>
+              )}
+            />
           </div>
+          {errors.features && (
+            <p className="text-sm text-destructive mt-1">
+              {errors.features.message}
+            </p>
+          )}
         </div>
       </div>
       <StepController 
-        onNext={() => {
-          const result = stepTwoSchema.safeParse({
-            description,
-            features,
-          });
-
-          if (!result.success) {
-            const errors = result.error.flatten().fieldErrors;
-            Object.values(errors).forEach((error) => {
-              if (error) toast.error(error[0]);
-            });
-            return;
-          }
-          next();
-        }} 
+        onNext={handleSubmit(onSubmit)}
         onPrev={prev} 
         showPrev={true} 
       />
-    </>
+    </form>
   );
 }
