@@ -42,6 +42,8 @@ export const createPropertyServerValidator = z.object({
   bedrooms: z.coerce.number().int().min(0),
   bathrooms: z.coerce.number().int().min(0),
   location: z.string().min(5, "Location is required."),
+  latitude: z.coerce.number().optional(),
+  longitude: z.coerce.number().optional(),
   furnishing: z.enum(FurnishingStatus),
   description: z.string().optional(),
   coverImage: z.coerce.number().optional(),

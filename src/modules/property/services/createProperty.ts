@@ -13,13 +13,25 @@ export async function createProperty(
   const { coverImage, gallery, ...propertyData } = input;
   const slug = await generateUniqueSlug(propertyData.title);
 
+  // Generate RefNo: 3 random capital letters + 4 random numbers
+  const randomLetters = Array(3)
+    .fill(0)
+    .map(() => String.fromCharCode(65 + Math.floor(Math.random() * 26)))
+    .join("");
+  const randomNumbers = Math.floor(1000 + Math.random() * 9000);
+  const refNo = `${randomLetters}${randomNumbers}`;
+
   // Step 1: Create the property
   const property = await prisma.property.create({
     data: {
       ...propertyData,
       slug,
+      refNo,
       createdById,
-      status: PropertyStatus.DRAFT,
+      status: PropertyStatus.PENDING_REVIEW,
+      availability: "AVAILABLE",
+      approvedById: null,
+      declinedReason: null,
     },
   });
 

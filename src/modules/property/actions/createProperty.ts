@@ -26,6 +26,8 @@ export async function createPropertyAction(formData: FormData) {
     bedrooms: formData.get("bedrooms"),
     bathrooms: formData.get("bathrooms"),
     location: formData.get("location"),
+    latitude: formData.get("latitude"),
+    longitude: formData.get("longitude"),
     furnishing: formData.get("furnishing"),
     description: formData.get("description") || "",
     coverImage: formData.get("coverImage"),

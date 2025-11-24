@@ -34,6 +34,8 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
     propertyStatus,
     propertyTypeId,
     location,
+    latitude,
+    longitude,
     update,
   } = useAdvertiseFormStore();
 
@@ -51,6 +53,8 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
       propertyStatus: propertyStatus || "",
       propertyTypeId: propertyTypeId || undefined,
       location: location || "",
+      latitude: latitude || undefined,
+      longitude: longitude || undefined,
     },
   });
 
@@ -62,6 +66,8 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
         propertyStatus: value.propertyStatus,
         propertyTypeId: value.propertyTypeId,
         location: value.location,
+        latitude: value.latitude,
+        longitude: value.longitude,
       });
     });
     return () => subscription.unsubscribe();
@@ -181,6 +187,40 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
               {errors.location.message}
             </p>
           )}
+
+        {/* Coordinates */}
+        <div className="grid grid-cols-2 gap-4">
+          <FieldWrapper>
+            <FormLabel>Latitude</FormLabel>
+            <Input
+              {...register("latitude", { valueAsNumber: true })}
+              type="number"
+              step="any"
+              placeholder="e.g. 25.2048"
+              className="h-12 border-input bg-background"
+            />
+            {errors.latitude && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.latitude.message}
+              </p>
+            )}
+          </FieldWrapper>
+          <FieldWrapper>
+            <FormLabel>Longitude</FormLabel>
+            <Input
+              {...register("longitude", { valueAsNumber: true })}
+              type="number"
+              step="any"
+              placeholder="e.g. 55.2708"
+              className="h-12 border-input bg-background"
+            />
+            {errors.longitude && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.longitude.message}
+              </p>
+            )}
+          </FieldWrapper>
+        </div>
       </div>
       
       <StepController 

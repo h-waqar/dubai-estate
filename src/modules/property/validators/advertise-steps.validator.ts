@@ -7,6 +7,8 @@ export const stepOneSchema = z.object({
   propertyStatus: z.string().min(1, "Property status is required."),
   propertyTypeId: z.number().int().positive("Property type is required."),
   location: z.string().min(5, "Location is required."),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 export const stepTwoSchema = z.object({
