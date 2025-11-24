@@ -56,13 +56,40 @@ export const stepFiveSchema = stepFiveGuestSchema;
 
 export const stepSixSchema = z.object({
   paymentMethod: z.string().min(1, "Payment method is required."),
-  cardholderName: z.string().min(3, "Cardholder name is required."),
-  cardNumber: z.string().min(19, "Card number must be 16 digits."), // 16 digits + 3 spaces
-  expiryDate: z.string().min(7, "Invalid expiry date."), // MM / YY
-  cvv: z.string().min(3, "CVV must be 3 or 4 digits."),
-  billingAddress1: z.string().min(5, "Address is required."),
+  cardholderName: z.string().optional(),
+  cardNumber: z.string().optional(),
+  expiryDate: z.string().optional(),
+  cvv: z.string().optional(),
+  billingAddress1: z.string().optional(),
   billingAddress2: z.string().optional(),
-  billingCity: z.string().min(2, "City is required."),
-  billingState: z.string().min(2, "State is required."),
-  billingPostalCode: z.string().min(4, "Postal code is required."),
+  billingCity: z.string().optional(),
+  billingState: z.string().optional(),
+  billingPostalCode: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.paymentMethod === "card") {
+    if (!data.cardholderName || data.cardholderName.length < 3) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Cardholder name is required.", path: ["cardholderName"] });
+    }
+    if (!data.cardNumber || data.cardNumber.length < 19) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Card number must be 16 digits.", path: ["cardNumber"] });
+    }
+    if (!data.expiryDate || data.expiryDate.length < 7) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid expiry date.", path: ["expiryDate"] });
+    }
+    if (!data.cvv || data.cvv.length < 3) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "CVV must be 3 or 4 digits.", path: ["cvv"] });
+    }
+    if (!data.billingAddress1 || data.billingAddress1.length < 5) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Address is required.", path: ["billingAddress1"] });
+    }
+    if (!data.billingCity || data.billingCity.length < 2) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "City is required.", path: ["billingCity"] });
+    }
+    if (!data.billingState || data.billingState.length < 2) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "State is required.", path: ["billingState"] });
+    }
+    if (!data.billingPostalCode || data.billingPostalCode.length < 4) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Postal code is required.", path: ["billingPostalCode"] });
+    }
+  }
 });

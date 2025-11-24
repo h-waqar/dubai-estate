@@ -220,6 +220,7 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
                 onValueChange={field.onChange}
                 defaultValue={field.value}
                 value={field.value}
+                className="space-y-3"
               >
                 {/* Credit/Debit Card */}
                 <Label
@@ -247,6 +248,24 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
                     </div>
                   </div>
                 </Label>
+
+                {/* Pay Later */}
+                <Label
+                  htmlFor="payment-later"
+                  className={cn(
+                    "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
+                    field.value === "pay-later" && "border-primary bg-muted"
+                  )}
+                >
+                  <RadioGroupItem value="pay-later" id="payment-later" />
+                  <Calendar className="w-5 h-5 text-muted-foreground" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Pay Later</p>
+                    <p className="text-sm text-muted-foreground">
+                      Submit your application now and pay upon approval
+                    </p>
+                  </div>
+                </Label>
               </RadioGroup>
             )}
           />
@@ -257,8 +276,9 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
           )}
         </div>
 
-        {/* Card Details Form */}
-        <div className="space-y-6 pt-2">
+        {/* Card Details Form - Only show if Card is selected */}
+        {watch("paymentMethod") === "card" && (
+          <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-top-4 duration-300">
             <h3 className="text-lg font-medium border-b pb-2">Card Details</h3>
 
             {/* Cardholder Name */}
@@ -443,6 +463,7 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
               <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500" />
             </div>
           </div>
+        )}
 
       </div>
 
@@ -457,20 +478,12 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
         </button>
         <div className="flex gap-3">
           <button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
-            className="px-6 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors disabled:opacity-50"
-          >
-            Pay Later
-          </button>
-          <button
             type="submit"
             disabled={isSubmitting}
             className="px-6 py-2.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-            Submit & Pay
+            {watch("paymentMethod") === "pay-later" ? "Submit Application" : "Submit & Pay"}
           </button>
         </div>
       </div>
