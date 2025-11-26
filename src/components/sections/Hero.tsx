@@ -89,6 +89,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -111,12 +112,14 @@ const Stat = ({ number, label }: StatProps) => {
 };
 
 export default function Hero() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement search functionality
-    console.log("Searching for:", searchQuery);
+    if (searchQuery.trim()) {
+      router.push(`/properties?search=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
   return (

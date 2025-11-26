@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -10,15 +11,21 @@ import {
 
 interface PropertyHeaderProps {
   propertyCount: number;
-  sortBy: string;
-  setSortBy: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const PropertyHeader: React.FC<PropertyHeaderProps> = ({
   propertyCount,
-  sortBy,
-  setSortBy,
 }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const sortBy = searchParams.get("sort") || "relevance";
+
+  const handleSortChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sort", value);
+    router.push(`/properties?${params.toString()}`);
+  };
+
   return (
     <section className="py-6">
       <div className="container mx-auto px-4">
@@ -31,7 +38,7 @@ const PropertyHeader: React.FC<PropertyHeaderProps> = ({
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">Sort by:</span>
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select value={sortBy} onValueChange={handleSortChange}>
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>

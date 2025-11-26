@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,34 +9,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
-interface PropertyFiltersProps {
-  searchQuery: string;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  propertyType: string;
-  setPropertyType: React.Dispatch<React.SetStateAction<string>>;
-  bedrooms: string;
-  setBedrooms: React.Dispatch<React.SetStateAction<string>>;
-  priceRange: string;
-  setPriceRange: React.Dispatch<React.SetStateAction<string>>;
-}
+const PropertyFilters = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-const PropertyFilters: React.FC<PropertyFiltersProps> = ({
-  searchQuery,
-  setSearchQuery,
-  propertyType,
-  setPropertyType,
-  bedrooms,
-  setBedrooms,
-  priceRange,
-  setPriceRange,
-}) => {
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [propertyType, setPropertyType] = useState(searchParams.get("type") || "");
+  const [bedrooms, setBedrooms] = useState(searchParams.get("bedrooms") || "");
+  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "");
+  const [status, setStatus] = useState(searchParams.get("status") || "buy");
+
+  // Sync local state with URL params if they change externally (e.g. back button)
+  useEffect(() => {
+    setSearchQuery(searchParams.get("search") || "");
+    setPropertyType(searchParams.get("type") || "");
+    setBedrooms(searchParams.get("bedrooms") || "");
+    setPriceRange(searchParams.get("price") || "");
+    setStatus(searchParams.get("status") || "buy");
+  }, [searchParams]);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("search", searchQuery);
+    if (propertyType) params.set("type", propertyType);
+    if (bedrooms) params.set("bedrooms", bedrooms);
+    if (priceRange) params.set("price", priceRange);
+    if (status) params.set("status", status);
+
+    router.push(`/properties?${params.toString()}`);
+  };
+
   return (
     <section className="section-bg-light py-8 border-b">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap gap-4 items-center">
-          <Select defaultValue="buy">
+          <Select value={status} onValueChange={setStatus}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -51,6 +62,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
 
@@ -90,7 +102,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
             </SelectContent>
           </Select>
 
-          <Button className="px-8">Search</Button>
+          <Button className="px-8" onClick={handleSearch}>Search</Button>
         </div>
       </div>
     </section>
