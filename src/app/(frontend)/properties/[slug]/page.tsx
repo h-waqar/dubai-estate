@@ -70,16 +70,13 @@ export default async function PropertyPage({ params }: PageProps) {
     where: { slug },
     include: {
       propertyType: true,
+      images: true, // Include legacy images
       features: {
         include: {
           feature: true,
         },
       },
-      mediaUsages: {
-        include: {
-          media: true,
-        },
-      },
+      // mediaUsages relation might be empty if propertyId is not set, so we fetch manually below
       createdBy: {
         include: {
           profile: true,
@@ -92,13 +89,54 @@ export default async function PropertyPage({ params }: PageProps) {
     notFound();
   }
 
-  // Filter images from mediaUsages
-  const images = property.mediaUsages
-    .map((usage) => usage.media)
-    .filter((media) => media.type === "IMAGE");
+  // Manually fetch media usages to ensure we get them even if the relation is broken
+  const mediaUsages = await prisma.mediaUsage.findMany({
+    where: {
+      entityType: "PROPERTY",
+      entityId: property.id,
+    },
+    include: {
+      media: true,
+    },
+  });
 
-  const mainImage = images.length > 0 ? images[0] : null;
-  const otherImages = images.length > 1 ? images.slice(1, 5) : [];
+  // Helper to process image URLs
+  const getImageUrl = (url: string) => {
+    if (!url) return "/assets/placeholder.jpg";
+    if (url.startsWith("http") || url.startsWith("/")) return url;
+    return `/uploads/${encodeURIComponent(url)}`;
+  };
+
+  // Combine images from both sources
+  // 1. Legacy PropertyImage table
+  const legacyImages = property.images.map((img) => ({
+    id: img.id,
+    url: getImageUrl(img.url),
+    alt: img.alt || property.title,
+  }));
+
+  // 2. MediaUsage table
+  const mediaImages = mediaUsages
+    .map((usage) => usage.media)
+    .filter((media) => media.type === "IMAGE")
+    .map((img) => ({
+      id: img.id,
+      url: getImageUrl(img.url),
+      alt: img.alt || property.title,
+    }));
+
+  // Merge and deduplicate (prefer MediaUsage if available, or just concat)
+  // If we have mediaImages, they are likely newer/better.
+  // But let's show all unique images.
+  const allImages = [...mediaImages, ...legacyImages];
+
+  // Deduplicate by URL just in case
+  const uniqueImages = Array.from(
+    new Map(allImages.map((img) => [img.url, img])).values()
+  );
+
+  const mainImage = uniqueImages.length > 0 ? uniqueImages[0] : null;
+  const otherImages = uniqueImages.length > 1 ? uniqueImages.slice(1, 5) : [];
 
   return (
     <div className="min-h-screen bg-background pb-12">
