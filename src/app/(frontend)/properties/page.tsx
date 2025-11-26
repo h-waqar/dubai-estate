@@ -22,13 +22,31 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
 
   const properties = await listProperties(filters);
 
-  const mappedProperties = properties.map((p) => ({
-    id: p.id,
-    image: p.images[0]?.url || "/assets/placeholder.jpg",
-    alt: p.title,
-    title: p.title,
-    location: p.location,
-    price: `${p.currency} ${p.price.toString()}`,
+  const mappedProperties = properties.map((p) => {
+    // Determine the primary image URL
+    let imageUrl = p.images[0]?.url;
+    
+    // If no direct image, check media usages (prefer COVER)
+    if (!imageUrl && p.mediaUsages?.length > 0) {
+      const cover = p.mediaUsages.find((mu) => mu.role === "COVER");
+      imageUrl = cover ? cover.media.url : p.mediaUsages[0].media.url;
+    }
+
+    // Process the URL to ensure it has the correct path
+    const finalImage = imageUrl
+      ? (imageUrl.startsWith("http") || imageUrl.startsWith("/")
+          ? imageUrl
+          : `/uploads/${encodeURIComponent(imageUrl)}`)
+      : "/assets/nopropertyfound.jpg";
+      // : "/assets/placeholder.jpg";
+
+    return {
+      id: p.id,
+      image: finalImage,
+      alt: p.title,
+      title: p.title,
+      location: p.location,
+      price: `${p.currency} ${p.price.toString()}`,
     bedrooms: p.bedrooms || 0,
     bathrooms: p.bathrooms || 0,
     area: `${p.builtUpArea || 0} ${p.areaUnit || "sqft"}`,
@@ -36,7 +54,8 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
     featured: false, // TODO: Add featured flag to DB
     ref: p.refNo || "",
     status: p.availability === "OFFPLAN" ? "Offplan" : "Ready",
-  }));
+    };
+  });
 
   return (
     <div className="min-h-screen">

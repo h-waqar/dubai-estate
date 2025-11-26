@@ -117,12 +117,31 @@ export async function listProperties(filters: PropertyFilters = {}) {
      where.location = { contains: location, mode: "insensitive" };
   }
 
-  return prisma.property.findMany({
+  const properties = await prisma.property.findMany({
     where,
     orderBy: { createdAt: "desc" },
     include: {
         propertyType: true,
         images: true,
+        // Remove the relation include since it's broken
     }
   });
+
+  // Manually fetch media usages for these properties
+  const propertyIds = properties.map(p => p.id);
+  const mediaUsages = await prisma.mediaUsage.findMany({
+    where: {
+      entityType: "PROPERTY",
+      entityId: { in: propertyIds }
+    },
+    include: {
+      media: true
+    }
+  });
+
+  // Attach media usages to properties
+  return properties.map(p => ({
+    ...p,
+    mediaUsages: mediaUsages.filter(mu => mu.entityId === p.id)
+  }));
 }
