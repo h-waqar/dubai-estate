@@ -144,7 +144,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   return (
     <Card className="property-card overflow-hidden group">
       <div className="relative">
-        <Link href={`/properties/${property.id}`}>
+        <Link href={`/properties/${property.slug}`}>
           <div className="overflow-hidden">
             <Image
               src={property.image}
@@ -178,7 +178,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="mb-4">
           <h3 className="text-lg md:text-xl font-bold mb-2 leading-tight">
             <Link
-              href={`/properties/${property.id}`}
+              href={`/properties/${property.slug}`}
               className="hover:text-primary transition-colors"
             >
               {property.title}

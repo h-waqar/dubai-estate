@@ -42,6 +42,7 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
 
     return {
       id: p.id,
+      slug: p.slug,
       image: finalImage,
       alt: p.title,
       title: p.title,

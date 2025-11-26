@@ -20,6 +20,7 @@ export type PropertyStatus = "Offplan" | "Ready";
 // The single source of truth for our Property type
 export interface Property {
   id: number;
+  slug: string; // Added for SEO-friendly URLs
   image: string;
   alt: string; // Kept for accessibility
   title: string;
