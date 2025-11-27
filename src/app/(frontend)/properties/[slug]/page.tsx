@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getMediaUrl } from "@/lib/utils";
 import {
   MapPin,
   Bed,
@@ -100,18 +101,12 @@ export default async function PropertyPage({ params }: PageProps) {
     },
   });
 
-  // Helper to process image URLs
-  const getImageUrl = (url: string) => {
-    if (!url) return "/assets/placeholder.jpg";
-    if (url.startsWith("http") || url.startsWith("/")) return url;
-    return `/uploads/${encodeURIComponent(url)}`;
-  };
 
   // Combine images from both sources
   // 1. Legacy PropertyImage table
   const legacyImages = property.images.map((img) => ({
     id: img.id,
-    url: getImageUrl(img.url),
+    url: getMediaUrl(img.url),
     alt: img.alt || property.title,
   }));
 
@@ -121,7 +116,7 @@ export default async function PropertyPage({ params }: PageProps) {
     .filter((media) => media.type === "IMAGE")
     .map((img) => ({
       id: img.id,
-      url: getImageUrl(img.url),
+      url: getMediaUrl(img.url),
       alt: img.alt || property.title,
     }));
 
