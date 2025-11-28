@@ -9,6 +9,7 @@ export type PropertyFilters = {
   bedrooms?: string;
   priceRange?: string;
   location?: string;
+  sort?: string;
 };
 
 export async function listProperties(filters: PropertyFilters = {}) {
@@ -19,6 +20,7 @@ export async function listProperties(filters: PropertyFilters = {}) {
     bedrooms,
     priceRange,
     location,
+    sort,
   } = filters;
 
   const where: any = {};
@@ -95,9 +97,30 @@ export async function listProperties(filters: PropertyFilters = {}) {
      where.location = { contains: location, mode: "insensitive" };
   }
 
+  // Sorting
+  let orderBy: any = { createdAt: "desc" }; // Default: Newest (Relevance fallback)
+
+  if (sort) {
+    switch (sort) {
+      case "price-low":
+        orderBy = { price: "asc" };
+        break;
+      case "price-high":
+        orderBy = { price: "desc" };
+        break;
+      case "newest":
+        orderBy = { createdAt: "desc" };
+        break;
+      case "relevance":
+      default:
+        orderBy = { createdAt: "desc" }; // Fallback to newest for now
+        break;
+    }
+  }
+
   const properties = await prisma.property.findMany({
     where,
-    orderBy: { createdAt: "desc" },
+    orderBy,
     include: {
         propertyType: true,
         images: true,

@@ -20,6 +20,7 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
     propertyType: typeof resolvedParams.type === "string" ? resolvedParams.type : undefined,
     bedrooms: typeof resolvedParams.bedrooms === "string" ? resolvedParams.bedrooms : undefined,
     priceRange: typeof resolvedParams.price === "string" ? resolvedParams.price : undefined,
+    sort: typeof resolvedParams.sort === "string" ? resolvedParams.sort : undefined,
   };
 
   const properties = await listProperties(filters);

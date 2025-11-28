@@ -16,25 +16,27 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { title: "Home", href: "/" },
+  // { title: "Home", href: "/" },
   {
     title: "Properties",
     items: [
       { name: "For Sale", href: "/properties" },
       { name: "For Rent", href: "/properties" },
       { name: "Off-Plan", href: "/properties-plan" },
-      { name: "Luxury", href: "/properties" },
+      // { name: "Luxury", href: "/properties" },
     ],
   },
-  {
-    title: "Areas",
-    items: [
-      { name: "Dubai Marina", href: "/areas/dubai-marina" },
-      { name: "Downtown Dubai", href: "/areas/downtown" },
-      { name: "Palm Jumeirah", href: "/areas/palm-jumeirah" },
-      { name: "Business Bay", href: "/areas/business-bay" },
-    ],
-  },
+  
+  // {
+  //   title: "Areas",
+  //   items: [
+  //     { name: "Dubai Marina", href: "/areas/dubai-marina" },
+  //     { name: "Downtown Dubai", href: "/areas/downtown" },
+  //     { name: "Palm Jumeirah", href: "/areas/palm-jumeirah" },
+  //     { name: "Business Bay", href: "/areas/business-bay" },
+  //   ],
+  // },
+
   { title: "Blog", href: "/blogs" },
   { title: "Guides", href: "/guides" },
   { title: "About Us", href: "/about" },
@@ -84,7 +86,7 @@ export default function Header() {
                 ) : (
                   <>
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 flex items-center gap-1 transition-colors"
+                      className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 flex items-center gap-1 transition-colors cursor-pointer"
                       onClick={() => toggleDropdown(item.title)}
                     >
                       {item.title}

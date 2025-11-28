@@ -55,11 +55,11 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
   }, [searchParams]);
 
   return (
-    <section className="section-bg-light py-8 border-b">
+    <section className="section-bg-light py-4 border-b">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap gap-4 items-center">
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 cursor-pointer">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -80,7 +80,7 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
           </div>
 
           <Select value={propertyType} onValueChange={setPropertyType}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 cursor-pointer">
               <SelectValue placeholder="Property Type" />
             </SelectTrigger>
             <SelectContent>
@@ -94,7 +94,7 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
           </Select>
 
           <Select value={bedrooms} onValueChange={setBedrooms}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 cursor-pointer">
               <SelectValue placeholder="Beds" />
             </SelectTrigger>
             <SelectContent>
@@ -107,7 +107,7 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
           </Select>
 
           <Select value={priceRange} onValueChange={setPriceRange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-32 cursor-pointer">
               <SelectValue placeholder="Price" />
             </SelectTrigger>
             <SelectContent>

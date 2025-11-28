@@ -39,7 +39,7 @@ const PropertyHeader: React.FC<PropertyHeaderProps> = ({
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">Sort by:</span>
             <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 cursor-pointer">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
