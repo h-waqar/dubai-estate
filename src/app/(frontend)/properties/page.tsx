@@ -6,21 +6,26 @@ import PropertyFilters from "@/components/properties/PropertyFilters";
 import PropertyBreadcrumb from "@/components/properties/PropertyBreadcrumb";
 import PropertyHeader from "@/components/properties/PropertyHeader";
 import { listProperties } from "@/modules/property/services/listProperties";
+import { prisma } from "@/lib/prisma";
 
 interface PropertiesPageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 const Properties = async ({ searchParams }: PropertiesPageProps) => {
+  const resolvedParams = await searchParams;
   const filters = {
-    searchQuery: typeof searchParams.search === "string" ? searchParams.search : undefined,
-    propertyStatus: typeof searchParams.status === "string" ? searchParams.status : undefined,
-    propertyType: typeof searchParams.type === "string" ? searchParams.type : undefined,
-    bedrooms: typeof searchParams.bedrooms === "string" ? searchParams.bedrooms : undefined,
-    priceRange: typeof searchParams.price === "string" ? searchParams.price : undefined,
+    searchQuery: typeof resolvedParams.search === "string" ? resolvedParams.search : undefined,
+    propertyStatus: typeof resolvedParams.status === "string" ? resolvedParams.status : undefined,
+    propertyType: typeof resolvedParams.type === "string" ? resolvedParams.type : undefined,
+    bedrooms: typeof resolvedParams.bedrooms === "string" ? resolvedParams.bedrooms : undefined,
+    priceRange: typeof resolvedParams.price === "string" ? resolvedParams.price : undefined,
   };
 
   const properties = await listProperties(filters);
+  const propertyTypes = await prisma.propertyType.findMany({
+    orderBy: { name: "asc" },
+  });
 
   const mappedProperties = properties.map((p) => {
     // Determine the primary image URL
@@ -62,7 +67,7 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
     <div className="min-h-screen">
       <Header />
 
-      <PropertyFilters />
+      <PropertyFilters propertyTypes={propertyTypes} />
 
       <PropertyBreadcrumb />
 

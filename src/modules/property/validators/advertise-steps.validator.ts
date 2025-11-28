@@ -4,7 +4,7 @@ import type { Media } from "@/modules/media/types/media.types";
 
 export const stepOneSchema = z.object({
   title: z.string().min(10, "Title must be at least 10 characters long."),
-  propertyStatus: z.string().min(1, "Property status is required."),
+  listingType: z.enum(["SALE", "RENT", "OFF_PLAN"]),
   propertyTypeId: z.number().int().positive("Property type is required."),
   location: z.string().min(5, "Location is required."),
   latitude: z.number().optional(),

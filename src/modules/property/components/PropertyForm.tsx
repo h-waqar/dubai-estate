@@ -6,7 +6,10 @@ import { toast } from "sonner";
 import { FurnishingStatus } from "@/generated/prisma";
 
 import { createPropertyValidator } from "../validators/createProperty.validator";
-import type { CreatePropertyInput } from "../types/property.types";
+import type {
+  CreatePropertyFormValues,
+  CreatePropertyInput,
+} from "../types/property.types";
 import { createPropertyAction } from "../actions/createProperty";
 
 import { Button } from "@/components/ui/button";
@@ -42,7 +45,7 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
   const [coverImage, setCoverImage] = useState<Media | null>(null);
   const [galleryImages, setGalleryImages] = useState<Media[]>([]);
 
-  const form = useForm<CreatePropertyInput>({
+  const form = useForm<CreatePropertyFormValues>({
     resolver: zodResolver(createPropertyValidator),
     defaultValues: {
       title: "",
@@ -58,7 +61,7 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
     },
   });
 
-  async function onSubmit(values: CreatePropertyInput) {
+  async function onSubmit(values: CreatePropertyFormValues) {
     console.log("onSubmit called");
 
     if (!coverImage) {

@@ -4,7 +4,8 @@ import { Media } from "@/modules/media/types/media.types";
 
 interface AdvertiseFormState {
   // Step 1: Basic
-  propertyStatus: string;
+  // Step 1: Basic
+  listingType: "SALE" | "RENT" | "OFF_PLAN";
   propertyTypeId: number | undefined;
   title: string;
   location: string;
@@ -56,7 +57,7 @@ export const useAdvertiseFormStore = create<AdvertiseFormState>()(
   persist(
     (set) => ({
       // Defaults
-      propertyStatus: "sale",
+      listingType: "SALE",
       propertyTypeId: undefined,
       title: "",
       location: "",
@@ -84,7 +85,7 @@ export const useAdvertiseFormStore = create<AdvertiseFormState>()(
       update: (data) => set((state) => ({ ...state, ...data })),
       reset: () =>
         set({
-          propertyStatus: "sale",
+          listingType: "SALE",
           propertyTypeId: undefined,
           title: "",
           location: "",

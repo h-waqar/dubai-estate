@@ -44,7 +44,6 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
     update,
     // Get all data for submission
     title,
-    propertyStatus,
     propertyTypeId,
     description,
     keywords,

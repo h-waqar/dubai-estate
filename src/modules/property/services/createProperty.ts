@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { CreatePropertyInput } from "../types/property.types";
 import { generateUniqueSlug } from "@/utils/slug";
-import { PropertyStatus } from "@/generated/prisma";
+import { PropertyStatus, ListingType } from "@/generated/prisma";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createProperty(
@@ -29,7 +29,8 @@ export async function createProperty(
       refNo,
       createdById,
       status: PropertyStatus.PENDING_REVIEW,
-      availability: "AVAILABLE",
+      availability: propertyData.listingType === "OFF_PLAN" ? "OFFPLAN" : "AVAILABLE",
+      listingType: propertyData.listingType as ListingType,
       approvedById: null,
       declinedReason: null,
     },

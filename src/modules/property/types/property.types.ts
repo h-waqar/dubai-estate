@@ -4,4 +4,5 @@ import { createPropertyValidator } from "../validators/createProperty.validator"
 
 // This is the output type - what we get AFTER validation/coercion
 export type CreatePropertyInput = z.output<typeof createPropertyValidator>;
+export type CreatePropertyFormValues = z.input<typeof createPropertyValidator>;
 

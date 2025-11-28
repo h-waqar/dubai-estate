@@ -31,7 +31,7 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
   const { next, prev } = useStepStore();
   const {
     title,
-    propertyStatus,
+    listingType, // Changed from propertyStatus
     propertyTypeId,
     location,
     latitude,
@@ -50,7 +50,7 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
     resolver: zodResolver(stepOneSchema),
     defaultValues: {
       title: title || "",
-      propertyStatus: propertyStatus || "",
+      listingType: listingType || "SALE", // Changed from propertyStatus
       propertyTypeId: propertyTypeId || undefined,
       location: location || "",
       latitude: latitude || undefined,
@@ -63,7 +63,7 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
     const subscription = watch((value) => {
       update({
         title: value.title,
-        propertyStatus: value.propertyStatus,
+        listingType: value.listingType, // Changed from propertyStatus
         propertyTypeId: value.propertyTypeId,
         location: value.location,
         latitude: value.latitude,
@@ -87,13 +87,13 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
-        {/* Property Status (sale/rent) */}
+        {/* Listing Property (sale/rent/off_plan) */}
         <FieldWrapper>
-          <FormLabel>Property Status</FormLabel>
+          <FormLabel>Listing Property</FormLabel>
           <div className="relative">
             <InputIcon icon={Tag} />
             <Controller
-              name="propertyStatus"
+              name="listingType" // Changed from propertyStatus
               control={control}
               render={({ field }) => (
                 <Select
@@ -102,19 +102,22 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
                   value={field.value}
                 >
                   <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
-                    <SelectValue placeholder="Select listing status" />
+                    <SelectValue placeholder="Select listing type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="sale">For Sale</SelectItem>
-                    <SelectItem value="rent">For Rent</SelectItem>
+                    <SelectItem value="SALE">For Sale</SelectItem>
+                    <SelectItem value="RENT">For Rent</SelectItem>
+                    <SelectItem value="OFF_PLAN">Off Plan</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             />
           </div>
-          {errors.propertyStatus && (
+          {/* @ts-ignore - listingType might not be in errors type yet if not updated */}
+          {errors.listingType && (
             <p className="text-sm text-destructive mt-1">
-              {errors.propertyStatus.message}
+              {/* @ts-ignore */}
+              {errors.listingType.message}
             </p>
           )}
         </FieldWrapper>

@@ -147,6 +147,12 @@ enum FurnishingStatus {
   UNFURNISHED
 }
 
+enum ListingType {
+  SALE
+  RENT
+  OFF_PLAN
+}
+
 // --- Pricing Plan & Quotas ---
 model PricingPlan {
   id           Int      @id @default(autoincrement())
@@ -172,6 +178,7 @@ model Property {
   currency       String       @default("AED")
   propertyType   PropertyType @relation(fields: [propertyTypeId], references: [id])
   propertyTypeId Int
+  listingType    ListingType  @default(SALE)
 
   // Media
   mediaUsages MediaUsage[] // direct backref, optional helper for queries3

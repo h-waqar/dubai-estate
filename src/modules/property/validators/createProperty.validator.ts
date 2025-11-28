@@ -1,6 +1,6 @@
 // src/modules/property/validators/createProperty.validator.ts
 import { z } from "zod";
-import { FurnishingStatus } from "@/generated/prisma";
+import { FurnishingStatus, ListingType } from "@/generated/prisma";
 export const createPropertyValidator = z.object({
   title: z.string().min(10, "Title must be at least 10 characters long."),
   price: z
@@ -11,7 +11,8 @@ export const createPropertyValidator = z.object({
   bedrooms: z.number("Bedrooms is required").int().min(0),
   bathrooms: z.number("Bathrooms is required").int().min(0),
   location: z.string().min(5, "Location is required."),
-  furnishing: z.enum(FurnishingStatus),
+  furnishing: z.nativeEnum(FurnishingStatus),
+  listingType: z.nativeEnum(ListingType).default(ListingType.SALE),
   description: z.string().optional(),
   coverImage: z.number("Cover imgae required").int().optional(),
   gallery: z
@@ -45,6 +46,7 @@ export const createPropertyServerValidator = z.object({
   latitude: z.coerce.number().optional(),
   longitude: z.coerce.number().optional(),
   furnishing: z.enum(FurnishingStatus),
+  listingType: z.enum(["SALE", "RENT", "OFF_PLAN"]).default("SALE"),
   description: z.string().optional(),
   coverImage: z.coerce.number().optional(),
   gallery: z.array(z.coerce.number()).optional(),

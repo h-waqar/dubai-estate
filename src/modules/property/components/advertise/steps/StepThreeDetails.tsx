@@ -56,7 +56,7 @@ interface StepThreeDetailsProps {
 // Extend schema to include fields present in UI but not in original validation schema
 const formSchema = stepThreeSchema.extend({
   currency: z.string(),
-  propertyStatus: z.string(),
+  listingType: z.enum(["SALE", "RENT", "OFF_PLAN"]),
   propertyTypeId: z.number().optional(),
 });
 
@@ -67,7 +67,7 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
   const {
     price,
     currency,
-    propertyStatus,
+    listingType,
     propertyTypeId,
     bedrooms,
     bathrooms,
@@ -87,7 +87,7 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
     defaultValues: {
       price: price || undefined,
       currency: currency || "dollar",
-      propertyStatus: propertyStatus || "",
+      listingType: listingType || "SALE",
       propertyTypeId: propertyTypeId || undefined,
       bedrooms: bedrooms || undefined,
       bathrooms: bathrooms || undefined,
@@ -102,7 +102,7 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
       update({
         price: value.price,
         currency: value.currency,
-        propertyStatus: value.propertyStatus,
+        listingType: value.listingType,
         propertyTypeId: value.propertyTypeId,
         bedrooms: value.bedrooms,
         bathrooms: value.bathrooms,
@@ -183,7 +183,7 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
           <div className="relative">
             <InputIcon icon={Tag} />
             <Controller
-              name="propertyStatus"
+              name="listingType"
               control={control}
               render={({ field }) => (
                 <Select
@@ -195,8 +195,9 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
                     <SelectValue placeholder="Select listing status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="sale">For Sale</SelectItem>
-                    <SelectItem value="rent">For Rent</SelectItem>
+                    <SelectItem value="SALE">For Sale</SelectItem>
+                    <SelectItem value="RENT">For Rent</SelectItem>
+                    <SelectItem value="OFF_PLAN">Off Plan</SelectItem>
                   </SelectContent>
                 </Select>
               )}

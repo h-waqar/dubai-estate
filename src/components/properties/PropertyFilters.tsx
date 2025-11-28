@@ -12,7 +12,11 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const PropertyFilters = () => {
+interface PropertyFiltersProps {
+  propertyTypes: { id: number; name: string; slug: string }[];
+}
+
+const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -34,7 +38,7 @@ const PropertyFilters = () => {
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (searchQuery) params.set("search", searchQuery);
-    if (propertyType) params.set("type", propertyType);
+    if (propertyType && propertyType !== "all") params.set("type", propertyType);
     if (bedrooms) params.set("bedrooms", bedrooms);
     if (priceRange) params.set("price", priceRange);
     if (status) params.set("status", status);
@@ -53,6 +57,7 @@ const PropertyFilters = () => {
             <SelectContent>
               <SelectItem value="buy">Buy</SelectItem>
               <SelectItem value="rent">Rent</SelectItem>
+              <SelectItem value="off_plan">Off Plan</SelectItem>
             </SelectContent>
           </Select>
 
@@ -71,10 +76,12 @@ const PropertyFilters = () => {
               <SelectValue placeholder="Property Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="apartment">Apartment</SelectItem>
-              <SelectItem value="villa">Villa</SelectItem>
-              <SelectItem value="penthouse">Penthouse</SelectItem>
-              <SelectItem value="studio">Studio</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
+              {propertyTypes.map((type) => (
+                <SelectItem key={type.id} value={type.slug}>
+                  {type.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
