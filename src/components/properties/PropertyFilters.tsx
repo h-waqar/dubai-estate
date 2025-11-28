@@ -12,6 +12,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useDebounce } from "@/hooks/use-debounce";
+
 interface PropertyFiltersProps {
   propertyTypes: { id: number; name: string; slug: string }[];
 }
@@ -20,31 +22,37 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Initialize state from URL
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [propertyType, setPropertyType] = useState(searchParams.get("type") || "");
-  const [bedrooms, setBedrooms] = useState(searchParams.get("bedrooms") || "");
-  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "");
-  const [status, setStatus] = useState(searchParams.get("status") || "buy");
+  const [propertyType, setPropertyType] = useState(searchParams.get("type") || "all");
+  const [bedrooms, setBedrooms] = useState(searchParams.get("bedrooms") || "all");
+  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "all");
+  const [status, setStatus] = useState(searchParams.get("status") || "all");
+
+  // Debounce search query to avoid excessive URL updates
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  // Effect to update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (debouncedSearchQuery) params.set("search", debouncedSearchQuery);
+    if (propertyType && propertyType !== "all") params.set("type", propertyType);
+    if (bedrooms && bedrooms !== "all") params.set("bedrooms", bedrooms);
+    if (priceRange && priceRange !== "all") params.set("price", priceRange);
+    if (status && status !== "all") params.set("status", status);
+
+    router.push(`/properties?${params.toString()}`);
+  }, [debouncedSearchQuery, propertyType, bedrooms, priceRange, status, router]);
 
   // Sync local state with URL params if they change externally (e.g. back button)
   useEffect(() => {
     setSearchQuery(searchParams.get("search") || "");
-    setPropertyType(searchParams.get("type") || "");
-    setBedrooms(searchParams.get("bedrooms") || "");
-    setPriceRange(searchParams.get("price") || "");
-    setStatus(searchParams.get("status") || "buy");
+    setPropertyType(searchParams.get("type") || "all");
+    setBedrooms(searchParams.get("bedrooms") || "all");
+    setPriceRange(searchParams.get("price") || "all");
+    setStatus(searchParams.get("status") || "all");
   }, [searchParams]);
-
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (searchQuery) params.set("search", searchQuery);
-    if (propertyType && propertyType !== "all") params.set("type", propertyType);
-    if (bedrooms) params.set("bedrooms", bedrooms);
-    if (priceRange) params.set("price", priceRange);
-    if (status) params.set("status", status);
-
-    router.push(`/properties?${params.toString()}`);
-  };
 
   return (
     <section className="section-bg-light py-8 border-b">
@@ -52,9 +60,10 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
         <div className="flex flex-wrap gap-4 items-center">
           <Select value={status} onValueChange={setStatus}>
             <SelectTrigger className="w-32">
-              <SelectValue />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="buy">Buy</SelectItem>
               <SelectItem value="rent">Rent</SelectItem>
               <SelectItem value="off_plan">Off Plan</SelectItem>
@@ -67,7 +76,6 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
 
@@ -90,6 +98,7 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
               <SelectValue placeholder="Beds" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">Any Bed</SelectItem>
               <SelectItem value="1">1 Bed</SelectItem>
               <SelectItem value="2">2 Beds</SelectItem>
               <SelectItem value="3">3 Beds</SelectItem>
@@ -102,14 +111,13 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
               <SelectValue placeholder="Price" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">Any Price</SelectItem>
               <SelectItem value="under-1m">Under 1M</SelectItem>
               <SelectItem value="1m-5m">1M - 5M</SelectItem>
               <SelectItem value="5m-10m">5M - 10M</SelectItem>
               <SelectItem value="over-10m">Over 10M</SelectItem>
             </SelectContent>
           </Select>
-
-          <Button className="px-8" onClick={handleSearch}>Search</Button>
         </div>
       </div>
     </section>
