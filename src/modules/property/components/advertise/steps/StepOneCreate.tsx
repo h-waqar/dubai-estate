@@ -80,6 +80,8 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
     }
   }, [location, setValue]);
 
+
+
   const onSubmit = () => {
     next();
   };
@@ -174,15 +176,6 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
           )}
         </FieldWrapper>
 
-        {/* Location Selector needs to be integrated or synced */}
-        {/* Assuming LocationSelector updates the store directly, we need to sync it back to the form or pass control */}
-        {/* For now, let's assume LocationSelector updates the store and we watch the store to update the form if needed, 
-            BUT here we are doing form -> store. 
-            If LocationSelector is a separate component that updates the store, we might need to register 'location' manually 
-            or pass setValue to it. 
-            Let's look at LocationSelector usage. It was just <LocationSelector />. 
-            I'll check LocationSelector implementation next. For now, I'll keep it as is but register a hidden input for location to validate it.
-        */}
         <LocationSelector />
         <input type="hidden" {...register("location")} />
         {errors.location && (

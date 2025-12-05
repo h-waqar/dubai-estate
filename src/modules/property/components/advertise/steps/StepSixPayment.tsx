@@ -41,6 +41,7 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
     billingCity,
     billingState,
     billingPostalCode,
+
     update,
     // Get all data for submission
     title,

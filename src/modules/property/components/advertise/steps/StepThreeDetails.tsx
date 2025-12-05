@@ -12,7 +12,7 @@ import {
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
-import { Building2, Bed, Bath, Maximize2, DollarSign, Tag } from "lucide-react";
+import { Building2, Bed, Bath, Maximize2, DollarSign, Tag, PenLine } from "lucide-react";
 import { stepThreeSchema } from "../../../validators/advertise-steps.validator";
 import { z } from "zod";
 
@@ -56,8 +56,6 @@ interface StepThreeDetailsProps {
 // Extend schema to include fields present in UI but not in original validation schema
 const formSchema = stepThreeSchema.extend({
   currency: z.string(),
-  listingType: z.enum(["SALE", "RENT", "OFF_PLAN"]),
-  propertyTypeId: z.number().optional(),
 });
 
 type StepThreeData = z.infer<typeof formSchema>;
@@ -67,8 +65,6 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
   const {
     price,
     currency,
-    listingType,
-    propertyTypeId,
     bedrooms,
     bathrooms,
     propertySize,
@@ -81,14 +77,13 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<StepThreeData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       price: price || undefined,
       currency: currency || "dollar",
-      listingType: listingType || "SALE",
-      propertyTypeId: propertyTypeId || undefined,
       bedrooms: bedrooms || undefined,
       bathrooms: bathrooms || undefined,
       propertySize: propertySize || undefined,
@@ -102,8 +97,6 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
       update({
         price: value.price,
         currency: value.currency,
-        listingType: value.listingType,
-        propertyTypeId: value.propertyTypeId,
         bedrooms: value.bedrooms,
         bathrooms: value.bathrooms,
         propertySize: value.propertySize,
@@ -177,63 +170,7 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
           </p>
         )}
 
-        {/* Property Status */}
-        <FieldWrapper>
-          <FormLabel>Property Status</FormLabel>
-          <div className="relative">
-            <InputIcon icon={Tag} />
-            <Controller
-              name="listingType"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  value={field.value}
-                >
-                  <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
-                    <SelectValue placeholder="Select listing status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SALE">For Sale</SelectItem>
-                    <SelectItem value="RENT">For Rent</SelectItem>
-                    <SelectItem value="OFF_PLAN">Off Plan</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-        </FieldWrapper>
 
-        {/* Property Type */}
-        <FieldWrapper>
-          <FormLabel>Property Type</FormLabel>
-          <div className="relative">
-            <InputIcon icon={Building2} />
-            <Controller
-              name="propertyTypeId"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  onValueChange={(val) => field.onChange(Number(val))}
-                  value={field.value?.toString()}
-                >
-                  <SelectTrigger className="min-h-12 min-w-full pl-10 border-input bg-background hover:bg-accent/50 transition-colors">
-                    <SelectValue placeholder="Select property type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Townhouse</SelectItem>
-                    <SelectItem value="2">Apartment</SelectItem>
-                    <SelectItem value="3">Villa</SelectItem>
-                    <SelectItem value="4">Penthouse</SelectItem>
-                    <SelectItem value="5">Office</SelectItem>
-                    <SelectItem value="6">Land</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-        </FieldWrapper>
 
         {/* Property Specifications Section */}
         <div className="md:col-span-2">
@@ -307,6 +244,10 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
           </div>
         </div>
       </div>
+
+
+
+
 
       <StepController 
         onNext={handleSubmit(onSubmit)}

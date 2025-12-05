@@ -78,19 +78,7 @@ export default function StepDescription({ serverData }: StepTwoDescriptionProps)
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <ClipboardPenLine className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">
-              Property Description
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Step 2 of 7 · Provide essential property information
-            </p>
-          </div>
-        </div>
+
 
         {/* Description */}
         <div>

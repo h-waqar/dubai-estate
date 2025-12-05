@@ -1,14 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectTrigger,
@@ -16,34 +8,21 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Globe, MapPin, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useLocationStore } from "@/stores/useLocationStore";
 import { useAdvertiseFormStore } from "../../stores/useAdvertiseForm";
+import { FieldWrapper, FormLabel } from "./FormComponents";
 
 export default function LocationSelector() {
-  const [open, setOpen] = useState(false);
   const [country, setCountry] = useState<string | null>(null);
   const [city, setCity] = useState<string | null>(null);
 
-  const [tempCountry, setTempCountry] = useState<string | null>(null);
-  const [tempCity, setTempCity] = useState<string | null>(null);
-
   const { countries, cities, loadCountries, loadCities } = useLocationStore();
+  const { update, location } = useAdvertiseFormStore();
 
   useEffect(() => {
     loadCountries();
   }, [loadCountries]);
 
-  useEffect(() => {
-    if (tempCountry) {
-      const countryObj = countries.find((c) => c.name === tempCountry);
-      if (countryObj) loadCities(countryObj.isoCode);
-    }
-  }, [tempCountry]);
-
-  const { update, location } = useAdvertiseFormStore();
-  
   // Initialize from store
   useEffect(() => {
     if (location) {
@@ -52,143 +31,75 @@ export default function LocationSelector() {
         setCity(parts[0]);
         setCountry(parts[1]);
       } else if (parts.length === 1) {
-        // Fallback if format is different
         setCountry(parts[0]); 
       }
     }
   }, [location]);
 
-  const handleSave = () => {
-    setCountry(tempCountry);
-    setCity(tempCity);
-    if (tempCountry && tempCity) {
-      update({ location: `${tempCity}, ${tempCountry}` });
+  // Load cities when country changes
+  useEffect(() => {
+    if (country) {
+      const countryObj = countries.find((c) => c.name === country);
+      if (countryObj) loadCities(countryObj.isoCode);
     }
-    setOpen(false);
+  }, [country, countries, loadCities]);
+
+  const handleCountryChange = (value: string) => {
+    setCountry(value);
+    setCity(null); // Reset city when country changes
+    update({ location: value }); // Update store with just country initially
   };
 
-  const openModal = () => setOpen(true);
+  const handleCityChange = (value: string) => {
+    setCity(value);
+    if (country) {
+      update({ location: `${value}, ${country}` });
+    }
+  };
 
-  const selectedCountry = countries.find((c) => c.name === tempCountry);
+  const selectedCountry = countries.find((c) => c.name === country);
   const cityList =
     selectedCountry && cities[selectedCountry.isoCode]
       ? cities[selectedCountry.isoCode]
       : [];
 
   return (
-    <div className="mt-6">
-      <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
-        Select Location <span className="text-red-500">*</span>
-      </label>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FieldWrapper>
+        <FormLabel required>Select Country</FormLabel>
+        <Select value={country || ""} onValueChange={handleCountryChange}>
+          <SelectTrigger className="h-12 border-input bg-background hover:bg-accent/50 transition-colors">
+            <SelectValue placeholder="Select Country" />
+          </SelectTrigger>
+          <SelectContent>
+            {countries.map((c) => (
+              <SelectItem key={c.isoCode} value={c.name}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </FieldWrapper>
 
-      <div className="grid sm:grid-cols-3 gap-3">
-        <LocationCard
-          icon={<Globe className="w-6 h-6" />}
-          label={country || "Select Country"}
-          onClick={openModal}
-        />
-        <LocationCard
-          icon={<MapPin className="w-6 h-6" />}
-          label={city || "Select City"}
-          onClick={openModal}
-        />
-        <LocationCard
-          icon={<Plus className="w-6 h-6" />}
-          label={country && city ? "Change" : "Select"}
-          dashed
-          onClick={openModal}
-        />
-      </div>
-
-      {/* Modal */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Select Location</DialogTitle>
-          </DialogHeader>
-
-          <div className="flex flex-col gap-4 py-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Country</label>
-              <Select
-                value={tempCountry || ""}
-                onValueChange={(value) => {
-                  setTempCountry(value);
-                  setTempCity(null);
-                }}
-              >
-                <SelectTrigger className="w-full cursor-pointer">
-                  <SelectValue placeholder="Select Country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((c) => (
-                    <SelectItem key={c.isoCode} value={c.name}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">City</label>
-              <Select
-                value={tempCity || ""}
-                onValueChange={setTempCity}
-                disabled={!tempCountry}
-              >
-                <SelectTrigger className="w-full cursor-pointer">
-                  <SelectValue placeholder="Select City" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cityList.map((c) => (
-                    <SelectItem key={c.name} value={c.name}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={!tempCountry || !tempCity}>
-              Save
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <FieldWrapper>
+        <FormLabel required>Select City</FormLabel>
+        <Select 
+          value={city || ""} 
+          onValueChange={handleCityChange}
+          disabled={!country}
+        >
+          <SelectTrigger className="h-12 border-input bg-background hover:bg-accent/50 transition-colors">
+            <SelectValue placeholder="Select City" />
+          </SelectTrigger>
+          <SelectContent>
+            {cityList.map((c) => (
+              <SelectItem key={c.name} value={c.name}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </FieldWrapper>
     </div>
-  );
-}
-
-function LocationCard({
-  icon,
-  label,
-  onClick,
-  dashed,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-  dashed?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex flex-col items-center justify-center rounded-lg border transition-all h-28 sm:h-32 w-full py-6 cursor-pointer",
-        dashed
-          ? "border-dashed border-gray-400 hover:border-brand-500 hover:text-brand-600"
-          : "border bg-muted/30 hover:bg-muted/50"
-      )}
-    >
-      {icon}
-      <span className="mt-2 text-sm font-medium">{label}</span>
-    </button>
   );
 }

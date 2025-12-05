@@ -40,13 +40,13 @@ const formatDate = (date: Date) => {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const property = await prisma.property.findUnique({
     where: { slug },
     select: { title: true, description: true },
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function PropertyPage({ params }: PageProps) {
-  const { slug } = params;
+  const { slug } = await params;
 
   const property = await prisma.property.findUnique({
     where: { slug },
