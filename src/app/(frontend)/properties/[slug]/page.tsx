@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getMediaUrl } from "@/lib/utils";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/modules/user/routes/auth";
 import {
   MapPin,
   Bed,
@@ -89,6 +91,21 @@ export default async function PropertyPage({ params }: PageProps) {
 
   if (!property) {
     notFound();
+  }
+
+  // Security Check: If not published, only allow Admin/Manager or Owner
+  const isPublished = property.status === "APPROVED" && property.published;
+
+  if (!isPublished) {
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
+
+    const isAdmin = user?.role === "ADMIN" || user?.role === "MANAGER";
+    const isOwner = user?.id === property.createdById;
+
+    if (!isAdmin && !isOwner) {
+      notFound(); // Hide existence from unauthorized users
+    }
   }
 
   // Manually fetch media usages to ensure we get them even if the relation is broken

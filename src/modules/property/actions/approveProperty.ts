@@ -29,6 +29,7 @@ export async function approvePropertyAction(
             updateData.published = true;
             updateData.publishedAt = new Date();
         } else if (status === "DECLINED") {
+            updateData.approvedById = session.user.id; // Track who declined it
             updateData.declinedReason = declinedReason;
             updateData.published = false;
         }

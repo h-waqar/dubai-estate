@@ -19,7 +19,9 @@ export async function createPropertyAction(formData: FormData) {
   // Admins/Managers -> APPROVED immediately (or DRAFT if they prefer, but sticking to previous behavior implies likely live)
   // Users -> PENDING_REVIEW
   const isAdminOrManager = session.user.role === "ADMIN" || session.user.role === "MANAGER";
-  const initialStatus = isAdminOrManager ? "APPROVED" : "PENDING_REVIEW";
+  // User requested manual approval for everyone, so we disable auto-approve for admins.
+  const initialStatus = "PENDING_REVIEW";
+  // const initialStatus = isAdminOrManager ? "APPROVED" : "PENDING_REVIEW";
   // For users, it's not published until approved. For admins, we can default published to true or let them toggle.
   // The schema has published @default(false). Let's keep it false for consistency or true for admins?
   // Let's set it to false by default for everyone to be safe, or true for admins if that was desired.
@@ -42,6 +44,7 @@ export async function createPropertyAction(formData: FormData) {
     description: formData.get("description") || "",
     coverImage: formData.get("coverImage"),
     gallery: formData.getAll("gallery[]"),
+    features: formData.getAll("features[]"),
   };
   // console.log("Parsed data for Zod:", data);
   // 3. Validate using the SERVER validator (with z.coerce)
@@ -63,8 +66,8 @@ export async function createPropertyAction(formData: FormData) {
     let property = await propertyService.createProperty(
       {
         ...validation.data,
-        status: initialStatus, // We need to update the service to accept this or add it to the type
-        published: isAdminOrManager, // Auto-publish for admins? Let's say yes for now to match MVP speed
+        status: initialStatus,
+        published: false, // Always false initially, requires approval
       },
       session.user.id
     );

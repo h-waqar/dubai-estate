@@ -16,27 +16,27 @@ import {
 import { toast } from "sonner";
 import { Property, User, PropertyType } from "@/generated/prisma";
 import Image from "next/image";
-import { formatCurrency } from "@/lib/utils"; // or whatever utils we have
 
 // Extend Property type to include relations we fetch
 type PropertyWithRelations = Property & {
     propertyType: PropertyType;
     createdBy: User;
+    approvedBy: User | null; // Added relation
     images: any[];
 };
 
 export default function ApprovalsPage() {
     const [properties, setProperties] = useState<PropertyWithRelations[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filterStatus, setFilterStatus] = useState<string>("PENDING_REVIEW");
 
-    const fetchPendingProperties = async () => {
+    const fetchProperties = async () => {
         try {
             setLoading(true);
-            // We use "ALL" or custom logic? listProperties now supports approvalStatus
-            const data = await listProperties({ approvalStatus: "PENDING_REVIEW" });
+            const data = await listProperties({ approvalStatus: filterStatus });
             setProperties(data as any);
         } catch (error) {
-            toast.error("Failed to fetch pending properties");
+            toast.error("Failed to fetch properties");
             console.error(error);
         } finally {
             setLoading(false);
@@ -44,15 +44,15 @@ export default function ApprovalsPage() {
     };
 
     useEffect(() => {
-        fetchPendingProperties();
-    }, []);
+        fetchProperties();
+    }, [filterStatus]);
 
     const handleApprove = async (id: number) => {
         try {
             const result = await approvePropertyAction(id, "APPROVED");
             if (result.success) {
                 toast.success("Property approved successfully");
-                fetchPendingProperties();
+                fetchProperties();
             } else {
                 toast.error("Failed to approve: " + result.error);
             }
@@ -69,7 +69,7 @@ export default function ApprovalsPage() {
             const result = await approvePropertyAction(id, "DECLINED", reason);
             if (result.success) {
                 toast.success("Property declined");
-                fetchPendingProperties();
+                fetchProperties();
             } else {
                 toast.error("Failed to decline: " + result.error);
             }
@@ -80,14 +80,30 @@ export default function ApprovalsPage() {
 
     return (
         <div className="container mx-auto py-8 px-4">
-            <h1 className="text-3xl font-bold mb-6">Pending Approvals</h1>
+            <h1 className="text-3xl font-bold mb-6">Property Approvals</h1>
+
+            <div className="flex gap-2 mb-6">
+                {[
+                    { label: "Pending", value: "PENDING_REVIEW" },
+                    { label: "Approved", value: "APPROVED" },
+                    { label: "Declined", value: "DECLINED" },
+                ].map((status) => (
+                    <Button
+                        key={status.value}
+                        variant={filterStatus === status.value ? "default" : "outline"}
+                        onClick={() => setFilterStatus(status.value)}
+                    >
+                        {status.label}
+                    </Button>
+                ))}
+            </div>
 
             <Card>
                 {loading ? (
                     <div className="p-8 text-center">Loading...</div>
                 ) : properties.length === 0 ? (
                     <div className="p-8 text-center text-muted-foreground">
-                        No properties pending review.
+                        No properties found for this status.
                     </div>
                 ) : (
                     <Table>
@@ -97,6 +113,9 @@ export default function ApprovalsPage() {
                                 <TableHead>Agent</TableHead>
                                 <TableHead>Price</TableHead>
                                 <TableHead>Submitted</TableHead>
+                                {filterStatus === "DECLINED" && (
+                                    <TableHead>Declined Details</TableHead>
+                                )}
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -132,23 +151,48 @@ export default function ApprovalsPage() {
                                     <TableCell>
                                         {new Date(property.createdAt).toLocaleDateString()}
                                     </TableCell>
+
+                                    {filterStatus === "DECLINED" && (
+                                        <TableCell>
+                                            <div className="text-sm">
+                                                <div className="font-medium text-red-600">Reason: {property.declinedReason || "No reason provided"}</div>
+                                                <div className="text-muted-foreground text-xs">
+                                                    Declined by: {property.approvedBy?.name || "Unknown Admin"}
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                    )}
+
                                     <TableCell className="text-right space-x-2">
                                         <Button
-                                            variant="outline"
+                                            variant="ghost"
                                             size="sm"
-                                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                            onClick={() => handleApprove(property.id)}
+                                            onClick={() => window.open(`/properties/${property.slug}`, '_blank')}
+                                            title="View Property"
                                         >
-                                            Approve
+                                            👀 View
                                         </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            onClick={() => handleDecline(property.id)}
-                                        >
-                                            Decline
-                                        </Button>
+
+                                        {filterStatus === "PENDING_REVIEW" && (
+                                            <>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                    onClick={() => handleApprove(property.id)}
+                                                >
+                                                    Approve
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => handleDecline(property.id)}
+                                                >
+                                                    Decline
+                                                </Button>
+                                            </>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}

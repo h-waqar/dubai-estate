@@ -50,4 +50,5 @@ export const createPropertyServerValidator = z.object({
   description: z.string().optional(),
   coverImage: z.coerce.number().optional(),
   gallery: z.array(z.coerce.number()).optional(),
+  features: z.array(z.coerce.number()).optional(),
 });

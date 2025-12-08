@@ -27,7 +27,7 @@ interface StepSixPaymentProps {
 
 type StepSixData = z.infer<typeof stepSixSchema>;
 
-function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
+function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
   const { next, prev } = useStepStore();
   const {
     plan,
@@ -55,8 +55,12 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
     bathrooms,
     propertySize,
     furnishing,
+    listingType,
     coverImage,
     gallery,
+    location,
+    latitude,
+    longitude,
   } = useAdvertiseFormStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,22 +121,44 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
       formData.append("propertyTypeId", propertyTypeId.toString());
       formData.append("bedrooms", bedrooms?.toString() || "0");
       formData.append("bathrooms", bathrooms?.toString() || "0");
-      formData.append("location", "Dubai"); // Hardcoded for now or get from store if available
+
+      // Use actual location from store, fallback to "Dubai" only if missing
+      formData.append("location", location || "Dubai");
+      if (latitude) formData.append("latitude", latitude.toString());
+      if (longitude) formData.append("longitude", longitude.toString());
+
+      // Pass listingType (critical fix for validation)
+      if (plan) formData.append("listingType", listingType || "SALE");
+      // Note: `plan` variable in store is about payment/subscription, `listingType` is SALE/RENT.
+
       formData.append("furnishing", furnishing || "UNFURNISHED");
-      formData.append("description", description);
-      
+      formData.append("description", description || "");
+
+      if (features && features.length > 0) {
+        const availableFeatures = serverData.features || [];
+        // features[] in store is array of strings (names), so we need to find the ID
+        features.forEach((featureName) => {
+          // If for some reason it's already an object (legacy?), handle it, otherwise find by name
+          const name = typeof featureName === 'string' ? featureName : (featureName as any).name;
+          const featureObj = availableFeatures.find(f => f.name === name);
+          if (featureObj) {
+            formData.append("features[]", featureObj.id.toString());
+          }
+        });
+      }
+
       if (coverImage) {
         formData.append("coverImage", coverImage.id.toString());
       }
-      
+
       gallery.forEach((img) => {
         formData.append("gallery[]", img.id.toString());
       });
 
       // Add other fields if needed by the action
-      
+
       const result = await createPropertyAction(formData);
-      
+
       if (result.success) {
         toast.success("Property created successfully!");
         next();
@@ -228,7 +254,7 @@ function StepSixPayment({ propertyTypes }: StepSixPaymentProps) {
                   className={cn(
                     "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
                     (field.value === "card" || !field.value) &&
-                      "border-primary bg-muted"
+                    "border-primary bg-muted"
                   )}
                 >
                   <RadioGroupItem value="card" id="payment-card" />

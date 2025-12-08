@@ -137,6 +137,8 @@ export async function listProperties(filters: PropertyFilters = {}) {
     include: {
       propertyType: true,
       images: true,
+      createdBy: true, // Needed for displaying agent info
+      approvedBy: true, // Needed for displaying who declined/approved
       // Remove the relation include since it's broken
     }
   });

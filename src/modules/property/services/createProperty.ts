@@ -10,7 +10,7 @@ export async function createProperty(
   input: CreatePropertyInput & { status?: string; published?: boolean },
   createdById: number
 ) {
-  const { coverImage, gallery, status, published, ...propertyData } = input;
+  const { coverImage, gallery, features, status, published, ...propertyData } = input;
   const slug = await generateUniqueSlug(propertyData.title);
 
   // Generate RefNo: 3 random capital letters + 4 random numbers
@@ -57,6 +57,19 @@ export async function createProperty(
         entityId: property.id,
         entityType: "PROPERTY",
         role: "GALLERY",
+      })),
+    });
+  }
+
+  // Step 3: Link features
+  // @ts-ignore - input might not have features type defined in CreatePropertyInput yet, assuming handled by passed object
+  if (input.features?.length) {
+    // @ts-ignore
+    const featureIds: number[] = input.features;
+    await prisma.propertyFeature.createMany({
+      data: featureIds.map((fid) => ({
+        propertyId: property.id,
+        featureId: fid,
       })),
     });
   }
