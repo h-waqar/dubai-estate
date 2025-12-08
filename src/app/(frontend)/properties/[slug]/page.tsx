@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
+import { ImageGallery } from "@/components/properties/ImageGallery";
 
 // Helper to format currency
 const formatCurrency = (amount: number, currency: string = "AED") => {
@@ -191,49 +192,7 @@ export default async function PropertyPage({ params }: PageProps) {
         </div>
 
         {/* Gallery Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12 h-[400px] md:h-[500px]">
-          <div className="md:col-span-2 h-full relative rounded-xl overflow-hidden bg-muted group">
-            {mainImage ? (
-              <Image
-                src={mainImage.url}
-                alt={mainImage.alt || property.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                priority
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                No Image Available
-              </div>
-            )}
-          </div>
-          <div className="md:col-span-2 grid grid-cols-2 gap-4 h-full">
-            {otherImages.map((image, index) => (
-              <div
-                key={image.id}
-                className="relative rounded-xl overflow-hidden bg-muted group"
-              >
-                <Image
-                  src={image.url}
-                  alt={image.alt || property.title}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-            ))}
-            {/* Placeholder for remaining slots if fewer than 4 other images */}
-            {Array.from({ length: Math.max(0, 4 - otherImages.length) }).map(
-              (_, i) => (
-                <div
-                  key={`placeholder-${i}`}
-                  className="bg-muted rounded-xl flex items-center justify-center text-muted-foreground/20"
-                >
-                  <Home className="w-8 h-8" />
-                </div>
-              )
-            )}
-          </div>
-        </div>
+        <ImageGallery images={uniqueImages} title={property.title} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
