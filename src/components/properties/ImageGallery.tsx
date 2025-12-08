@@ -5,13 +5,11 @@ import Image from "next/image";
 import {
     Dialog,
     DialogContent,
-    DialogTrigger,
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X, Grid, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface PropertyImage {
     id: number;
@@ -26,6 +24,7 @@ interface ImageGalleryProps {
 
 export function ImageGallery({ images, title }: ImageGalleryProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [showAll, setShowAll] = useState(false);
     const [photoIndex, setPhotoIndex] = useState(0);
 
     const mainImage = images.length > 0 ? images[0] : null;
@@ -43,6 +42,10 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
 
     const showPrev = () => {
         setPhotoIndex((prev) => (prev - 1 + images.length) % images.length);
+    };
+
+    const handleShowAll = () => {
+        setShowAll(true);
     };
 
     return (
@@ -71,7 +74,14 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
                         <div
                             key={image.id}
                             className="relative rounded-xl overflow-hidden bg-muted group cursor-pointer"
-                            onClick={() => openLightbox(index + 1)}
+                            onClick={() => {
+                                // If it's the last visible image (index 3) and there are more images, open show all
+                                if (index === 3 && remainingCount > 0) {
+                                    handleShowAll();
+                                } else {
+                                    openLightbox(index + 1);
+                                }
+                            }}
                         >
                             <Image
                                 src={image.url}
@@ -81,7 +91,9 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
                             />
                             {/* Overlay for the last image if there are more */}
                             {index === 3 && remainingCount > 0 && (
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-medium text-lg group-hover:bg-black/70 transition-colors">
+                                <div
+                                    className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-medium text-lg cursor-pointer hover:bg-black/70 transition-colors"
+                                >
                                     +{remainingCount} Photos
                                 </div>
                             )}
@@ -108,7 +120,7 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
                             className="absolute bottom-4 right-4 shadow-lg z-10 hidden md:flex"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                openLightbox(0);
+                                handleShowAll();
                             }}
                         >
                             <Grid className="w-4 h-4 mr-2" />
@@ -118,12 +130,66 @@ export function ImageGallery({ images, title }: ImageGalleryProps) {
                 </div>
             </div>
 
+            {/* Full Screen Grid View ("Bento" Style) */}
+            <Dialog open={showAll} onOpenChange={setShowAll}>
+                <DialogContent
+                    className="max-w-none sm:max-w-none w-screen h-screen bg-background p-0 border-none rounded-none overflow-y-auto"
+                    aria-describedby={undefined}
+                    showCloseButton={false}
+                >
+                    <DialogTitle className="sr-only">Image Gallery</DialogTitle>
+
+                    {/* Header */}
+                    <div className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background/80 backdrop-blur-md border-b">
+                        <Button variant="ghost" size="icon" onClick={() => setShowAll(false)}>
+                            <ChevronLeft className="w-5 h-5" />
+                        </Button>
+                        <span className="font-semibold">Image Gallery</span>
+                        <div className="w-9" /> {/* Spacer for centering */}
+                    </div>
+
+                    {/* Grid */}
+                    <div className="container mx-auto px-4 py-6 pb-20">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[250px]">
+                            {images.map((image, index) => {
+                                // Simple logic to create a "bento" feel:
+                                // Make every 7th item span 2 columns and 2 rows (large)
+                                // Make every 3rd item (that isn't 7th) span 2 columns (wide)
+                                const isLarge = index % 7 === 0;
+                                const isWide = !isLarge && index % 3 === 0;
+
+                                return (
+                                    <div
+                                        key={image.id}
+                                        className={cn(
+                                            "relative rounded-xl overflow-hidden bg-muted cursor-pointer hover:opacity-95 transition-opacity",
+                                            isLarge ? "sm:col-span-2 sm:row-span-2" : isWide ? "sm:col-span-2" : ""
+                                        )}
+                                        onClick={() => openLightbox(index)}
+                                    >
+                                        <Image
+                                            src={image.url}
+                                            alt={image.alt || title}
+                                            fill
+                                            className="object-cover"
+                                            sizes={isLarge ? "(max-width: 768px) 100vw, 50vw" : isWide ? "(max-width: 768px) 100vw, 33vw" : "(max-width: 768px) 100vw, 25vw"}
+                                        />
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             {/* Lightbox Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-screen-xl w-full h-[90vh] bg-black/95 border-none p-0 flex flex-col items-center justify-center text-white" aria-describedby={undefined}>
-                    <VisuallyHidden>
-                        <DialogTitle>Image Gallery</DialogTitle>
-                    </VisuallyHidden>
+                <DialogContent
+                    className="max-w-none sm:max-w-none w-screen h-screen bg-black/95 border-none p-0 flex flex-col items-center justify-center text-white rounded-none"
+                    aria-describedby={undefined}
+                    showCloseButton={false}
+                >
+                    <DialogTitle className="sr-only">Image Gallery</DialogTitle>
 
                     <button
                         onClick={() => setIsOpen(false)}
