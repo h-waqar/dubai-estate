@@ -11,12 +11,21 @@ export async function createPropertyAction(formData: FormData) {
   // console.log("🔥 createPropertyAction received:", formData);
   const session = await getServerSession(authOptions);
 
-  if (
-    !session?.user?.id ||
-    (session.user.role !== "ADMIN" && session.user.role !== "MANAGER")
-  ) {
+  if (!session?.user?.id) {
     return { success: false, error: "Unauthorized" };
   }
+
+  // Determine initial status based on role
+  // Admins/Managers -> APPROVED immediately (or DRAFT if they prefer, but sticking to previous behavior implies likely live)
+  // Users -> PENDING_REVIEW
+  const isAdminOrManager = session.user.role === "ADMIN" || session.user.role === "MANAGER";
+  const initialStatus = isAdminOrManager ? "APPROVED" : "PENDING_REVIEW";
+  // For users, it's not published until approved. For admins, we can default published to true or let them toggle.
+  // The schema has published @default(false). Let's keep it false for consistency or true for admins?
+  // Let's set it to false by default for everyone to be safe, or true for admins if that was desired.
+  // User said "approve only then they will be visible", implies published=true might be conflated with status=APPROVED.
+  // Actually, let's keep published=false by default for everyone, but status=APPROVED for admins.
+
   // 2. Convert FormData to plain object
   // const data = Object.fromEntries(formData);
   const data = {
@@ -46,8 +55,17 @@ export async function createPropertyAction(formData: FormData) {
   }
   // 4. Create property in database
   try {
+    // We need to pass status to the service or handle it there.
+    // Since createProperty service takes validation.data which matches the schema roughly,
+    // we might need to inject status into it.
+    // Let's modify the service call or the service itself.
+    // Checking service signature...
     let property = await propertyService.createProperty(
-      validation.data,
+      {
+        ...validation.data,
+        status: initialStatus, // We need to update the service to accept this or add it to the type
+        published: isAdminOrManager, // Auto-publish for admins? Let's say yes for now to match MVP speed
+      },
       session.user.id
     );
     // property = serializeDecimals(property);

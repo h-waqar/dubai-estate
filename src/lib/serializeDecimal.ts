@@ -1,4 +1,3 @@
-// src/lib/serializeDecimal.ts
 import { Prisma } from "@/generated/prisma/client";
 
 export function serializeDecimals<T>(obj: T): T {
@@ -9,15 +8,32 @@ export function serializeDecimals<T>(obj: T): T {
   }
 
   if (typeof obj === "object") {
+    // Check for Decimal-like object (duck typing)
+    // Prisma Decimals / decimal.js have s (sign), e (exponent), d (digits)
+    const isDecimal =
+      "s" in obj &&
+      "e" in obj &&
+      "d" in obj;
+
+    if (isDecimal) {
+      try {
+        // Safe conversion
+        return Number(obj.toString()) as unknown as T;
+      } catch (err) {
+        // Fallback
+        const val = obj as any;
+        return Number(val.s * parseFloat(val.d.join('')) * Math.pow(10, val.e)) as unknown as T;
+      }
+    }
+
+    // Handle Date objects
+    if (obj instanceof Date) {
+      return obj.toISOString() as unknown as T;
+    }
+
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
-      if (value instanceof Prisma.Decimal) {
-        result[key] = Number(value); // or value.toString() if you want exact precision
-      } else if (typeof value === "object" && value !== null) {
-        result[key] = serializeDecimals(value);
-      } else {
-        result[key] = value;
-      }
+      result[key] = serializeDecimals(value);
     }
     return result as T;
   }

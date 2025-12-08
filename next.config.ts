@@ -46,6 +46,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizeCss: true,
+    mcpServer: true,
     serverActions: {
       bodySizeLimit: "50mb",
     },

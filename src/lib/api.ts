@@ -3,10 +3,10 @@
 import axios from "axios";
 
 // You can switch to NEXT_PUBLIC_API_BASE later if needed
-const baseURL =
-    process.env.NEXT_PUBLIC_API_BASE || typeof window !== "undefined"
-        ? "/api"
-        : process.env.API_INTERNAL_BASE || "http://localhost:3000/api"; // fallback for SSR
+const isServer = typeof window === "undefined";
+const baseURL = isServer
+    ? process.env.API_INTERNAL_BASE || "http://localhost:3000/api"
+    : process.env.NEXT_PUBLIC_API_BASE || "/api";
 
 export const api = axios.create({
     baseURL,

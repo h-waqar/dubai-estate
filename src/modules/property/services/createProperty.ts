@@ -7,10 +7,10 @@ import { PropertyStatus, ListingType } from "@/generated/prisma";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createProperty(
-  input: CreatePropertyInput,
+  input: CreatePropertyInput & { status?: string; published?: boolean },
   createdById: number
 ) {
-  const { coverImage, gallery, ...propertyData } = input;
+  const { coverImage, gallery, status, published, ...propertyData } = input;
   const slug = await generateUniqueSlug(propertyData.title);
 
   // Generate RefNo: 3 random capital letters + 4 random numbers
@@ -28,10 +28,12 @@ export async function createProperty(
       slug,
       refNo,
       createdById,
-      status: PropertyStatus.PENDING_REVIEW,
+      status: (status as PropertyStatus) || PropertyStatus.PENDING_REVIEW,
+      published: published ?? false,
       availability: propertyData.listingType === "OFF_PLAN" ? "OFFPLAN" : "AVAILABLE",
       listingType: propertyData.listingType as ListingType,
-      approvedById: null,
+      approvedById: status === "APPROVED" ? createdById : null, // Auto-approve if status is APPROVED? Maybe separate logic. 
+      // Actually checking schema... approvedById is optional. 
       declinedReason: null,
     },
   });

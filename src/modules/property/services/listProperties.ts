@@ -1,10 +1,12 @@
 // src\modules\property\services\listProperties.ts
 "use server";
 import { prisma } from "@/lib/prisma";
+import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export type PropertyFilters = {
   searchQuery?: string;
-  propertyStatus?: string;
+  propertyStatus?: string; // This actually maps to listingType (Sale/Rent)
+  approvalStatus?: string; // This maps to DB status (APPROVED, PENDING_REVIEW)
   propertyType?: string;
   bedrooms?: string;
   priceRange?: string;
@@ -16,6 +18,7 @@ export async function listProperties(filters: PropertyFilters = {}) {
   const {
     searchQuery,
     propertyStatus,
+    approvalStatus,
     propertyType,
     bedrooms,
     priceRange,
@@ -24,6 +27,16 @@ export async function listProperties(filters: PropertyFilters = {}) {
   } = filters;
 
   const where: any = {};
+
+  // Default to APPROVED if no specific status requested
+  if (approvalStatus) {
+    if (approvalStatus !== "ALL") {
+      where.status = approvalStatus;
+    }
+    // If "ALL", don't add status filter (for admin)
+  } else {
+    where.status = "APPROVED";
+  }
 
   // Search Query (Title or Location)
   if (searchQuery) {
@@ -38,13 +51,13 @@ export async function listProperties(filters: PropertyFilters = {}) {
   if (propertyStatus) {
     // propertyStatus from UI: "sale", "rent", "off_plan" (or "off-plan"?)
     // Let's assume UI sends "sale", "rent", "off_plan" matching the enum (case insensitive)
-    
+
     let typeStr = propertyStatus.toUpperCase();
     if (typeStr === "OFF-PLAN") typeStr = "OFF_PLAN"; // Handle potential slug variation
     if (typeStr === "BUY") typeStr = "SALE"; // Map "BUY" from frontend to "SALE" in DB
 
     if (["SALE", "RENT", "OFF_PLAN"].includes(typeStr)) {
-        where.listingType = typeStr;
+      where.listingType = typeStr;
     }
   }
 
@@ -94,7 +107,7 @@ export async function listProperties(filters: PropertyFilters = {}) {
   // If `searchQuery` covers location, we might not need this unless it's a specific filter.
   // But if we have a separate location filter:
   if (location) {
-     where.location = { contains: location, mode: "insensitive" };
+    where.location = { contains: location, mode: "insensitive" };
   }
 
   // Sorting
@@ -122,9 +135,9 @@ export async function listProperties(filters: PropertyFilters = {}) {
     where,
     orderBy,
     include: {
-        propertyType: true,
-        images: true,
-        // Remove the relation include since it's broken
+      propertyType: true,
+      images: true,
+      // Remove the relation include since it's broken
     }
   });
 
@@ -141,8 +154,10 @@ export async function listProperties(filters: PropertyFilters = {}) {
   });
 
   // Attach media usages to properties
-  return properties.map(p => ({
+  const result = properties.map(p => ({
     ...p,
     mediaUsages: mediaUsages.filter(mu => mu.entityId === p.id)
   }));
+
+  return serializeDecimals(result);
 }

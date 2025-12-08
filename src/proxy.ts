@@ -1,7 +1,7 @@
-// src/middleware.ts
-import {withAuth} from "next-auth/middleware";
-import {NextResponse} from "next/server";
-import type {NextRequest} from "next/server";
+// src/proxy.ts
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export default withAuth(
     function middleware(req: NextRequest) {
@@ -15,7 +15,7 @@ export default withAuth(
     },
     {
         callbacks: {
-            authorized: ({token}) => !!token,
+            authorized: ({ token }) => !!token,
         },
     }
 );
