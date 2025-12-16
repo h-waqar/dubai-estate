@@ -78,53 +78,53 @@ export default function Hero({ propertyTypes }: HeroProps) {
           </div>
 
           {/* Search Widget Container */}
-          <div className="w-full bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 ring-1 ring-black/5 max-w-3xl">
+          <div className="w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 ring-1 ring-white/20 border border-white/20 max-w-3xl">
 
             {/* Top Section: Toggle Group */}
-            <div className="border-b border-gray-100 dark:border-gray-800 p-2 bg-gray-50/50 dark:bg-gray-800/50">
+            <div className="border-b border-gray-200/50 dark:border-gray-700/50 p-3 md:p-4 bg-white/40 dark:bg-gray-800/40">
               <ToggleGroup
                 type="single"
                 value={purpose}
                 onValueChange={(value) => { if (value) setPurpose(value); }}
                 className="justify-start w-full"
               >
-                <ToggleGroupItem value="buy" className="flex-1 data-[state=on]:bg-white data-[state=on]:text-yellow-600 data-[state=on]:shadow-sm data-[state=on]:font-semibold">Buy</ToggleGroupItem>
-                <ToggleGroupItem value="rent" className="flex-1 data-[state=on]:bg-white data-[state=on]:text-yellow-600 data-[state=on]:shadow-sm data-[state=on]:font-semibold">Rent</ToggleGroupItem>
-                <ToggleGroupItem value="off_plan" className="flex-1 data-[state=on]:bg-white data-[state=on]:text-yellow-600 data-[state=on]:shadow-sm data-[state=on]:font-semibold">Off Plan</ToggleGroupItem>
+                <ToggleGroupItem value="buy" className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300">Buy</ToggleGroupItem>
+                <ToggleGroupItem value="rent" className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300">Rent</ToggleGroupItem>
+                <ToggleGroupItem value="off_plan" className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300">Off Plan</ToggleGroupItem>
               </ToggleGroup>
             </div>
 
-            <div className="p-3 md:p-4 space-y-2">
+            <div className="p-5 md:p-6 space-y-4">
               {/* Middle Section: Search & Button */}
-              <div className="flex flex-col md:flex-row gap-2">
+              <div className="flex flex-col md:flex-row gap-3">
                 {/* Location Input */}
                 <div className="flex-grow relative group">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-yellow-500 transition-colors" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-yellow-500 transition-colors" />
                   <Input
                     placeholder="Enter location..."
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="h-10 pl-9 text-sm bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:ring-1 focus:ring-yellow-500/20 focus:border-yellow-500 rounded-lg transition-all"
+                    className="h-12 pl-12 text-base bg-white/60 dark:bg-gray-800/60 border-gray-200/60 dark:border-gray-700/60 focus:ring-1 focus:ring-yellow-500 focus:border-yellow-500 rounded-xl transition-all shadow-sm focus:bg-white dark:focus:bg-gray-800"
                   />
                 </div>
 
                 {/* Search Button (Desktop) */}
                 <Button
                   onClick={handleSearch}
-                  className="hidden md:flex h-10 px-6 text-sm font-bold bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-sm hover:shadow-md transition-all min-w-[100px]"
+                  className="hidden md:flex h-12 px-8 text-base font-bold bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all min-w-[120px]"
                 >
                   Search
                 </Button>
               </div>
 
               {/* Bottom Section: Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {/* Property Type */}
                 <Select value={propertyType} onValueChange={setPropertyType}>
-                  <SelectTrigger className="h-9 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-yellow-500/50 transition-colors focus:ring-0 focus:border-yellow-500 text-xs font-medium px-3">
+                  <SelectTrigger className="h-11 w-full bg-white/60 dark:bg-gray-800/60 border-gray-200/60 dark:border-gray-700/60 hover:bg-white hover:border-yellow-500/50 transition-all focus:ring-0 focus:border-yellow-500 text-sm font-medium px-4 rounded-xl shadow-sm">
                     <SelectValue placeholder="Property Type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="backdrop-blur-xl bg-white/95 dark:bg-gray-900/95">
                     <SelectItem value="all">All Types</SelectItem>
                     {propertyTypes.map((type) => (
                       <SelectItem key={type.id} value={type.slug}>
@@ -136,10 +136,10 @@ export default function Hero({ propertyTypes }: HeroProps) {
 
                 {/* Bedrooms */}
                 <Select value={bedrooms} onValueChange={setBedrooms}>
-                  <SelectTrigger className="h-9 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-yellow-500/50 transition-colors focus:ring-0 focus:border-yellow-500 text-xs font-medium px-3">
+                  <SelectTrigger className="h-11 w-full bg-white/60 dark:bg-gray-800/60 border-gray-200/60 dark:border-gray-700/60 hover:bg-white hover:border-yellow-500/50 transition-all focus:ring-0 focus:border-yellow-500 text-sm font-medium px-4 rounded-xl shadow-sm">
                     <SelectValue placeholder="Bedrooms" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="backdrop-blur-xl bg-white/95 dark:bg-gray-900/95">
                     <SelectItem value="all">Any Bed</SelectItem>
                     <SelectItem value="1">1 Bed</SelectItem>
                     <SelectItem value="2">2 Beds</SelectItem>
@@ -151,10 +151,10 @@ export default function Hero({ propertyTypes }: HeroProps) {
 
                 {/* Price Range */}
                 <Select value={priceRange} onValueChange={setPriceRange}>
-                  <SelectTrigger className="h-9 w-full bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-yellow-500/50 transition-colors focus:ring-0 focus:border-yellow-500 text-xs font-medium px-3">
+                  <SelectTrigger className="h-11 w-full bg-white/60 dark:bg-gray-800/60 border-gray-200/60 dark:border-gray-700/60 hover:bg-white hover:border-yellow-500/50 transition-all focus:ring-0 focus:border-yellow-500 text-sm font-medium px-4 rounded-xl shadow-sm">
                     <SelectValue placeholder="Price Range" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="backdrop-blur-xl bg-white/95 dark:bg-gray-900/95">
                     <SelectItem value="all">Any Price</SelectItem>
                     {purpose === "rent" ? (
                       <>
@@ -177,7 +177,7 @@ export default function Hero({ propertyTypes }: HeroProps) {
                 {/* Search Button (Mobile Only) */}
                 <Button
                   onClick={handleSearch}
-                  className="md:hidden w-full h-10 text-sm font-bold bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow-sm"
+                  className="md:hidden w-full h-12 text-base font-bold bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl shadow-md"
                 >
                   Search Properties
                 </Button>
