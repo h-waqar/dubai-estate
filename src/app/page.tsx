@@ -6,13 +6,18 @@ import Categories from "@/components/sections/Categories";
 import FeaturedProperties from "@/components/sections/FeaturedProperties";
 import FeaturedArticles from "@/components/sections/FeaturedArticles";
 import Newsletter from "@/components/sections/Newsletter";
+import { prisma } from "@/lib/prisma";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const propertyTypes = await prisma.propertyType.findMany({
+    orderBy: { name: "asc" },
+  });
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <Header />
       <main className="relative">
-        <Hero />
+        <Hero propertyTypes={propertyTypes} />
         <Categories />
         <FeaturedProperties />
         <FeaturedArticles />
