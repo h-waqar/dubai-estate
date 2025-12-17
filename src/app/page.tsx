@@ -18,7 +18,7 @@ export default async function HomePage() {
       <Header />
       <main className="relative">
         <Hero propertyTypes={propertyTypes} />
-        <Categories />
+        {/* <Categories /> */}
         <FeaturedProperties />
         <FeaturedArticles />
         <Newsletter />

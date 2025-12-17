@@ -48,7 +48,7 @@ interface StepSevenSuccessProps {
   };
 }
 
-function StepSevenSuccess({}: StepSevenSuccessProps) {
+function StepSevenSuccess({ }: StepSevenSuccessProps) {
   const router = useRouter();
   const [showConfetti, setShowConfetti] = useState(true);
   const { next, prev } = useStepStore();
@@ -56,7 +56,7 @@ function StepSevenSuccess({}: StepSevenSuccessProps) {
   const handleGoToDashboard = () => {
     useStepStore.getState().reset();
     useAdvertiseFormStore.getState().reset();
-    router.push("/dashboard");
+    router.push("/agent/dashboard");
   };
 
   useEffect(() => {
