@@ -14,6 +14,7 @@ import StepFourMedia from "./steps/StepFourMedia";
 import StepFiveAccount from "./steps/StepFiveAccount";
 import StepSixPayment from "./steps/StepSixPayment";
 import StepSevenSuccess from "./steps/StepSevenSuccess";
+import DevStepSwitcher from "./DevStepSwitcher";
 
 interface AdvertiseWizardProps {
   propertyTypes: { id: number; name: string; slug: string }[];
@@ -66,6 +67,8 @@ export default function AdvertiseWizard({
           </motion.div>
         </AnimatePresence>
       </div>
+      {/* Dev helper */}
+      <DevStepSwitcher />
     </div>
   );
 }
