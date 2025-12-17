@@ -12,6 +12,7 @@ export type PropertyFilters = {
   priceRange?: string;
   location?: string;
   sort?: string;
+  userId?: number;
 };
 
 export async function listProperties(filters: PropertyFilters = {}) {
@@ -24,18 +25,28 @@ export async function listProperties(filters: PropertyFilters = {}) {
     priceRange,
     location,
     sort,
+    userId, // Add userId to destructuring
   } = filters;
 
   const where: any = {};
+
+  // Filter by User ID (for Agent Dashboard)
+  if (userId) {
+    where.createdById = userId;
+  }
 
   // Default to APPROVED if no specific status requested
   if (approvalStatus) {
     if (approvalStatus !== "ALL") {
       where.status = approvalStatus;
     }
-    // If "ALL", don't add status filter (for admin)
+    // If "ALL", don't add status filter (for admin or agent dashboard)
   } else {
-    where.status = "APPROVED";
+    // Only default to APPROVED if NOT filtering by userId (public view)
+    // If filtering by userId, we likely want to see all their properties unless specified otherwise
+    if (!userId) {
+      where.status = "APPROVED";
+    }
   }
 
   // Search Query (Title or Location)

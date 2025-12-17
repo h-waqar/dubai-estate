@@ -1,8 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { ImagePlus, Upload, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
 import StepController from "./StepController";
@@ -10,7 +12,7 @@ import MediaLibraryButton from "@/modules/media/components/MediaLibraryButton";
 import type { Media } from "@/modules/media/types/media.types";
 import { cn } from "@/lib/utils";
 import { stepFourSchema } from "../../../validators/advertise-steps.validator";
-import { z } from "zod";
+import { updatePropertyAction } from "@/modules/property/actions/updateProperty";
 
 // Reusable component for the media item preview (FOR GALLERY)
 function MediaPreview({
@@ -49,6 +51,8 @@ interface StepFourMediaProps {
   serverData: {
     features?: { id: number; name: string; slug: string }[];
   };
+  isEditMode?: boolean;
+  propertyId?: number;
 }
 
 type StepFourData = {
@@ -56,9 +60,11 @@ type StepFourData = {
   gallery: Media[];
 };
 
-export default function StepFourMedia({}: StepFourMediaProps) {
+export default function StepFourMedia({ isEditMode, propertyId }: StepFourMediaProps) {
   const { next, prev } = useStepStore();
+  const router = useRouter();
   const { coverImage, gallery, update } = useAdvertiseFormStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     setValue,
@@ -79,14 +85,11 @@ export default function StepFourMedia({}: StepFourMediaProps) {
   // Sync form -> store
   useEffect(() => {
     const subscription = watch((value) => {
-      // We need to cast because react-hook-form might treat them as partials or slightly different types
-      // depending on how Zod schema is defined vs actual Media type.
-      // Assuming Media type matches what's expected.
       if (value.coverImage !== undefined) {
-         update({ coverImage: value.coverImage as Media | null });
+        update({ coverImage: value.coverImage as Media | null });
       }
       if (value.gallery !== undefined) {
-         update({ gallery: value.gallery as Media[] });
+        update({ gallery: value.gallery as Media[] });
       }
     });
     return () => subscription.unsubscribe();
@@ -98,15 +101,11 @@ export default function StepFourMedia({}: StepFourMediaProps) {
   };
 
   const handleCoverRemove = () => {
-    setValue("coverImage", null as any, { shouldValidate: true }); // Cast to any to allow null if schema permits or just undefined
-    // Schema says: coverImage: z.object({ id: z.number() }, { message: "Cover image is required." })
-    // So it shouldn't be null. But initially it is null/undefined.
-    // If I set it to undefined, it might trigger validation error.
+    setValue("coverImage", null as any, { shouldValidate: true });
   };
 
   // --- Gallery Handlers ---
   const handleGallerySelect = (media: Media) => {
-    // Avoid duplicates
     const current = currentGallery || [];
     if (!current.find((img) => img.id === media.id)) {
       setValue("gallery", [...current, media], { shouldValidate: true });
@@ -119,20 +118,58 @@ export default function StepFourMedia({}: StepFourMediaProps) {
     setValue("gallery", newGallery, { shouldValidate: true });
   };
 
-  const onSubmit = () => {
-    next();
+  const onSubmit = async () => {
+    if (isEditMode && propertyId) {
+      setIsSubmitting(true);
+      try {
+        const state = useAdvertiseFormStore.getState();
+
+        const formData = new FormData();
+        formData.append("title", state.title);
+        formData.append("price", String(state.price || 0));
+        formData.append("listingType", state.listingType);
+        formData.append("propertyTypeId", String(state.propertyTypeId));
+        formData.append("bedrooms", String(state.bedrooms || 0));
+        formData.append("bathrooms", String(state.bathrooms || 0));
+        formData.append("location", state.location);
+        formData.append("latitude", String(state.latitude || 0));
+        formData.append("longitude", String(state.longitude || 0));
+        formData.append("furnishing", state.furnishing);
+        formData.append("description", state.description);
+
+        state.features.forEach(f => formData.append("features[]", f));
+
+        if (state.coverImage?.id) formData.append("coverImage", String(state.coverImage.id));
+        state.gallery.forEach(m => formData.append("gallery[]", String(m.id)));
+
+        const result = await updatePropertyAction(propertyId, formData);
+
+        if (result.success) {
+          toast.success("Property updated successfully!");
+          router.push("/agent/dashboard");
+          return;
+        } else {
+          toast.error("Failed to update property: " + JSON.stringify(result.error));
+        }
+
+      } catch (error) {
+        toast.error("Something went wrong");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      next();
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* Card container */}
       <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-sm p-6 space-y-6 border border-border">
-        {/* Header */}
         <h2 className="text-2xl font-semibold flex items-center gap-2">
           🖼️ 04 Media
         </h2>
 
-        {/* --- Cover Image Section ("My Photos") --- */}
+        {/* --- Cover Image --- */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Cover Image</h3>
@@ -149,7 +186,6 @@ export default function StepFourMedia({}: StepFourMediaProps) {
             )}
           >
             {currentCoverImage ? (
-              // Use a full-width preview for the cover image
               <div className="relative group w-full">
                 <div className="relative w-full aspect-video overflow-hidden rounded-lg border border-border">
                   <Image
@@ -186,10 +222,9 @@ export default function StepFourMedia({}: StepFourMediaProps) {
           )}
         </div>
 
-        {/* Divider */}
         <hr className="border-border" />
 
-        {/* --- Gallery Section ("My Videos" -> Gallery) --- */}
+        {/* --- Gallery --- */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">
@@ -237,11 +272,12 @@ export default function StepFourMedia({}: StepFourMediaProps) {
         </div>
       </div>
 
-      {/* Navigation */}
-      <StepController 
+      <StepController
         onNext={handleSubmit(onSubmit)}
-        onPrev={prev} 
-        showPrev={true} 
+        onPrev={prev}
+        showPrev={true}
+        nextLabel={isEditMode ? "Update Property" : undefined}
+        isSubmitting={isSubmitting}
       />
     </form>
   );

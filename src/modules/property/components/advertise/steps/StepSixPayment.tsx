@@ -62,6 +62,7 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
     location,
     latitude,
     longitude,
+    reset,
   } = useAdvertiseFormStore();
 
   const initialPayPalOptions = {
@@ -168,6 +169,11 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
 
       if (result.success) {
         toast.success("Property created successfully!");
+        reset(); // Reset form data
+        // We might not want to reset step store immediately if we navigate to "Success" step
+        // But if "next()" goes to Success step, we should let it.
+        // The Success step component can handle cleaning up the step store on unmount or on "Go to Dashboard" click.
+        // However, the user asked to clear data "when submit is clicked".
         next();
       } else {
         console.error(result.error);
@@ -535,6 +541,7 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
                     return actions.order.create({
                       purchase_units: [{
                         amount: {
+                          currency_code: "USD",
                           value: plan === "gold" ? "25" : "10"
                         }
                       }]
@@ -545,6 +552,7 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
                     if (details?.status === "COMPLETED") {
                       toast.success("Payment successful!");
                       onSubmit({ ...watch(), paymentMethod: "paypal" });
+                      // onSubmit handles the reset
                     }
                   }}
                 />

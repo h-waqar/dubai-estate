@@ -23,13 +23,6 @@ export default function AgentDashboardLayout({
                         Dashboard
                     </Link>
                     <Link
-                        href="/agent/properties"
-                        className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    >
-                        <Building2 className="w-5 h-5" />
-                        My Properties
-                    </Link>
-                    <Link
                         href="/advertise"
                         className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     >
