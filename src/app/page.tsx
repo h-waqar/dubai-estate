@@ -7,6 +7,7 @@ import FeaturedProperties from "@/components/sections/FeaturedProperties";
 import FeaturedArticles from "@/components/sections/FeaturedArticles";
 import Newsletter from "@/components/sections/Newsletter";
 import { StatsFeatureSection } from "@/components/sections/StatsFeatureSection";
+import { DevelopersCarousel } from "@/components/sections/DevelopersCarousel";
 import { prisma } from "@/lib/prisma";
 
 export default async function HomePage() {
@@ -21,6 +22,7 @@ export default async function HomePage() {
         <Hero propertyTypes={propertyTypes} />
         {/* <Categories /> */}
         <FeaturedProperties />
+        <DevelopersCarousel />
         <StatsFeatureSection />
         <FeaturedArticles />
         <Newsletter />

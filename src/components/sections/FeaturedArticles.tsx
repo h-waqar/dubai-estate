@@ -192,7 +192,7 @@ export default function FeaturedArticles() {
 
         {/* View All Button */}
         <div className="text-center">
-          <Link href="/blog">
+          <Link href="/blogs">
             <Button
               variant="outline"
               size="lg"
