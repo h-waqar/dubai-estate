@@ -27,7 +27,7 @@ interface AdvertiseWizardProps {
   propertyId?: number;
 }
 
-const steps = [
+const allSteps = [
   StepOneCreate,
   StepTwoDescription,
   StepThreeDetails,
@@ -44,15 +44,46 @@ export default function AdvertiseWizard({
   initialData,
   propertyId,
 }: AdvertiseWizardProps) {
-  const { step, goTo } = useStepStore(); // Changed setStep to goTo
+  const { step, goTo } = useStepStore();
   const { update } = useAdvertiseFormStore();
-  const StepComponent = steps[step] as React.ComponentType<any>; // Cast to any to accept extra props
+
+  // Filter steps for Edit Mode: remove Account (5), Payment (6), Success (7)
+  // Indices: 0, 1, 2, 3. Step 4 becomes the last one.
+  const steps = isEditMode ? allSteps.slice(0, 4) : allSteps;
+
+  const StepComponent = steps[step] as React.ComponentType<any>;
   const prevStep = useRef(step);
+
+  const [isLoaded, setIsLoaded] = React.useState(!isEditMode);
 
   // Initialize store with data if in Edit Mode
   React.useEffect(() => {
+    // 1. Sync the store's "steps" array structure based on mode
+    const createSteps = [
+      { title: "Create", description: "Property title and type" },
+      { title: "Description", description: "Address and map" },
+      { title: "Details", description: "Features and pricing" },
+      { title: "Media", description: "Images and gallery" },
+      { title: "Account", description: "Confirm & submit" },
+      { title: "Payment", description: "Confirm & submit" },
+      { title: "Success", description: "Confirm & submit" },
+    ];
+
+    // In edit mode, we only use the first 4 steps
+    const currentSteps = isEditMode ? createSteps.slice(0, 4) : createSteps;
+
+    // Update store to reflect the current steps (so header renders correctly)
+    useStepStore.setState({ steps: currentSteps });
+
+    // 2. Validate/Clamp step index
+    // If we switched from Create (step 6) to Edit (max step 3), we need to clamp.
+    if (step >= currentSteps.length) {
+      goTo(0);
+      return; // Return early, let the effect re-run or component re-render
+    }
+
+    // 3. Hydrate data (Edit Mode only)
     if (isEditMode && initialData) {
-      // Map server data to store state
       update({
         listingType: initialData.listingType,
         propertyTypeId: initialData.propertyTypeId,
@@ -63,26 +94,31 @@ export default function AdvertiseWizard({
         longitude: initialData.longitude,
         description: initialData.description || "",
         price: Number(initialData.price),
+        currency: initialData.currency || "AED",
         bedrooms: initialData.bedrooms,
         bathrooms: initialData.bathrooms,
+        propertySize: initialData.builtUpArea ? Number(initialData.builtUpArea) : undefined,
         furnishing: initialData.furnishing,
-        // Map features: serverData features are { id, name }, property has { propertyId, featureId }
-        // We need feature NAMES for the store string[]
-        features: initialData.features?.map((f: any) => f.feature.name) || [],
-        // Map media
-        // Cover Image (search for role="COVER" in mediaUsages)
+        features: initialData.features?.map((f: any) => f.feature?.name).filter(Boolean) || [],
+        keywords: [],
         coverImage: initialData.mediaUsages?.find((m: any) => m.role === "COVER")?.media || null,
-        // Gallery (role="GALLERY")
         gallery: initialData.mediaUsages?.filter((m: any) => m.role === "GALLERY").map((m: any) => m.media) || [],
       });
-      // Ensure we start at step 0 if not already
-      // setStep(0); 
+      setIsLoaded(true);
+    } else {
+      // Not edit mode, just mark loaded
+      setIsLoaded(true);
     }
-  }, [isEditMode, initialData, update]);
+  }, [isEditMode, initialData, update, step, goTo]);
 
   // Determine slide direction
   const direction = step > prevStep.current ? 1 : -1;
   prevStep.current = step;
+
+  // Safety check: if StepComponent is missing (e.g. index out of bounds before effect runs), render loading
+  if (!isLoaded || !StepComponent) {
+    return <div className="min-h-[400px] flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4">

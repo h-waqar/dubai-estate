@@ -9,12 +9,14 @@ export default function StepController({
   disableNext,
   showPrev = true,
   nextLabel,
+  isSubmitting,
 }: {
   onNext?: () => void;
   onPrev?: () => void;
   disableNext?: boolean;
   showPrev?: boolean;
   nextLabel?: string;
+  isSubmitting?: boolean;
 }) {
   const { next, prev, step, steps } = useStepStore();
   const isLast = step === steps.length - 1;
@@ -28,8 +30,8 @@ export default function StepController({
       ) : (
         <div />
       )}
-      <Button onClick={onNext || next} disabled={disableNext} variant="default">
-        {nextLabel || (isLast ? "Finish" : "Next")}
+      <Button onClick={onNext || next} disabled={disableNext || isSubmitting} variant="default">
+        {isSubmitting ? "Loading..." : (nextLabel || (isLast ? "Finish" : "Next"))}
       </Button>
     </div>
   );

@@ -60,7 +60,7 @@ const formSchema = stepThreeSchema.extend({
 
 type StepThreeData = z.infer<typeof formSchema>;
 
-function StepThreeDetails({}: StepThreeDetailsProps) {
+function StepThreeDetails({ }: StepThreeDetailsProps) {
   const { next, prev } = useStepStore();
   const {
     price,
@@ -83,10 +83,10 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       price: price || undefined,
-      currency: currency || "dollar",
+      currency: currency || "AED",
       bedrooms: bedrooms || undefined,
       bathrooms: bathrooms || undefined,
-      propertySize: propertySize || undefined,
+      propertySize: propertySize !== 0 ? propertySize : undefined,
       furnishing: furnishing || "UNFURNISHED",
     },
   });
@@ -144,10 +144,10 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
                   <SelectValue placeholder="Currency" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dollar">Dollar</SelectItem>
-                  <SelectItem value="aed">AED</SelectItem>
-                  <SelectItem value="eur">Euro</SelectItem>
-                  <SelectItem value="pkr">PKR</SelectItem>
+                  <SelectItem value="USD">Dollar (USD)</SelectItem>
+                  <SelectItem value="AED">AED</SelectItem>
+                  <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                  <SelectItem value="PKR">PKR</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -249,10 +249,10 @@ function StepThreeDetails({}: StepThreeDetailsProps) {
 
 
 
-      <StepController 
+      <StepController
         onNext={handleSubmit(onSubmit)}
-        onPrev={prev} 
-        showPrev={true} 
+        onPrev={prev}
+        showPrev={true}
       />
     </form>
   );

@@ -60,7 +60,7 @@ type StepFourData = {
   gallery: Media[];
 };
 
-export default function StepFourMedia({ isEditMode, propertyId }: StepFourMediaProps) {
+export default function StepFourMedia({ isEditMode, propertyId, serverData }: StepFourMediaProps) {
   const { next, prev } = useStepStore();
   const router = useRouter();
   const { coverImage, gallery, update } = useAdvertiseFormStore();
@@ -137,7 +137,14 @@ export default function StepFourMedia({ isEditMode, propertyId }: StepFourMediaP
         formData.append("furnishing", state.furnishing);
         formData.append("description", state.description);
 
-        state.features.forEach(f => formData.append("features[]", f));
+        // Map feature names to IDs using serverData
+        const featureMap = new Map(serverData.features?.map(f => [f.name, f.id]) || []);
+        state.features.forEach(name => {
+          const id = featureMap.get(name);
+          if (id) {
+            formData.append("features[]", String(id));
+          }
+        });
 
         if (state.coverImage?.id) formData.append("coverImage", String(state.coverImage.id));
         state.gallery.forEach(m => formData.append("gallery[]", String(m.id)));
@@ -146,6 +153,7 @@ export default function StepFourMedia({ isEditMode, propertyId }: StepFourMediaP
 
         if (result.success) {
           toast.success("Property updated successfully!");
+          useAdvertiseFormStore.getState().reset(); // Reset form data
           router.push("/agent/dashboard");
           return;
         } else {
