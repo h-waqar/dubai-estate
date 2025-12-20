@@ -4,9 +4,9 @@ import { ProjectService } from "@/modules/project/services/project.service";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Building2, ArrowLeft } from "lucide-react";
+import { Building2, MapPin } from "lucide-react";
+import { ProjectHeroSlider } from "@/components/project/ProjectHeroSlider";
+import { ProjectHeroOverlay } from "@/components/project/ProjectHeroOverlay";
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -27,64 +27,59 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         },
     });
 
+    const logo = mediaUsages.find(mu => mu.role === "LOGO")?.media;
     const coverImage = mediaUsages.find(mu => mu.role === "COVER")?.media;
     const gallery = mediaUsages.filter(mu => mu.role === "GALLERY").map(mu => mu.media);
 
+    // Combine cover image and gallery for slider
+    const sliderImages = [
+        ...(coverImage ? [coverImage] : []),
+        ...gallery,
+    ];
+
     return (
         <div className="min-h-screen bg-white dark:bg-gray-950">
-            <div className="container mx-auto px-4 py-8">
-                {/* Back Button */}
-                <Link href="/projects">
-                    <Button variant="ghost" className="mb-4">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Projects
-                    </Button>
-                </Link>
+            {/* Hero Slider with Overlay */}
+            <div className="relative">
+                <ProjectHeroSlider images={sliderImages} />
+                <ProjectHeroOverlay
+                    logo={logo}
+                    projectName={project.name}
+                    description={project.description}
+                    priceFrom={project.priceFrom}
+                    paymentPlanSummary={project.paymentPlanSummary}
+                    handoverDate={project.handoverDate}
+                />
+            </div>
 
-                {/* Cover Image */}
-                {coverImage && (
-                    <div className="relative w-full h-96 mb-8 rounded-lg overflow-hidden">
-                        <Image
-                            src={coverImage.url}
-                            alt={project.name}
-                            fill
-                            className="object-cover"
-                        />
-                    </div>
-                )}
-
+            {/* Content Below Hero */}
+            <div className="container mx-auto px-4 py-12">
                 {/* Project Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <div>
-                            <h1 className="text-4xl font-bold mb-2">{project.name}</h1>
-                            <p className="text-xl text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Developer & Location Info */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                            <p className="text-xl text-gray-600 dark:text-gray-400 flex items-center gap-2 mb-3">
                                 <Building2 className="w-5 h-5" />
-                                by {project.developer.name}
+                                Developed by {project.developer.name}
                             </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-                            <span className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
+                            <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                                <MapPin className="w-5 h-5" />
                                 {project.location}
-                            </span>
-                            {project.handoverDate && (
-                                <span className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4" />
-                                    Handover: {new Date(project.handoverDate).toLocaleDateString()}
+                            </p>
+                            <div className="mt-4">
+                                <span className="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
+                                    {project.projectType}
                                 </span>
-                            )}
-                            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
-                                {project.projectType}
-                            </span>
+                            </div>
                         </div>
 
+                        {/* Full Description */}
                         {project.description && (
-                            <div>
-                                <h2 className="text-2xl font-semibold mb-4">About</h2>
-                                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                                <h2 className="text-2xl font-semibold mb-4">About This Project</h2>
+                                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
                                     {project.description}
                                 </p>
                             </div>
@@ -92,12 +87,12 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
                         {/* Amenities */}
                         {project.amenities.length > 0 && (
-                            <div>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
                                 <h2 className="text-2xl font-semibold mb-4">Amenities</h2>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                     {project.amenities.map((amenity) => (
                                         <div key={amenity.id} className="flex items-center gap-2">
-                                            <span className="text-green-600">✓</span>
+                                            <span className="text-green-600 text-lg">✓</span>
                                             <span>{amenity.name}</span>
                                         </div>
                                     ))}
@@ -105,15 +100,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                             </div>
                         )}
 
-                        {/* Payment Plan */}
+                        {/* Payment Plan Details */}
                         {project.paymentPlan.length > 0 && (
-                            <div>
-                                <h2 className="text-2xl font-semibold mb-4">Payment Plan</h2>
-                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-2">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                                <h2 className="text-2xl font-semibold mb-4">Payment Plan Breakdown</h2>
+                                <div className="space-y-3">
                                     {project.paymentPlan.map((stage) => (
-                                        <div key={stage.id} className="flex justify-between">
-                                            <span>{stage.description}</span>
-                                            <span className="font-semibold">{stage.percentage}%</span>
+                                        <div key={stage.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded">
+                                            <span className="text-gray-700 dark:text-gray-300">{stage.description}</span>
+                                            <span className="font-semibold text-lg text-blue-600">{stage.percentage}%</span>
                                         </div>
                                     ))}
                                 </div>
@@ -122,11 +117,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
                         {/* Floorplans */}
                         {project.floorplans.length > 0 && (
-                            <div>
-                                <h2 className="text-2xl font-semibold mb-4">Floor Plans</h2>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                                <h2 className="text-2xl font-semibold mb-4">Available Floor Plans</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {project.floorplans.map((floorplan) => (
-                                        <div key={floorplan.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border">
+                                        <div key={floorplan.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                                             <h3 className="font-semibold text-lg mb-2">{floorplan.unitName}</h3>
                                             <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                                                 <p>{floorplan.bedrooms} Bed | {floorplan.bathrooms} Bath</p>
@@ -141,33 +136,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
                     {/* Sidebar */}
                     <div className="space-y-6">
-                        {/* Price */}
-                        {project.priceFrom && (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Starting from</p>
-                                <p className="text-3xl font-bold text-blue-600">
-                                    AED {project.priceFrom.toLocaleString()}
-                                </p>
-                                {project.paymentPlanSummary && (
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                        Payment Plan: {project.paymentPlanSummary}
-                                    </p>
-                                )}
-                                <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
-                                    Contact Developer
-                                </Button>
-                            </div>
-                        )}
-
                         {/* Nearby Attractions */}
                         {project.nearbyAttractions.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-                                <h3 className="text-lg font-semibold mb-4">Nearby</h3>
-                                <div className="space-y-2">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                                <h3 className="text-lg font-semibold mb-4">Nearby Attractions</h3>
+                                <div className="space-y-3">
                                     {project.nearbyAttractions.map((attraction) => (
-                                        <div key={attraction.id} className="flex justify-between text-sm">
-                                            <span>{attraction.name}</span>
-                                            <span className="text-gray-600 dark:text-gray-400">{attraction.distance}</span>
+                                        <div key={attraction.id} className="flex justify-between text-sm pb-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                                            <span className="text-gray-700 dark:text-gray-300">{attraction.name}</span>
+                                            <span className="text-gray-600 dark:text-gray-400 font-medium">{attraction.distance}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -175,25 +152,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                         )}
                     </div>
                 </div>
-
-                {/* Gallery */}
-                {gallery.length > 0 && (
-                    <div className="mt-12">
-                        <h2 className="text-2xl font-semibold mb-6">Gallery</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {gallery.map((image) => (
-                                <div key={image.id} className="relative aspect-video rounded-lg overflow-hidden">
-                                    <Image
-                                        src={image.url}
-                                        alt={image.title || project.name}
-                                        fill
-                                        className="object-cover hover:scale-110 transition-transform duration-300"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );
