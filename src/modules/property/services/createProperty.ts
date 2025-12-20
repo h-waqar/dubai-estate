@@ -62,12 +62,9 @@ export async function createProperty(
   }
 
   // Step 3: Link features
-  // @ts-ignore - input might not have features type defined in CreatePropertyInput yet, assuming handled by passed object
-  if (input.features?.length) {
-    // @ts-ignore
-    const featureIds: number[] = input.features;
+  if (features?.length) {
     await prisma.propertyFeature.createMany({
-      data: featureIds.map((fid) => ({
+      data: features.map((fid) => ({
         propertyId: property.id,
         featureId: fid,
       })),

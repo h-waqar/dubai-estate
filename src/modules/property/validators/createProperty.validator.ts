@@ -18,6 +18,7 @@ export const createPropertyValidator = z.object({
   gallery: z
     .array(z.number().int().positive("Invalid image reference"))
     .optional(),
+  features: z.array(z.number().int().positive()).optional(),
 });
 
 // export const createPropertyValidator = z.object({

@@ -52,6 +52,8 @@ model User {
   properties         Property[]
   pricingPlanId      Int?
   approvedProperties Property[]   @relation("PropertyApprovals")
+  projects           Project[]
+  approvedProjects   Project[]    @relation("ProjectApprovals")
   pricingPlan        PricingPlan? @relation(fields: [pricingPlanId], references: [id], onDelete: SetNull)
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
@@ -152,6 +154,36 @@ enum ListingType {
   RENT
   OFF_PLAN
 }
+
+// --- Projects Module Enums ---
+enum ProjectType {
+  FUTURE
+  CURRENT
+  PAST
+}
+
+enum ProjectStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  DECLINED
+  ARCHIVED
+}
+
+enum UnitType {
+  STUDIO
+  ONE_BEDROOM
+  ONE_BEDROOM_STUDY
+  TWO_BEDROOM
+  TWO_BEDROOM_STUDY
+  THREE_BEDROOM
+  THREE_BEDROOM_MAID
+  FOUR_BEDROOM
+  PENTHOUSE
+  VILLA
+  TOWNHOUSE
+}
+
 
 // --- Pricing Plan & Quotas ---
 model PricingPlan {
@@ -315,4 +347,175 @@ model PropertyFeature {
   feature    Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
 
   @@id([propertyId, featureId])
+}
+
+// ========================================
+// PROJECTS MODULE
+// ========================================
+
+// --- Developer ---
+model Developer {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique // Auto-generated from name
+  logo        String? // URL to logo image
+  description String? // About the developer
+  website     String?
+  email       String?
+  phone       String?
+  projects    Project[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+// --- Project ---
+model Project {
+  id          Int           @id @default(autoincrement())
+  name        String
+  slug        String        @unique // Auto-generated from name
+  description String? // About section
+  projectType ProjectType   @default(CURRENT)
+  status      ProjectStatus @default(DRAFT)
+
+  // Location
+  community String? // e.g., "Al Furjan"
+  location  String // Full location/address
+  address   String?
+  latitude  Float?
+  longitude Float?
+
+  // Pricing
+  priceFrom          Decimal? @db.Decimal(12, 2)
+  currency           String   @default("AED")
+  paymentPlanSummary String? // Brief summary like "30/70"
+
+  // Dates & Timeline
+  handoverDate          DateTime?
+  announcementDate      DateTime?
+  bookingOpenedDate     DateTime?
+  constructionStartDate DateTime?
+
+  // Media - Using MediaLibrary via MediaUsage
+  // logo, cover, gallery will be linked via MediaUsage with entityType="PROJECT"
+  // No direct image fields needed
+
+  // Developer Relation
+  developerId Int
+  developer   Developer @relation(fields: [developerId], references: [id])
+
+  // Relations
+  floorplans         ProjectFloorplan[]
+  amenities          ProjectAmenity[]
+  paymentPlan        PaymentPlanStage[]
+  nearbyAttractions  NearbyAttraction[]
+  faqs               ProjectFAQ[]
+
+  // Moderation & Ownership
+  createdById  Int
+  createdBy    User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  approvedById Int?
+  approvedBy   User?     @relation("ProjectApprovals", fields: [approvedById], references: [id])
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([projectType])
+  @@index([status])
+  @@index([developerId])
+  @@index([createdById])
+}
+
+// --- Project Floorplan ---
+model ProjectFloorplan {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  unitType  UnitType
+  unitName  String? // e.g., "1 Bedroom Apartment", "2 Bedroom + Study"
+  
+  bedrooms  Int?
+  bathrooms Int?
+  size      Float? // Square footage/meters
+  sizeUnit  String?  @default("sqft")
+  
+  imageUrl  String? // URL to floorplan image
+  pdfUrl    String? // URL to downloadable PDF
+  
+  featured  Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// --- Project Amenity ---
+model ProjectAmenity {
+  id          Int       @id @default(autoincrement())
+  name        String
+  icon        String? // Icon identifier (lucide icon name, emoji, etc.)
+  category    String? // e.g., "Wellness", "Leisure", "Security"
+  projects    Project[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([name])
+}
+
+// --- Payment Plan Stage ---
+model PaymentPlanStage {
+  id           Int     @id @default(autoincrement())
+  projectId    Int
+  project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  percentage   Int // e.g., 10, 20, 70
+  description  String // e.g., "On Booking", "Within 30 Days", "On Handover"
+  triggerEvent String? // Optional detailed trigger
+  
+  order        Int     @default(0) // Display order
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// --- Nearby Attraction ---
+model NearbyAttraction {
+  id        Int     @id @default(autoincrement())
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  name      String // e.g., "Metro Station", "Sheikh Zayed Road"
+  distance  String // e.g., "5 Minutes", "10 km"
+  
+  order     Int     @default(0) // Display order
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// --- Project FAQ ---
+model ProjectFAQ {
+  id        Int     @id @default(autoincrement())
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  question  String
+  answer    String
+  
+  order     Int     @default(0) // Display order
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
 }

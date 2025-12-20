@@ -71,6 +71,14 @@ const links: SidebarItem[] = [
       { href: "/admin/features", label: "Features", icon: FaStar },
     ],
   },
+  {
+    label: "Projects",
+    icon: FaBoxOpen,
+    subItems: [
+      { href: "/admin/project-approvals", label: "Approvals", icon: FaCheckCircle },
+      { href: "/admin/projects", label: "All Projects", icon: FaImage },
+    ],
+  },
 ];
 
 // --- Components ---

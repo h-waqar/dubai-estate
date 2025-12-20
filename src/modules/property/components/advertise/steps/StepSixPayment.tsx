@@ -539,6 +539,7 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
                   style={{ layout: "vertical", shape: "rect", label: "pay" }}
                   createOrder={(data, actions) => {
                     return actions.order.create({
+                      intent: "CAPTURE",
                       purchase_units: [{
                         amount: {
                           currency_code: "USD",

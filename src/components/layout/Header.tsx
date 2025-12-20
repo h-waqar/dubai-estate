@@ -26,7 +26,7 @@ const navigation: NavItem[] = [
       // { name: "Luxury", href: "/properties" },
     ],
   },
-  
+
   // {
   //   title: "Areas",
   //   items: [
@@ -75,11 +75,10 @@ export default function Header() {
                 {item.href ? (
                   <Link
                     href={item.href}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isActive(item.href)
-                        ? "text-yellow-500 dark:text-yellow-400"
-                        : "text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400"
-                    }`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive(item.href)
+                      ? "text-yellow-500 dark:text-yellow-400"
+                      : "text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400"
+                      }`}
                   >
                     {item.title}
                   </Link>
@@ -125,7 +124,7 @@ export default function Header() {
               </Button>
             </Link>
 
-            <Link href="/auth/register" className="hidden md:block me-0">
+            <Link href="/register" className="hidden md:block me-0">
               <Button className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white">
                 Get Started
               </Button>
@@ -153,11 +152,10 @@ export default function Header() {
                         <Link
                           href={item.href}
                           onClick={() => setIsOpen(false)}
-                          className={`block px-4 py-2 rounded-md text-base font-medium ${
-                            isActive(item.href)
-                              ? "text-yellow-500 dark:text-yellow-400 bg-gray-100 dark:bg-gray-800"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                          }`}
+                          className={`block px-4 py-2 rounded-md text-base font-medium ${isActive(item.href)
+                            ? "text-yellow-500 dark:text-yellow-400 bg-gray-100 dark:bg-gray-800"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                            }`}
                         >
                           {item.title}
                         </Link>
@@ -169,9 +167,8 @@ export default function Header() {
                           >
                             {item.title}
                             <ChevronDown
-                              className={`w-4 h-4 transition-transform ${
-                                openDropdown === item.title ? "rotate-180" : ""
-                              }`}
+                              className={`w-4 h-4 transition-transform ${openDropdown === item.title ? "rotate-180" : ""
+                                }`}
                             />
                           </button>
                           {openDropdown === item.title && (
@@ -203,7 +200,7 @@ export default function Header() {
                       </Button>
                     </Link>
                     <Link
-                      href="/auth/register"
+                      href="/register"
                       onClick={() => setIsOpen(false)}
                     >
                       <Button className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white">
