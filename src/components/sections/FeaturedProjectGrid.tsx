@@ -108,7 +108,6 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
                                 1024: { slidesPerView: 3 },
                             }}
                             className="w-full"
-                        // className="w-full !overflow-visible"
                         >
                             {bottomProjects.map((project) => {
                                 const coverImage = project.mediaUsages.find((m) => m.role === "COVER")?.media.url || "/placeholder-project.jpg";

@@ -93,7 +93,7 @@ export default function CategoriesPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Categories</h1>
+        <h1 className="text-3xl font-bold">Blog Categories</h1>
         <Button onClick={openNewDialog}>Add Category</Button>
       </div>
 

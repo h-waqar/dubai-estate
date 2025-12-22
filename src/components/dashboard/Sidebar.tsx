@@ -60,6 +60,7 @@ const links: SidebarItem[] = [
     subItems: [
       { href: "/admin/products", label: "Products", icon: FaBoxOpen },
       { href: "/admin/blog", label: "Blog Posts", icon: FaEnvelope },
+      { href: "/admin/categories", label: "Blog Categories", icon: FaTags },
     ],
   },
   {
@@ -67,7 +68,7 @@ const links: SidebarItem[] = [
     icon: FaImage,
     subItems: [
       { href: "/admin/approvals", label: "Approvals", icon: FaCheckCircle },
-      { href: "/admin/categories", label: "Categories", icon: FaTags },
+      { href: "/admin/property-types", label: "Property Types", icon: FaTags },
       { href: "/admin/features", label: "Features", icon: FaStar },
     ],
   },
