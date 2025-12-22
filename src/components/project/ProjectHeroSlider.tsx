@@ -29,7 +29,7 @@ export function ProjectHeroSlider({ images, autoPlayInterval = 7000 }: ProjectHe
         }, autoPlayInterval);
 
         return () => clearInterval(interval);
-    }, [currentIndex, images.length, autoPlayInterval]);
+    }, [images.length, autoPlayInterval]);
 
     const handlePrevious = () => {
         if (isTransitioning) return;

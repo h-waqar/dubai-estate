@@ -12,8 +12,18 @@ export interface FloorplanInput {
     size?: number;
     sizeUnit?: string;
     imageUrl?: string;
+    image?: Media; // Uploaded floorplan image
     pdfUrl?: string;
     featured?: boolean;
+}
+
+// About Feature for About section
+export interface AboutFeatureInput {
+    id?: string;
+    name: string;
+    icon: string; // Lucide icon name
+    customIcon?: Media; // Custom uploaded icon
+    order: number;
 }
 
 // Payment plan stage for step 3
@@ -33,6 +43,12 @@ export interface NearbyAttractionInput {
     order: number;
 }
 
+export interface AmenityInput {
+    id: number;
+    name: string;
+    image?: Media;
+}
+
 // FAQ for step 2
 export interface FAQInput {
     id?: string;
@@ -49,43 +65,70 @@ interface ProjectAdvertiseFormState {
     community: string;
     location: string;
     address: string;
-    latitude: number | undefined;
-    longitude: number | undefined;
+    // Location Details
+    latitude?: number;
+    longitude?: number;
+    locationDescription?: string;
 
-    // Step 2: Description & Details
+    // Dates
+    handoverDate?: Date;
+    announcementDate?: Date;
+    bookingOpenedDate?: Date;
+    constructionStartDate?: Date;
+
+    // Progress
+    progressPercentage?: number;
+    progressStatus?: string;
+    progressImage?: Media;
+
+    // Details/Media
+    highlights: string[];
+    tagline: string;
     description: string;
-    highlights: string[]; // Array of highlight points
-    nearbyAttractions: NearbyAttractionInput[];
-    faqs: FAQInput[];
+    aboutContent: string;
+    aboutFeatures: AboutFeatureInput[];
 
-    // Step 3: Pricing & Payment Plan
+    // Media IDs
+    logo?: Media;
+    coverImage?: Media;
+    gallery: Media[];
+
+    // Payment Plan
     priceFrom: number | undefined;
     currency: string;
-    paymentPlanSummary: string; // e.g., "30/70"
+    paymentPlanSummary?: string;
     paymentPlan: PaymentStageInput[];
-    handoverDate: Date | undefined;
 
-    // Additional Timeline Dates
-    announcementDate: Date | undefined;
-    bookingOpenedDate: Date | undefined;
-    constructionStartDate: Date | undefined;
+    // Nearby Attractions
+    nearbyAttractions: NearbyAttractionInput[];
 
-    // Step 4: Media (Logo, Cover, Gallery)
-    logo: Media | null;
-    coverImage: Media | null;
-    gallery: Media[];
+    // Selected Amenities (Step 5/6)
+    selectedAmenities: AmenityInput[];
+    amenityIds: number[];
+
+    // FAQs
+    faqs: FAQInput[];
 
     // Step 5: Floorplans
     floorplans: FloorplanInput[];
-
-    // Step 6: Amenities
-    selectedAmenities: number[]; // Array of amenity IDs
 
     // Step 7: Account (if new user)
     username?: string;
     email?: string;
     password?: string;
     repeatPassword?: string;
+
+    // Step 9: Payment
+    paymentMethod?: "card" | "paypal" | "pay-later";
+    cardholderName?: string;
+    cardNumber?: string;
+    expiryDate?: string;
+    cvv?: string;
+    billingAddress1?: string;
+    billingAddress2?: string;
+    billingCity?: string;
+    billingState?: string;
+    billingPostalCode?: string;
 
     // Methods
     update: (data: Partial<ProjectAdvertiseFormState>) => void;
@@ -95,10 +138,14 @@ interface ProjectAdvertiseFormState {
     updateFloorplan: (id: string, data: Partial<FloorplanInput>) => void;
     addPaymentStage: (stage: PaymentStageInput) => void;
     removePaymentStage: (id: string) => void;
+    toggleAmenity: (amenity: AmenityInput) => void;
+    updateAmenityImage: (id: number, image: Media) => void;
     addNearbyAttraction: (attraction: NearbyAttractionInput) => void;
     removeNearbyAttraction: (id: string) => void;
     addFAQ: (faq: FAQInput) => void;
     removeFAQ: (id: string) => void;
+    addAboutFeature: (feature: AboutFeatureInput) => void;
+    removeAboutFeature: (id: string) => void;
 }
 
 const initialState = {
@@ -112,30 +159,48 @@ const initialState = {
     longitude: undefined,
 
     description: "",
+    tagline: "",
+    aboutContent: "",
     highlights: [],
+    aboutFeatures: [],
     nearbyAttractions: [],
     faqs: [],
 
     priceFrom: undefined,
     currency: "AED",
-    paymentPlanSummary: "",
+    paymentPlanSummary: undefined,
     paymentPlan: [],
     handoverDate: undefined,
     announcementDate: undefined,
     bookingOpenedDate: undefined,
     constructionStartDate: undefined,
 
-    logo: null,
-    coverImage: null,
+    logo: undefined,
+    coverImage: undefined,
     gallery: [],
 
     floorplans: [],
+    amenityIds: [],
     selectedAmenities: [],
+
+    locationDescription: "",
 
     username: "",
     email: "",
     password: "",
+    phone: "",
+    userType: "DEVELOPER" as const,
     repeatPassword: "",
+    paymentMethod: "card" as const,
+    cardholderName: "",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    billingAddress1: "",
+    billingAddress2: "",
+    billingCity: "",
+    billingState: "",
+    billingPostalCode: "",
 };
 
 export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(
@@ -193,12 +258,43 @@ export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(
             // FAQ methods
             addFAQ: (faq) =>
                 set((state) => ({
-                    faqs: [...state.faqs, { ...faq, id: crypto.randomUUID() }],
+                    faqs: [...state.faqs, { ...faq, id: Math.random().toString(36).substr(2, 9) }],
                 })),
 
             removeFAQ: (id) =>
                 set((state) => ({
-                    faqs: state.faqs.filter((faq) => faq.id !== id),
+                    faqs: state.faqs.filter((f) => f.id !== id),
+                })),
+
+            // About Feature methods
+            addAboutFeature: (feature) =>
+                set((state) => ({
+                    aboutFeatures: [...state.aboutFeatures, { ...feature, id: Math.random().toString(36).substr(2, 9) }],
+                })),
+
+            removeAboutFeature: (id) =>
+                set((state) => ({
+                    aboutFeatures: state.aboutFeatures.filter((f) => f.id !== id),
+                })),
+
+            // Amenity Actions
+            toggleAmenity: (amenity) =>
+                set((state) => {
+                    const exists = state.selectedAmenities.find((a) => a.id === amenity.id);
+                    if (exists) {
+                        return {
+                            selectedAmenities: state.selectedAmenities.filter((a) => a.id !== amenity.id),
+                        };
+                    }
+                    return {
+                        selectedAmenities: [...state.selectedAmenities, amenity],
+                    };
+                }),
+            updateAmenityImage: (id, image) =>
+                set((state) => ({
+                    selectedAmenities: state.selectedAmenities.map((a) =>
+                        a.id === id ? { ...a, image } : a
+                    ),
                 })),
         }),
         { name: "project-advertise-store" }

@@ -4,6 +4,7 @@ import React from "react";
 import { useProjectAdvertiseStore } from "../../../stores/useProjectAdvertiseStore";
 import { useProjectStepStore } from "../../../stores/useProjectStepStore";
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import { createProjectAction } from "../../../actions/createProject.action";
 import { useRouter } from "next/navigation";
 
@@ -29,13 +30,20 @@ export default function StepEightReview() {
             formData.append("location", store.location);
             formData.append("address", store.address || "");
             formData.append("description", store.description || "");
+            formData.append("tagline", store.tagline || "");
+            formData.append("aboutContent", store.aboutContent || "");
+            formData.append("locationDescription", store.locationDescription || "");
             formData.append("highlights", JSON.stringify(store.highlights));
+            formData.append("aboutFeatures", JSON.stringify(store.aboutFeatures));
             formData.append("priceFrom", store.priceFrom?.toString() || "");
             formData.append("currency", store.currency);
             formData.append("paymentPlanSummary", store.paymentPlanSummary || "");
             formData.append("paymentPlan", JSON.stringify(store.paymentPlan));
             formData.append("floorplans", JSON.stringify(store.floorplans));
-            formData.append("amenityIds", JSON.stringify(store.selectedAmenities));
+            // Send selectedAmenities as JSON (AmenityInput[])
+            formData.append("selectedAmenities", JSON.stringify(store.selectedAmenities));
+            // Also keep amenityIds for backward compatibility if needed, though we use name map now
+            formData.append("amenityIds", JSON.stringify(store.selectedAmenities.map(a => a.id)));
             formData.append("nearbyAttractions", JSON.stringify(store.nearbyAttractions));
             formData.append("faqs", JSON.stringify(store.faqs));
 
@@ -106,11 +114,12 @@ export default function StepEightReview() {
             </div>
 
             <div className="flex justify-between">
-                <Button onClick={prev} variant="outline" disabled={isSubmitting}>
+                <Button onClick={prev} variant="outline">
                     Back
                 </Button>
-                <Button onClick={handleSubmit} disabled={isSubmitting}>
-                    {isSubmitting ? "Submitting..." : "Submit Project"}
+                <Button onClick={() => next()} className="gap-2">
+                    Proceed to Payment
+                    <ArrowRight className="w-4 h-4" />
                 </Button>
             </div>
         </div>

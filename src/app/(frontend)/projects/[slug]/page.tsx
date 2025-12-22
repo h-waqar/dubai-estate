@@ -7,6 +7,70 @@ import Image from "next/image";
 import { Building2, MapPin } from "lucide-react";
 import { ProjectHeroSlider } from "@/components/project/ProjectHeroSlider";
 import { ProjectHeroOverlay } from "@/components/project/ProjectHeroOverlay";
+import { ProjectNavigation } from "@/components/project/ProjectNavigation";
+import { AboutSection } from "@/components/project/sections/AboutSection";
+import { GallerySlider } from "@/components/project/GallerySlider";
+import { UnitsFloorplansSection } from "@/components/project/sections/UnitsFloorplansSection";
+import { FeaturesAmenitiesSection } from "@/components/project/sections/FeaturesAmenitiesSection";
+import { PaymentPlanSection } from "@/components/project/sections/PaymentPlanSection";
+import { LocationSection } from "@/components/project/sections/LocationSection";
+import { ProjectProgressSection } from "@/components/project/sections/ProjectProgressSection";
+import "leaflet/dist/leaflet.css";
+import type { Metadata } from "next";
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const project = await ProjectService.getProjectBySlug(slug);
+
+    if (!project) {
+        return {
+            title: "Project Not Found",
+        };
+    }
+
+    // Fetch cover image for Open Graph
+    const mediaUsages = await prisma.mediaUsage.findMany({
+        where: {
+            entityType: "PROJECT",
+            entityId: project.id,
+            role: "COVER",
+        },
+        include: { media: true },
+        take: 1,
+    });
+
+    const coverImage = mediaUsages[0]?.media;
+    const description = project.description?.slice(0, 160) || `${project.name} - Luxury real estate project in ${project.location}`;
+    const imageUrl = coverImage?.url ? `${process.env.NEXT_PUBLIC_BASE_URL || ''}${coverImage.url}` : undefined;
+
+    return {
+        title: `${project.name} | Dubai Real Estate Projects`,
+        description,
+        keywords: [
+            project.name,
+            project.location,
+            project.community || '',
+            project.developer.name,
+            'Dubai Real Estate',
+            'Property Development',
+            'Luxury Apartments',
+        ].filter(Boolean),
+        openGraph: {
+            title: project.name,
+            description,
+            images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : [],
+            type: 'website',
+            siteName: 'Dubai Real Estate',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: project.name,
+            description,
+            images: imageUrl ? [imageUrl] : [],
+        },
+    };
+}
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -37,122 +101,114 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         ...gallery,
     ];
 
+    // Generate JSON-LD structured data
+    const structuredData = {
+        "@context": "https://schema.org",
+        "@type": "RealEstateProject",
+        name: project.name,
+        description: project.description,
+        address: {
+            "@type": "PostalAddress",
+            addressLocality: project.location,
+            addressCountry: "AE",
+        },
+        ...(project.priceFrom && {
+            offers: {
+                "@type": "Offer",
+                price: project.priceFrom.toString(),
+                priceCurrency: project.currency,
+            },
+        }),
+        ...(project.latitude && project.longitude && {
+            geo: {
+                "@type": "GeoCoordinates",
+                latitude: project.latitude,
+                longitude: project.longitude,
+            },
+        }),
+        developer: {
+            "@type": "Organization",
+            name: project.developer.name,
+        },
+        ...(project.handoverDate && {
+            expectedCompletionDate: project.handoverDate.toISOString(),
+        }),
+    };
+
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-950">
-            {/* Hero Slider with Overlay */}
-            <div className="relative">
-                <ProjectHeroSlider images={sliderImages} />
-                <ProjectHeroOverlay
-                    logo={logo}
+        <>
+            {/* JSON-LD Structured Data */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            />
+
+            <div className="min-h-screen bg-white dark:bg-gray-950">
+                {/* Hero Slider with Overlay */}
+                <div className="relative">
+                    <ProjectHeroSlider images={sliderImages} />
+                    <ProjectHeroOverlay
+                        logo={logo}
+                        projectName={project.name}
+                        description={project.description}
+                        priceFrom={project.priceFrom}
+                        paymentPlanSummary={project.paymentPlanSummary}
+                        handoverDate={project.handoverDate}
+                    />
+                </div>
+
+                {/* Navigation */}
+                <ProjectNavigation />
+
+                {/* About Section */}
+                <AboutSection
+                    tagline={project.tagline}
+                    aboutContent={project.aboutContent || project.description}
+                    features={project.features?.filter(f => f.category === "ABOUT_FEATURE").map(f => ({
+                        name: f.name,
+                        icon: f.icon || undefined,
+                        imageUrl: f.imageUrl || undefined
+                    })) || []}
+                    randomGalleryImage={gallery[0] || null}
+                />
+
+                {/* Gallery Slider */}
+                {gallery.length > 0 && (
+                    <GallerySlider images={gallery} />
+                )}
+
+                {/* Units & Floorplans Section */}
+                <UnitsFloorplansSection floorplans={project.floorplans} />
+
+                {/* Features & Amenities Section */}
+                <FeaturesAmenitiesSection features={project.features || []} />
+
+                {/* 6. Payment Plan */}
+                <PaymentPlanSection
+                    paymentPlan={project.paymentPlan}
+                    locationDescription={project.locationDescription}
+                />
+
+                {/* 7. Project Progress */}
+                <ProjectProgressSection
+                    percentage={project.progressPercentage || 0}
+                    status={project.progressStatus || ""}
+                    image={project.progressImage || undefined}
+                    constructionDate={project.constructionStartDate || undefined}
+                    handoverDate={project.handoverDate || undefined}
+                />
+
+                {/* 8. Location */}
+                <LocationSection
                     projectName={project.name}
-                    description={project.description}
-                    priceFrom={project.priceFrom}
-                    paymentPlanSummary={project.paymentPlanSummary}
-                    handoverDate={project.handoverDate}
+                    location={project.location}
+                    latitude={project.latitude}
+                    longitude={project.longitude}
+                    progressTimeline={project.progressTimeline}
+                    nearbyAttractions={project.nearbyAttractions}
                 />
             </div>
-
-            {/* Content Below Hero */}
-            <div className="container mx-auto px-4 py-12">
-                {/* Project Info */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Developer & Location Info */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                            <p className="text-xl text-gray-600 dark:text-gray-400 flex items-center gap-2 mb-3">
-                                <Building2 className="w-5 h-5" />
-                                Developed by {project.developer.name}
-                            </p>
-                            <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                                <MapPin className="w-5 h-5" />
-                                {project.location}
-                            </p>
-                            <div className="mt-4">
-                                <span className="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                                    {project.projectType}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Full Description */}
-                        {project.description && (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                                <h2 className="text-2xl font-semibold mb-4">About This Project</h2>
-                                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
-                                    {project.description}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Amenities */}
-                        {project.amenities.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                                <h2 className="text-2xl font-semibold mb-4">Amenities</h2>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                    {project.amenities.map((amenity) => (
-                                        <div key={amenity.id} className="flex items-center gap-2">
-                                            <span className="text-green-600 text-lg">✓</span>
-                                            <span>{amenity.name}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Payment Plan Details */}
-                        {project.paymentPlan.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                                <h2 className="text-2xl font-semibold mb-4">Payment Plan Breakdown</h2>
-                                <div className="space-y-3">
-                                    {project.paymentPlan.map((stage) => (
-                                        <div key={stage.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                                            <span className="text-gray-700 dark:text-gray-300">{stage.description}</span>
-                                            <span className="font-semibold text-lg text-blue-600">{stage.percentage}%</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Floorplans */}
-                        {project.floorplans.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                                <h2 className="text-2xl font-semibold mb-4">Available Floor Plans</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {project.floorplans.map((floorplan) => (
-                                        <div key={floorplan.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-                                            <h3 className="font-semibold text-lg mb-2">{floorplan.unitName}</h3>
-                                            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                                                <p>{floorplan.bedrooms} Bed | {floorplan.bathrooms} Bath</p>
-                                                <p>{floorplan.size} {floorplan.sizeUnit}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Sidebar */}
-                    <div className="space-y-6">
-                        {/* Nearby Attractions */}
-                        {project.nearbyAttractions.length > 0 && (
-                            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-                                <h3 className="text-lg font-semibold mb-4">Nearby Attractions</h3>
-                                <div className="space-y-3">
-                                    {project.nearbyAttractions.map((attraction) => (
-                                        <div key={attraction.id} className="flex justify-between text-sm pb-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
-                                            <span className="text-gray-700 dark:text-gray-300">{attraction.name}</span>
-                                            <span className="text-gray-600 dark:text-gray-400 font-medium">{attraction.distance}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
+        </>
     );
 }
+

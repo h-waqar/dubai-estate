@@ -35,12 +35,15 @@ export class ProjectService {
                 name: data.name,
                 slug,
                 description: data.description,
+                tagline: data.tagline,
+                aboutContent: data.aboutContent,
                 projectType: data.projectType,
                 community: data.community,
                 location: data.location,
                 address: data.address,
                 latitude: data.latitude,
                 longitude: data.longitude,
+                locationDescription: data.locationDescription,
                 priceFrom: data.priceFrom,
                 currency: data.currency,
                 paymentPlanSummary: data.paymentPlanSummary,
@@ -93,6 +96,26 @@ export class ProjectService {
                         answer: faq.answer,
                         order: faq.order,
                     })),
+                },
+
+                // Create about features as ProjectFeature
+                features: {
+                    create: [
+                        ...(data.aboutFeatures || []).map((feature: any) => ({
+                            name: feature.name,
+                            icon: feature.icon,
+                            imageUrl: feature.imageUrl,
+                            category: "ABOUT_FEATURE",
+                            order: feature.order,
+                        })),
+                        ...(data.amenityFeatures || []).map((feature: any) => ({
+                            name: feature.name,
+                            icon: feature.icon,
+                            imageUrl: feature.imageUrl,
+                            category: "AMENITY",
+                            order: 0,
+                        }))
+                    ],
                 },
 
                 // Connect amenities
@@ -157,8 +180,10 @@ export class ProjectService {
                 developer: true,
                 floorplans: { orderBy: { featured: "desc" } },
                 amenities: true,
+                features: { orderBy: { order: "asc" } },
                 paymentPlan: { orderBy: { order: "asc" } },
                 nearbyAttractions: { orderBy: { order: "asc" } },
+                progressTimeline: { orderBy: { order: "asc" } },
                 faqs: { orderBy: { order: "asc" } },
                 createdBy: { select: { id: true, name: true, email: true } },
                 approvedBy: { select: { id: true, name: true } },
@@ -176,8 +201,10 @@ export class ProjectService {
                 developer: true,
                 floorplans: { orderBy: { featured: "desc" } },
                 amenities: true,
+                features: { orderBy: { order: "asc" } },
                 paymentPlan: { orderBy: { order: "asc" } },
                 nearbyAttractions: { orderBy: { order: "asc" } },
+                progressTimeline: { orderBy: { order: "asc" } },
                 faqs: { orderBy: { order: "asc" } },
                 createdBy: { select: { id: true, name: true, email: true } },
             },

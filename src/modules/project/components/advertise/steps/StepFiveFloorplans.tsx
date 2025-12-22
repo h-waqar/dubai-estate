@@ -8,17 +8,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, X } from "lucide-react";
+import MediaLibraryButton from "@/modules/media/components/MediaLibraryButton";
+import Image from "next/image";
+import type { Media } from "@/modules/media/types/media.types";
 
 export default function StepFiveFloorplans() {
     const store = useProjectAdvertiseStore();
     const { next, prev } = useProjectStepStore();
 
-    const [floorplan, setFloorplan] = React.useState({
+    const [floorplan, setFloorplan] = React.useState<{
+        unitType: string;
+        unitName: string;
+        bedrooms: string;
+        bathrooms: string;
+        size: string;
+        image?: Media;
+    }>({
         unitType: "ONE_BEDROOM",
         unitName: "",
         bedrooms: "",
         bathrooms: "",
         size: "",
+        image: undefined,
     });
 
     const addFloorplan = () => {
@@ -30,6 +41,7 @@ export default function StepFiveFloorplans() {
                 bathrooms: floorplan.bathrooms ? Number(floorplan.bathrooms) : undefined,
                 size: floorplan.size ? Number(floorplan.size) : undefined,
                 sizeUnit: "sqft",
+                image: floorplan.image,
             });
             setFloorplan({
                 unitType: "ONE_BEDROOM",
@@ -37,6 +49,7 @@ export default function StepFiveFloorplans() {
                 bedrooms: "",
                 bathrooms: "",
                 size: "",
+                image: undefined,
             });
         }
     };
@@ -110,6 +123,33 @@ export default function StepFiveFloorplans() {
                             }
                         />
                     </div>
+                    <div className="col-span-2">
+                        <Label>Floorplan Image</Label>
+                        <div className="flex gap-4 items-start mt-2">
+                            <MediaLibraryButton
+                                onSelect={(media) => setFloorplan({ ...floorplan, image: media })}
+                                buttonText={floorplan.image ? "Change Image" : "Select Image"}
+                                mode="select"
+                            />
+                            {floorplan.image && (
+                                <div className="relative w-32 h-24 rounded-lg overflow-hidden border border-gray-200">
+                                    <Image
+                                        src={floorplan.image.url}
+                                        alt="Floorplan preview"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setFloorplan({ ...floorplan, image: undefined })}
+                                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-sm hover:bg-red-600"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 <Button type="button" onClick={addFloorplan} className="w-full">
@@ -129,13 +169,25 @@ export default function StepFiveFloorplans() {
                                     {fp.bedrooms}BR • {fp.bathrooms}BA • {fp.size} sqft
                                 </p>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => store.removeFloorplan(fp.id!)}
-                                className="text-red-500 hover:text-red-700"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-4">
+                                {fp.image && (
+                                    <div className="relative w-16 h-12 rounded overflow-hidden border border-gray-200">
+                                        <Image
+                                            src={fp.image.url}
+                                            alt={fp.unitName || "Floorplan"}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => store.removeFloorplan(fp.id!)}
+                                    className="text-red-500 hover:text-red-700"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

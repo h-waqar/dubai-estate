@@ -24,6 +24,9 @@ const stepOneSchema = z.object({
     community: z.string().optional(),
     location: z.string().min(1, "Location is required"),
     address: z.string().optional(),
+    locationDescription: z.string().optional(),
+    latitude: z.coerce.number().optional(),
+    longitude: z.coerce.number().optional(),
 });
 
 export default function StepOneBasic({ developers }: { developers: any[] }) {
@@ -45,6 +48,7 @@ export default function StepOneBasic({ developers }: { developers: any[] }) {
             community: store.community,
             location: store.location,
             address: store.address,
+            locationDescription: store.locationDescription,
         },
     });
 
@@ -146,6 +150,40 @@ export default function StepOneBasic({ developers }: { developers: any[] }) {
                         id="address"
                         {...register("address")}
                         placeholder="Optional detailed address"
+                    />
+                </div>
+
+                {/* Coordinates */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <Label htmlFor="latitude">Latitude</Label>
+                        <Input
+                            id="latitude"
+                            type="number"
+                            step="any"
+                            {...register("latitude")}
+                            placeholder="e.g. 25.1234"
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="longitude">Longitude</Label>
+                        <Input
+                            id="longitude"
+                            type="number"
+                            step="any"
+                            {...register("longitude")}
+                            placeholder="e.g. 55.1234"
+                        />
+                    </div>
+                </div>
+
+                {/* Location Description */}
+                <div>
+                    <Label htmlFor="locationDescription">Location Description</Label>
+                    <Input
+                        id="locationDescription"
+                        {...register("locationDescription")}
+                        placeholder="Rich description of the area/community"
                     />
                 </div>
             </div>

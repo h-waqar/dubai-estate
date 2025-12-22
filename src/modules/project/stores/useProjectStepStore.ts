@@ -21,12 +21,14 @@ export const useProjectStepStore = create<ProjectStepState>()(
             steps: [
                 { title: "Basic Info", description: "Project details and location" },
                 { title: "Description", description: "About and highlights" },
+                { title: "Features", description: "Key features" },
                 { title: "Pricing", description: "Payment plan and pricing" },
                 { title: "Media", description: "Logo, cover, and gallery" },
                 { title: "Floorplans", description: "Unit types and layouts" },
                 { title: "Amenities", description: "Features and facilities" },
                 { title: "Account", description: "User registration" },
-                { title: "Review", description: "Review and submit" },
+                { title: "Review", description: "Review details" },
+                { title: "Payment", description: "Secure checkout" },
                 { title: "Success", description: "Submission complete" },
             ],
             step: 0,
@@ -36,6 +38,9 @@ export const useProjectStepStore = create<ProjectStepState>()(
             goTo: (index) => set({ step: index }),
             reset: () => set({ step: 0 }),
         }),
-        { name: "project-advertise-step" }
+        {
+            name: "project-advertise-step-v2",
+            partialize: (state) => ({ step: state.step }),
+        }
     )
 );

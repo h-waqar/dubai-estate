@@ -24,7 +24,7 @@ export const floorplanValidator = z.object({
     bathrooms: z.number().int().min(0).optional(),
     size: z.number().positive().optional(),
     sizeUnit: z.string().default("sqft"),
-    imageUrl: z.string().url().optional(),
+    imageUrl: z.string().optional(),
     pdfUrl: z.string().url().optional(),
     featured: z.boolean().default(false),
 });
@@ -51,6 +51,14 @@ export const faqValidator = z.object({
     order: z.number().int().default(0),
 });
 
+// About Feature validator
+export const aboutFeatureValidator = z.object({
+    name: z.string().min(1),
+    icon: z.string().optional(), // Make icon optional as we might have imageUrl
+    imageUrl: z.string().optional(),
+    order: z.number().int().default(0),
+});
+
 // Main project creation validator
 export const createProjectValidator = z.object({
     // Basic Info
@@ -63,9 +71,19 @@ export const createProjectValidator = z.object({
     latitude: z.number().optional(),
     longitude: z.number().optional(),
 
+    // Data for Progress Section
+    progressPercentage: z.number().int().min(0).max(100).optional(),
+    progressStatus: z.string().optional(),
+    progressImage: z.string().optional(),
+
     // Description
     description: z.string().optional(),
+    tagline: z.string().optional(),
+    aboutContent: z.string().optional(),
+    locationDescription: z.string().optional(),
     highlights: z.array(z.string()).default([]),
+    aboutFeatures: z.array(aboutFeatureValidator).default([]),
+    amenityFeatures: z.array(aboutFeatureValidator).default([]), // Reusing aboutFeatureValidator as struct is same
 
     // Pricing
     priceFrom: z.number().positive().optional(),

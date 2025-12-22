@@ -54,7 +54,7 @@ export default function StepFourMedia() {
     };
 
     const handleLogoRemove = () => {
-        store.update({ logo: null });
+        store.update({ logo: undefined });
     };
 
     // Handle cover image selection
@@ -63,7 +63,7 @@ export default function StepFourMedia() {
     };
 
     const handleCoverRemove = () => {
-        store.update({ coverImage: null });
+        store.update({ coverImage: undefined });
     };
 
     // Handle gallery selection
@@ -182,6 +182,53 @@ export default function StepFourMedia() {
                             <div className="text-center text-muted-foreground">
                                 <ImagePlus className="w-10 h-10 mx-auto" />
                                 <p className="mt-2 text-sm font-medium">Select a cover image</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <hr className="border-border" />
+
+                {/* Progress Update Image */}
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-medium">Progress Update Image</h3>
+                        <MediaLibraryButton
+                            onSelect={(media) => store.update({ progressImage: media })}
+                            buttonText={store.progressImage ? "Change Image" : "Select Image"}
+                            mode="select"
+                        />
+                    </div>
+                    <div
+                        className={cn(
+                            "p-4 border border-dashed rounded-lg min-h-[150px] flex items-center justify-center",
+                            !store.progressImage && "bg-muted/30"
+                        )}
+                    >
+                        {store.progressImage ? (
+                            <div className="relative group w-full">
+                                <div className="relative w-full aspect-video overflow-hidden rounded-lg border border-border">
+                                    <Image
+                                        src={store.progressImage.url}
+                                        alt="Progress update"
+                                        fill
+                                        sizes="100vw"
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => store.update({ progressImage: undefined })}
+                                    className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg z-40 cursor-pointer"
+                                    aria-label="Remove progress image"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="text-center text-muted-foreground">
+                                <ImagePlus className="w-10 h-10 mx-auto" />
+                                <p className="mt-2 text-sm font-medium">Select a progress update image</p>
                             </div>
                         )}
                     </div>
