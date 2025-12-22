@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 // Dynamically import Leaflet to avoid SSR issues
 const MapContainer = dynamic(
@@ -51,6 +51,25 @@ export function LocationSection({
     progressTimeline,
     nearbyAttractions,
 }: LocationSectionProps) {
+    // Fix Leaflet marker icon issue
+    useEffect(() => {
+        const fixLeafletIcon = async () => {
+            try {
+                const L = (await import("leaflet")).default;
+                // @ts-ignore
+                delete L.Icon.Default.prototype._getIconUrl;
+                L.Icon.Default.mergeOptions({
+                    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+                    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+                });
+            } catch (e) {
+                console.error("Failed to fix Leaflet icon", e);
+            }
+        };
+        fixLeafletIcon();
+    }, []);
+
     // Default to Dubai coordinates if not provided
     const position = useMemo<[number, number]>(() => {
         return [latitude || 25.2048, longitude || 55.2708];

@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import "leaflet/dist/leaflet.css";
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -23,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageGallery } from "@/components/properties/ImageGallery";
+import { PropertyLocationSection } from "@/components/property/PropertyLocationSection";
 
 // Helper to format currency
 const formatCurrency = (amount: number, currency: string = "AED") => {
@@ -279,21 +281,13 @@ export default async function PropertyPage({ params }: PageProps) {
 
             <Separator />
 
-            {/* Map Placeholder */}
-            <section>
-              <h2 className="text-xl font-bold mb-4">Location</h2>
-              <div className="bg-muted rounded-xl h-[300px] flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <MapPin className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>Map View Unavailable</p>
-                  <p className="text-sm opacity-75">
-                    {property.latitude && property.longitude
-                      ? `Lat: ${property.latitude}, Long: ${property.longitude}`
-                      : "Coordinates not provided"}
-                  </p>
-                </div>
-              </div>
-            </section>
+            {/* Location Map */}
+            <PropertyLocationSection
+              title={property.title}
+              location={property.address || property.location}
+              latitude={property.latitude}
+              longitude={property.longitude}
+            />
           </div>
 
           {/* Sidebar */}
