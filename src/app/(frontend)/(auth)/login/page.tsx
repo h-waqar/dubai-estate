@@ -47,7 +47,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <Toaster /> {/* <-- render once */}
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="w-full max-w-md shadow-lg py-4">
         <CardHeader>
           <h1 className="text-2xl font-bold text-center">Welcome Back</h1>
           <p className="text-center text-sm text-muted-foreground">

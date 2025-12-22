@@ -58,6 +58,7 @@ export interface FAQInput {
 }
 
 interface ProjectAdvertiseFormState {
+    id?: number; // For editing
     // Step 1: Basic Info
     projectType: "FUTURE" | "CURRENT" | "PAST";
     name: string;
@@ -149,6 +150,7 @@ interface ProjectAdvertiseFormState {
 }
 
 const initialState = {
+    id: undefined,
     projectType: "CURRENT" as const,
     name: "",
     developerId: undefined,

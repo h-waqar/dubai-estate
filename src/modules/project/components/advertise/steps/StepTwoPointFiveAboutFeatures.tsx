@@ -72,7 +72,7 @@ export default function StepTwoPointFiveAboutFeatures() {
                 </div>
 
                 {/* Add Feature Form */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div className="md:col-span-2">
                         <Label htmlFor="featureName">Feature Text</Label>
                         <Input

@@ -174,7 +174,7 @@ export class ProjectService {
      * Get project by ID with all relations
      */
     static async getProjectById(id: number) {
-        return prisma.project.findUnique({
+        const project = await prisma.project.findUnique({
             where: { id },
             include: {
                 developer: true,
@@ -189,13 +189,14 @@ export class ProjectService {
                 approvedBy: { select: { id: true, name: true } },
             },
         });
+        return serializeDecimals(project);
     }
 
     /**
      * Get project by slug with all relations
      */
     static async getProjectBySlug(slug: string) {
-        return prisma.project.findUnique({
+        const project = await prisma.project.findUnique({
             where: { slug },
             include: {
                 developer: true,
@@ -209,6 +210,7 @@ export class ProjectService {
                 createdBy: { select: { id: true, name: true, email: true } },
             },
         });
+        return serializeDecimals(project);
     }
 
     /**
@@ -238,7 +240,12 @@ export class ProjectService {
                 { name: { contains: filters.search, mode: "insensitive" } },
                 { description: { contains: filters.search, mode: "insensitive" } },
                 { location: { contains: filters.search, mode: "insensitive" } },
+                { location: { contains: filters.search, mode: "insensitive" } },
             ];
+        }
+
+        if (filters.createdById) {
+            where.createdById = filters.createdById;
         }
 
         const projects = await prisma.project.findMany({
@@ -334,6 +341,12 @@ export class ProjectService {
         delete updateData.nearbyAttractions;
         delete updateData.faqs;
         delete updateData.amenityIds;
+
+        // Reset status to PENDING_REVIEW on edit
+        updateData.status = "PENDING_REVIEW";
+        updateData.published = false;
+        updateData.approvedById = null;
+        updateData.publishedAt = null;
 
         return prisma.project.update({
             where: { id: projectId },

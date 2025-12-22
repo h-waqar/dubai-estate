@@ -121,6 +121,7 @@ export const projectFilterValidator = z.object({
     status: z.enum(["DRAFT", "PENDING_REVIEW", "APPROVED", "DECLINED", "ARCHIVED"]).optional(),
     search: z.string().optional(),
     published: z.boolean().optional(),
+    createdById: z.number().int().positive().optional(),
 });
 
 // Export types

@@ -8,6 +8,7 @@ import FeaturedArticles from "@/components/sections/FeaturedArticles";
 import Newsletter from "@/components/sections/Newsletter";
 import { StatsFeatureSection } from "@/components/sections/StatsFeatureSection";
 import { DevelopersCarousel } from "@/components/sections/DevelopersCarousel";
+import { FeaturedProjectsSection } from "@/components/sections/FeaturedProjectsSection";
 import { prisma } from "@/lib/prisma";
 
 export default async function HomePage() {
@@ -23,6 +24,7 @@ export default async function HomePage() {
         {/* <Categories /> */}
         <FeaturedProperties />
         <DevelopersCarousel />
+        <FeaturedProjectsSection />
         <StatsFeatureSection />
         <FeaturedArticles />
         <Newsletter />

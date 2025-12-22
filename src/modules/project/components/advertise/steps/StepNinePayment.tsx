@@ -10,6 +10,7 @@ import { useProjectStepStore } from "../../../stores/useProjectStepStore";
 import { CreditCard, Lock, Calendar, Shield, CheckCircle2, Loader2, DollarSign, ArrowRight, Wallet } from "lucide-react";
 import { useProjectAdvertiseStore } from "../../../stores/useProjectAdvertiseStore";
 import { createProjectAction } from "../../../actions/createProject.action";
+import { updateProjectAction } from "../../../actions/updateProject.action";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
@@ -197,10 +198,18 @@ export default function StepNinePayment() {
             // Payment
             formData.append("paymentMethod", data.paymentMethod);
 
-            const result = await createProjectAction(formData);
+            let result;
+            if (store.id) {
+                // UPDATE MODE
+                formData.append("id", store.id.toString());
+                result = await updateProjectAction(formData);
+            } else {
+                // CREATE MODE
+                result = await createProjectAction(formData);
+            }
 
             if (result.success) {
-                toast.success("Transaction approved. Creating project...");
+                toast.success(store.id ? "Project updated successfully!" : "Transaction approved. Creating project...");
                 next();
             } else {
                 toast.error("Submission failed: " + JSON.stringify(result.error));
@@ -234,10 +243,10 @@ export default function StepNinePayment() {
 
                     {/* LEFT COLUMN: Payment Method & Details */}
                     <div className="lg:col-span-2 space-y-8">
-                        <div>
+                        {/* <div>
                             <h2 className="text-3xl font-bold tracking-tight mb-2">Checkout</h2>
                             <p className="text-muted-foreground">Choose how you'd like to pay for your project listing.</p>
-                        </div>
+                        </div> */}
 
                         {/* Payment Method Grid */}
                         <div className="space-y-4">
@@ -450,7 +459,8 @@ export default function StepNinePayment() {
 
                     {/* RIGHT COLUMN: Order Summary */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-24 space-y-6">
+                        {/* <div className="sticky top-24 space-y-6"> */}
+                        <div className="sticky top-10 space-y-6">
 
                             {/* Summary Card */}
                             <div className="bg-card border rounded-xl shadow-sm overflow-hidden">

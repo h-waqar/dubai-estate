@@ -131,7 +131,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             name: project.developer.name,
         },
         ...(project.handoverDate && {
-            expectedCompletionDate: project.handoverDate.toISOString(),
+            expectedCompletionDate: project.handoverDate,
         }),
     };
 

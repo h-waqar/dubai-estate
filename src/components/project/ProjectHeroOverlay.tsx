@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Decimal } from "@prisma/client/runtime/library";
 import { Download, Phone } from "lucide-react";
 
 interface Media {
@@ -13,9 +12,9 @@ interface ProjectHeroOverlayProps {
     logo?: Media | null;
     projectName: string;
     description: string | null;
-    priceFrom: Decimal | null;
+    priceFrom: number | string | null;
     paymentPlanSummary: string | null;
-    handoverDate: Date | null;
+    handoverDate: string | Date | null;
 }
 
 export function ProjectHeroOverlay({
@@ -85,7 +84,7 @@ export function ProjectHeroOverlay({
                                     Prices From
                                 </p>
                                 <p className="text-xl md:text-2xl font-bold text-white drop-shadow-lg">
-                                    AED {priceFrom.toNumber().toLocaleString()}
+                                    AED {Number(priceFrom).toLocaleString()}
                                 </p>
                             </div>
                         )}
