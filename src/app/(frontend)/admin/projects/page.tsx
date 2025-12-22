@@ -11,6 +11,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { FeaturedToggle } from "@/components/admin/FeaturedToggle";
+import { toggleProjectFeature } from "@/modules/admin/actions/feature.actions";
 
 export default async function AdminProjectsPage() {
     const projects = await ProjectService.listProjects({});
@@ -38,6 +40,7 @@ export default async function AdminProjectsPage() {
                             <TableHead>Developer</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Published</TableHead>
+                            <TableHead>Featured</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -50,16 +53,23 @@ export default async function AdminProjectsPage() {
                                 <TableCell>
                                     <span
                                         className={`px-2 py-1 rounded text-xs ${project.status === "APPROVED"
-                                                ? "bg-green-100 text-green-800"
-                                                : project.status === "PENDING_REVIEW"
-                                                    ? "bg-yellow-100 text-yellow-800"
-                                                    : "bg-gray-100 text-gray-800"
+                                            ? "bg-green-100 text-green-800"
+                                            : project.status === "PENDING_REVIEW"
+                                                ? "bg-yellow-100 text-yellow-800"
+                                                : "bg-gray-100 text-gray-800"
                                             }`}
                                     >
                                         {project.status}
                                     </span>
                                 </TableCell>
                                 <TableCell>{project.published ? "Yes" : "No"}</TableCell>
+                                <TableCell>
+                                    <FeaturedToggle
+                                        id={project.id}
+                                        initialIsFeatured={project.isFeatured}
+                                        onToggle={toggleProjectFeature}
+                                    />
+                                </TableCell>
                                 <TableCell>
                                     <Link href={`/projects/${project.slug}`}>
                                         <Button variant="outline" size="sm">

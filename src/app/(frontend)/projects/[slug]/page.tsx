@@ -151,7 +151,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                         logo={logo}
                         projectName={project.name}
                         description={project.description}
-                        priceFrom={project.priceFrom}
+                        priceFrom={project.priceFrom ? Number(project.priceFrom) : null}
                         paymentPlanSummary={project.paymentPlanSummary}
                         handoverDate={project.handoverDate}
                     />
