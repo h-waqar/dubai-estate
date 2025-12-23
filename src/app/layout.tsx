@@ -7,6 +7,7 @@ import { ClientThemeProvider } from "@/components/ClientThemeProvider";
 import { SessionProvider } from "@/components/SessionProvider";
 import React from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { WhatsAppButton } from "@/components/common/WhatsAppButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
           <ClientThemeProvider>
             {children}
             <Toaster />
+            <WhatsAppButton />
           </ClientThemeProvider>
         </SessionProvider>
       </body>
