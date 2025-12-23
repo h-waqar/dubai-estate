@@ -44,6 +44,7 @@ const PropertyHeader: React.FC<PropertyHeaderProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="relevance">Relevance</SelectItem>
+                <SelectItem value="featured">Featured</SelectItem>
                 <SelectItem value="price-low">Price: Low to High</SelectItem>
                 <SelectItem value="price-high">Price: High to Low</SelectItem>
                 <SelectItem value="newest">Newest First</SelectItem>

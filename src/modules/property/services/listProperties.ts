@@ -135,6 +135,12 @@ export async function listProperties(filters: PropertyFilters = {}) {
       case "newest":
         orderBy = { createdAt: "desc" };
         break;
+      case "featured":
+        orderBy = [
+          { isFeatured: "desc" },
+          { createdAt: "desc" }
+        ];
+        break;
       case "relevance":
       default:
         orderBy = { createdAt: "desc" }; // Fallback to newest for now

@@ -31,7 +31,7 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
   const mappedProperties = properties.map((p) => {
     // Determine the primary image URL
     let imageUrl = p.images[0]?.url;
-    
+
     // If no direct image, check media usages (prefer COVER)
     if (!imageUrl && p.mediaUsages?.length > 0) {
       const cover = p.mediaUsages.find((mu) => mu.role === "COVER");
@@ -41,10 +41,10 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
     // Process the URL to ensure it has the correct path
     const finalImage = imageUrl
       ? (imageUrl.startsWith("http") || imageUrl.startsWith("/")
-          ? imageUrl
-          : `/uploads/${encodeURIComponent(imageUrl)}`)
+        ? imageUrl
+        : `/uploads/${encodeURIComponent(imageUrl)}`)
       : "/assets/nopropertyfound.jpg";
-      // : "/assets/placeholder.jpg";
+    // : "/assets/placeholder.jpg";
 
     return {
       id: p.id,
@@ -54,13 +54,13 @@ const Properties = async ({ searchParams }: PropertiesPageProps) => {
       title: p.title,
       location: p.location,
       price: `${p.currency} ${p.price.toString()}`,
-    bedrooms: p.bedrooms || 0,
-    bathrooms: p.bathrooms || 0,
-    area: `${p.builtUpArea || 0} ${p.areaUnit || "sqft"}`,
-    type: p.propertyType?.name || "Unknown",
-    featured: false, // TODO: Add featured flag to DB
-    ref: p.refNo || "",
-    status: p.availability === "OFFPLAN" ? "Offplan" : "Ready",
+      bedrooms: p.bedrooms || 0,
+      bathrooms: p.bathrooms || 0,
+      area: `${p.builtUpArea || 0} ${p.areaUnit || "sqft"}`,
+      type: p.propertyType?.name || "Unknown",
+      featured: p.isFeatured,
+      ref: p.refNo || "",
+      status: p.availability === "OFFPLAN" ? "Offplan" : "Ready",
     };
   });
 

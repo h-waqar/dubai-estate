@@ -228,9 +228,6 @@ model Property {
   furnishing   FurnishingStatus     @default(UNFURNISHED)
   availability PropertyAvailability @default(AVAILABLE)
   status       PropertyStatus       @default(DRAFT)
-  // ❌ old
-  // features     String[]             @default([])
-  // ✅ new relation
   features     PropertyFeature[]
   images       PropertyImage[]
   videos       PropertyVideo[]

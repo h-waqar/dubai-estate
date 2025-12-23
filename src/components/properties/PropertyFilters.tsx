@@ -35,7 +35,7 @@ const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
   // Effect to update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    
+
     if (debouncedSearchQuery) params.set("search", debouncedSearchQuery);
     if (propertyType && propertyType !== "all") params.set("type", propertyType);
     if (bedrooms && bedrooms !== "all") params.set("bedrooms", bedrooms);

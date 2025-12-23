@@ -100,7 +100,13 @@ export default async function ProjectsPage() {
                             </div>
 
                             {/* Badge - Top Right */}
-                            <div className="absolute top-6 right-6">
+                            <div className="absolute top-6 px-4 flex justify-end gap-2">
+                                {/* <div className="absolute top-6 right-6 flex flex-col gap-2 items-end"> */}
+                                {project.isFeatured && (
+                                    <div className="px-4 py-2 rounded-full bg-primary/90 backdrop-blur-md border border-primary/30 text-white font-semibold text-sm">
+                                        Featured
+                                    </div>
+                                )}
                                 <div className="px-4 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white font-semibold text-sm">
                                     {project.projectType}
                                 </div>
