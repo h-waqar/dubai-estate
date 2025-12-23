@@ -12,6 +12,7 @@ import {
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
+import DeveloperSelector from "../DeveloperSelector";
 import { Building2, Bed, Bath, Maximize2, DollarSign, Tag, PenLine } from "lucide-react";
 import { stepThreeSchema } from "../../../validators/advertise-steps.validator";
 import { z } from "zod";
@@ -242,6 +243,11 @@ function StepThreeDetails({ }: StepThreeDetailsProps) {
               )}
             </FieldWrapper>
           </div>
+        </div>
+
+        {/* Developer Selection */}
+        <div className="md:col-span-2">
+          <DeveloperSelector />
         </div>
       </div>
 

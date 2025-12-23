@@ -25,6 +25,8 @@ interface AdvertiseFormState {
   bathrooms: number | undefined;
   propertySize: number | undefined;
   furnishing: "FURNISHED" | "SEMI_FURNISHED" | "UNFURNISHED";
+  developerId: number | undefined;
+  proposedDeveloperName: string | undefined;
 
   // Step 4: Media
   coverImage: Media | null;
@@ -75,6 +77,8 @@ export const useAdvertiseFormStore = create<AdvertiseFormState>()(
       bathrooms: undefined,
       propertySize: undefined,
       furnishing: "UNFURNISHED",
+      developerId: undefined,
+      proposedDeveloperName: undefined,
 
       coverImage: null,
       gallery: [],
@@ -101,6 +105,8 @@ export const useAdvertiseFormStore = create<AdvertiseFormState>()(
           bathrooms: undefined,
           propertySize: undefined,
           furnishing: "UNFURNISHED",
+          developerId: undefined,
+          proposedDeveloperName: undefined,
           coverImage: null,
           gallery: [],
           plan: "silver",

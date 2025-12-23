@@ -58,6 +58,7 @@ model User {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   Media              Media[]
+  createdDevelopers  Developer[]
 }
 
 // --- Categories ---
@@ -213,6 +214,10 @@ model Property {
   propertyTypeId Int
   listingType    ListingType  @default(SALE)
 
+  developerId           Int?
+  developer             Developer? @relation(fields: [developerId], references: [id], onDelete: SetNull)
+  proposedDeveloperName String?
+
   // Media
   mediaUsages MediaUsage[] // direct backref, optional helper for queries3
 
@@ -361,11 +366,24 @@ model Developer {
   website     String?
   email       String?
   phone       String?
+  
+  status      DeveloperStatus @default(PENDING)
+  createdById Int?
+  createdBy   User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
   projects    Project[]
+  properties  Property[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([slug])
+  @@index([status])
+}
+
+enum DeveloperStatus {
+  PENDING
+  APPROVED
+  DECLINED
 }
 
 // --- Project ---

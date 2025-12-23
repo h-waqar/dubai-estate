@@ -58,6 +58,8 @@ export async function updatePropertyAction(
         coverImage: formData.get("coverImage"),
         gallery: formData.getAll("gallery[]"),
         features: formData.getAll("features[]"),
+        developerId: formData.get("developerId") ? Number(formData.get("developerId")) : undefined,
+        proposedDeveloperName: formData.get("proposedDeveloperName")?.toString() || undefined,
     };
 
     const validation = createPropertyServerValidator.safeParse(data);
@@ -69,11 +71,36 @@ export async function updatePropertyAction(
         };
     }
 
-    const { title, price, propertyTypeId, bedrooms, bathrooms, location, latitude, longitude, furnishing, listingType, description, coverImage, gallery, features } = validation.data;
+    const { title, price, propertyTypeId, bedrooms, bathrooms, location, latitude, longitude, furnishing, listingType, description, coverImage, gallery, features, developerId, proposedDeveloperName } = validation.data;
 
     // 3. Update Property
     try {
         const updatedStatus = isAdmin ? existingProperty.status : PropertyStatus.PENDING_REVIEW;
+
+        // Handle Developer Logic (same as create)
+        let finalDeveloperId = developerId;
+        let finalProposedName = proposedDeveloperName;
+
+        if (finalProposedName && !finalDeveloperId) {
+            const existingDev = await prisma.developer.findUnique({
+                where: { name: finalProposedName },
+            });
+            if (existingDev) {
+                if (existingDev.status === "APPROVED") {
+                    finalDeveloperId = existingDev.id;
+                    finalProposedName = undefined;
+                }
+            } else {
+                await prisma.developer.create({
+                    data: {
+                        name: finalProposedName,
+                        slug: finalProposedName.toLowerCase().replace(/\s+/g, '-'), // Simple slug check
+                        status: "PENDING",
+                        createdById: userId,
+                    }
+                });
+            }
+        }
 
         // Manage Transactions for atomicity
         const property = await prisma.$transaction(async (tx) => {
@@ -93,9 +120,16 @@ export async function updatePropertyAction(
                     listingType: listingType as any,
                     description,
                     status: updatedStatus as any,
-                    // If user edits, we might want to unpublish until approved
                     published: isAdmin ? undefined : false, // Reset published for non-admins
                     declinedReason: null, // Clear previous decline reasons
+                    developerId: finalDeveloperId ?? null, // Allow clearing if explicitly null? Or undefined to keep current? 
+                    // Validator returns undefined if not present. If user wants to clear, we need to handle that.
+                    // For now assuming replace.
+                    // Actually, if finalDeveloperId is undefined, it skips update.
+                    // If we want to support unlinking, we need more logic.
+                    // Assuming for now if passed, update it.
+                    ...(finalDeveloperId !== undefined && { developerId: finalDeveloperId }),
+                    ...(finalProposedName !== undefined && { proposedDeveloperName: finalProposedName }),
                 }
             });
 

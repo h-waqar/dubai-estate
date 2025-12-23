@@ -19,6 +19,8 @@ export const createPropertyValidator = z.object({
     .array(z.number().int().positive("Invalid image reference"))
     .optional(),
   features: z.array(z.number().int().positive()).optional(),
+  developerId: z.coerce.number().optional(),
+  proposedDeveloperName: z.string().optional(),
 });
 
 // export const createPropertyValidator = z.object({
@@ -52,4 +54,6 @@ export const createPropertyServerValidator = z.object({
   coverImage: z.coerce.number().optional(),
   gallery: z.array(z.coerce.number()).optional(),
   features: z.array(z.coerce.number()).optional(),
+  developerId: z.coerce.number().optional(),
+  proposedDeveloperName: z.string().optional(),
 });

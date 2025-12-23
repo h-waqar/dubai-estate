@@ -56,6 +56,8 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
     bathrooms,
     propertySize,
     furnishing,
+    developerId,
+    proposedDeveloperName,
     listingType,
     coverImage,
     gallery,
@@ -162,6 +164,9 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
       gallery.forEach((img) => {
         formData.append("gallery[]", img.id.toString());
       });
+
+      if (developerId) formData.append("developerId", developerId.toString());
+      if (proposedDeveloperName) formData.append("proposedDeveloperName", proposedDeveloperName);
 
       // Add other fields if needed by the action
 

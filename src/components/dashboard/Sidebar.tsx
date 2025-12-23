@@ -19,6 +19,7 @@ import {
   FaCheckCircle,
   FaFileAlt,
   FaList,
+  FaBuilding,
 } from "react-icons/fa";
 import { IconType } from "react-icons";
 import { motion, AnimatePresence } from "framer-motion";
@@ -72,7 +73,9 @@ const links: SidebarItem[] = [
       { href: "/admin/approvals", label: "Approvals", icon: FaCheckCircle },
       { href: "/admin/properties", label: "All Properties", icon: FaList },
       { href: "/admin/property-types", label: "Property Types", icon: FaTags },
+      { href: "/admin/categories", label: "Categories", icon: FaTags },
       { href: "/admin/features", label: "Features", icon: FaStar },
+      { href: "/admin/developers", label: "Developers", icon: FaBuilding },
     ],
   },
   {

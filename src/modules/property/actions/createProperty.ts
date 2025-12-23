@@ -45,6 +45,8 @@ export async function createPropertyAction(formData: FormData) {
     coverImage: formData.get("coverImage"),
     gallery: formData.getAll("gallery[]"),
     features: formData.getAll("features[]"),
+    developerId: formData.get("developerId") ? Number(formData.get("developerId")) : undefined,
+    proposedDeveloperName: formData.get("proposedDeveloperName")?.toString() || undefined,
   };
   // console.log("Parsed data for Zod:", data);
   // 3. Validate using the SERVER validator (with z.coerce)

@@ -21,6 +21,37 @@ export async function createProperty(
   const randomNumbers = Math.floor(1000 + Math.random() * 9000);
   const refNo = `${randomLetters}${randomNumbers}`;
 
+  // Handle Developer Logic
+  let finalDeveloperId = propertyData.developerId;
+  let finalProposedName = propertyData.proposedDeveloperName;
+
+  if (finalProposedName && !finalDeveloperId) {
+    // Check if developer exists to dedupe
+    const existingDev = await prisma.developer.findUnique({
+      where: { name: finalProposedName },
+    });
+
+    if (existingDev) {
+      if (existingDev.status === "APPROVED") {
+        finalDeveloperId = existingDev.id;
+        finalProposedName = undefined; // Linked directly
+      } else {
+        // Pending or Declined - keep as proposed name so it links later (or stays proposed)
+        // We don't need to re-create it.
+      }
+    } else {
+      // Create new PENDING developer
+      await prisma.developer.create({
+        data: {
+          name: finalProposedName,
+          slug: await generateUniqueSlug(finalProposedName), // Reusing slug util
+          status: "PENDING",
+          createdById,
+        },
+      });
+    }
+  }
+
   // Step 1: Create the property
   const property = await prisma.property.create({
     data: {
@@ -28,6 +59,8 @@ export async function createProperty(
       slug,
       refNo,
       createdById,
+      developerId: finalDeveloperId,
+      proposedDeveloperName: finalProposedName,
       status: (status as PropertyStatus) || PropertyStatus.PENDING_REVIEW,
       published: published ?? false,
       availability: propertyData.listingType === "OFF_PLAN" ? "OFFPLAN" : "AVAILABLE",
