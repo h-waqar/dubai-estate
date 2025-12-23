@@ -23,31 +23,33 @@ function MediaPreview({
   onRemove: () => void;
 }) {
   return (
-    <div className="relative group w-40 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-border">
+    <div className="relative group w-40 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg border border-border">
       {media.type === "VIDEO" ? (
-        <div className="w-full h-full flex items-center justify-center bg-gray-900">
-          {/* Using Lucide Play icon directly since we can't easily import the other component's styles */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-8 h-8 text-white opacity-80"
-          >
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
+        <div className="w-full h-full flex items-center justify-center bg-gray-900 group relative rounded-lg overflow-hidden">
           <video
-            src={media.url}
-            className="absolute inset-0 w-full h-full object-cover opacity-60"
+            src={`${media.url}#t=0.1`}
+            className="absolute inset-0 w-full h-full object-cover"
             muted
             playsInline
+            preload="metadata"
           />
+          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-8 h-8 text-white/90"
+            >
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </div>
         </div>
       ) : media.type === "DOCUMENT" ? (
-        <div className="w-full h-full flex flex-col items-center justify-center p-2">
+        <div className="w-full h-full flex flex-col items-center justify-center p-2 rounded-lg overflow-hidden">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -71,7 +73,7 @@ function MediaPreview({
           alt={media.alt || media.title || "Uploaded media"}
           fill
           sizes="160px"
-          className="object-cover"
+          className="object-cover rounded-lg overflow-hidden"
         />
       )}
 
@@ -144,6 +146,10 @@ export default function StepFourMedia({ isEditMode, propertyId, serverData }: St
 
   // --- Cover Image Handlers ---
   const handleCoverSelect = (media: Media) => {
+    if (media.type !== "IMAGE") {
+      toast.error("Cover image must be an image file.");
+      return;
+    }
     setValue("coverImage", media, { shouldValidate: true });
   };
 

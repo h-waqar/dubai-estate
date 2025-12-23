@@ -21,14 +21,61 @@ function MediaPreview({
     onRemove: () => void;
 }) {
     return (
-        <div className="relative group w-40 h-32">
-            <Image
-                src={media.url}
-                alt={media.alt || media.title || "Uploaded media"}
-                fill
-                sizes="160px"
-                className="object-cover rounded-lg border border-border"
-            />
+        // <div className="relative group w-40 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-border">
+        <div className="relative group w-40 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg border border-border">
+            {media.type === "VIDEO" ? (
+                <div className="w-full h-full flex items-center justify-center bg-gray-900 group relative rounded-lg overflow-hidden">
+                    <video
+                        src={`${media.url}#t=0.1`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                    />
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-8 h-8 text-white/90"
+                        >
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </div>
+                </div>
+            ) : media.type === "DOCUMENT" ? (
+                <div className="w-full h-full flex flex-col items-center justify-center p-2 rounded-lg overflow-hidden">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="w-8 h-8 text-gray-400 mb-1"
+                    >
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <p className="text-[10px] text-center text-gray-500 truncate w-full px-1">
+                        {media.title || "Document"}
+                    </p>
+                </div>
+            ) : (
+                <Image
+                    src={media.url}
+                    alt={media.alt || media.title || "Uploaded media"}
+                    fill
+                    sizes="160px"
+                    className="object-cover rounded-lg overflow-hidden"
+                />
+            )}
+
             <button
                 type="button"
                 onClick={onRemove}
@@ -37,12 +84,16 @@ function MediaPreview({
             >
                 <X className="w-4 h-4" />
             </button>
-            <p className="text-xs text-muted-foreground mt-1 truncate">
-                {media.title}
-            </p>
+            {media.type !== "DOCUMENT" && (
+                <p className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] p-1 truncate">
+                    {media.title}
+                </p>
+            )}
         </div>
     );
 }
+
+import { toast } from "sonner"; // Assuming sonner is used for toasts
 
 export default function StepFourMedia() {
     const store = useProjectAdvertiseStore();
@@ -50,6 +101,10 @@ export default function StepFourMedia() {
 
     // Handle logo selection
     const handleLogoSelect = (media: Media) => {
+        if (media.type !== "IMAGE") {
+            toast.error("Logo must be an image file.");
+            return;
+        }
         store.update({ logo: media });
     };
 
@@ -59,6 +114,10 @@ export default function StepFourMedia() {
 
     // Handle cover image selection
     const handleCoverSelect = (media: Media) => {
+        if (media.type !== "IMAGE") {
+            toast.error("Cover image must be an image file.");
+            return;
+        }
         store.update({ coverImage: media });
     };
 

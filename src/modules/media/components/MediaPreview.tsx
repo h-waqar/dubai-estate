@@ -33,8 +33,8 @@ export default function MediaPreview({
   };
 
   const baseClasses = `relative rounded-lg overflow-hidden transition-all duration-200 ${isSelected
-      ? "ring-2 ring-blue-500"
-      : "hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600"
+    ? "ring-2 ring-blue-500"
+    : "hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600"
     }`;
 
   return (
@@ -50,13 +50,16 @@ export default function MediaPreview({
         )}
         {media.type === "VIDEO" && (
           <div className="w-full h-full flex items-center justify-center bg-gray-900 group">
-            <Play className="w-12 h-12 text-white opacity-80 z-10" />
             <video
-              src={media.url}
-              className="absolute inset-0 w-full h-full object-cover opacity-60"
+              src={`${media.url}#t=0.1`}
+              className="absolute inset-0 w-full h-full object-cover"
               muted
               playsInline
+              preload="metadata"
             />
+            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+              <Play className="w-12 h-12 text-white/90" />
+            </div>
           </div>
         )}
         {(media.type === "DOCUMENT" || media.type === "OTHER") && (
