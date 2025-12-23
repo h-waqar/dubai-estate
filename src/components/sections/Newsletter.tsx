@@ -1,58 +1,4 @@
-// export default function Newsletter() {
-//   return (
-//     <section className="py-20 bg-white">
-//       <div className="container mx-auto px-4">
-//         <div className="rounded-lg bg-card text-card-foreground max-w-4xl mx-auto border-0 shadow-2xl section-bg-light">
-//           <div className="p-12 text-center">
-//             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-//               Stay Updated with Dubai Real Estate
-//             </h2>
-//             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-//               Get weekly insights, market updates, and exclusive property deals
-//               delivered to your inbox
-//             </p>
-
-//             {/* Newsletter Form */}
-//             <div className="max-w-md mx-auto mb-12">
-//               <div className="flex flex-col sm:flex-row gap-4">
-//                 <input
-//                   type="email"
-//                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1 h-12 search-focus"
-//                   placeholder="Enter your email address"
-//                 />
-//                 <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md h-12 px-8">
-//                   Subscribe
-//                 </button>
-//               </div>
-//             </div>
-
-//             {/* Stats */}
-//             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-//               <Stat number="15K+" label="Subscribers" />
-//               <Stat number="Weekly" label="Updates" />
-//               <Stat number="Expert" label="Insights" />
-//             </div>
-
-//             <p className="text-sm text-muted-foreground">
-//               No spam, unsubscribe at any time. We respect your privacy.
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-// function Stat({ number, label }) {
-//   return (
-//     <div className="text-center">
-//       <div className="text-4xl font-bold text-primary mb-2">{number}</div>
-//       <div className="text-muted-foreground">{label}</div>
-//     </div>
-//   );
-// }
-
-// src/components/sections/Newsletter.tsx
+// src\components\sections\Newsletter.tsx
 "use client";
 
 import { useState } from "react";
@@ -60,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { subscribeToNewsletter } from "@/app/actions/newsletter";
 
 interface StatProps {
   number: string;
@@ -91,16 +38,28 @@ export default function Newsletter() {
 
     setIsSubmitting(true);
 
-    // TODO: Implement newsletter subscription API
-    setTimeout(() => {
-      toast.success("Successfully subscribed to newsletter!");
-      setEmail("");
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+
+      const result = await subscribeToNewsletter(formData);
+
+      if (result.success) {
+        toast.success(result.message || "Successfully subscribed!");
+        setEmail("");
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (
     <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <h1>Test Newsletter 1</h1>
       <div className="container mx-auto px-4">
         <Card className="max-w-4xl mx-auto border-0 shadow-2xl bg-white dark:bg-gray-800">
           <CardContent className="p-12 text-center">

@@ -1,4 +1,4 @@
-// components/posts/Newsletter.tsx
+// src\modules\blog\components\Newsletter.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
+import { subscribeToNewsletter } from "@/app/actions/newsletter";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
@@ -20,16 +21,28 @@ export function Newsletter() {
 
     setLoading(true);
 
-    // Simulate API call - replace with actual newsletter API
-    setTimeout(() => {
-      toast.success("Thanks for subscribing! Check your email to confirm.");
-      setEmail("");
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+
+      const result = await subscribeToNewsletter(formData);
+
+      if (result.success) {
+        toast.success(result.message || "Thanks for subscribing!");
+        setEmail("");
+      } else {
+        toast.error(result.error);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="bg-primary/5 border border-primary/20 rounded-xl p-8 mb-12">
+      <h1>Test Newsletter 2</h1>
       <div className="max-w-xl mx-auto text-center">
         <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
           <Mail className="h-6 w-6 text-primary" />

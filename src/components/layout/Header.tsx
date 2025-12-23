@@ -20,9 +20,9 @@ const navigation: NavItem[] = [
   {
     title: "Properties",
     items: [
-      { name: "For Sale", href: "/properties" },
-      { name: "For Rent", href: "/properties" },
-      { name: "Off-Plan", href: "/properties-plan" },
+      { name: "For Sale", href: "/for-sale" },
+      { name: "For Rent", href: "/for-rent" },
+      { name: "Off-Plan", href: "/off-plan" },
       // { name: "Luxury", href: "/properties" },
     ],
   },

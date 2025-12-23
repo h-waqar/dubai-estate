@@ -10,55 +10,93 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 import { useDebounce } from "@/hooks/use-debounce";
 
 interface PropertyFiltersProps {
   propertyTypes: { id: number; name: string; slug: string }[];
+  forcedListingType?: "buy" | "rent" | "off_plan";
 }
 
-const PropertyFilters = ({ propertyTypes }: PropertyFiltersProps) => {
+const PropertyFilters = ({ propertyTypes, forcedListingType }: PropertyFiltersProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  // Initialize state from URL
+  // Initialize state
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [propertyType, setPropertyType] = useState(searchParams.get("type") || "all");
   const [bedrooms, setBedrooms] = useState(searchParams.get("bedrooms") || "all");
   const [priceRange, setPriceRange] = useState(searchParams.get("price") || "all");
-  const [status, setStatus] = useState(searchParams.get("status") || "all");
 
-  // Debounce search query to avoid excessive URL updates
+  // Status is slightly more complex: it might come from prop or URL
+  const [status, setStatus] = useState(
+    forcedListingType || searchParams.get("status") || "all"
+  );
+
+  // Debounce search query
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   // Effect to update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
 
+    // Add query params
     if (debouncedSearchQuery) params.set("search", debouncedSearchQuery);
     if (propertyType && propertyType !== "all") params.set("type", propertyType);
     if (bedrooms && bedrooms !== "all") params.set("bedrooms", bedrooms);
     if (priceRange && priceRange !== "all") params.set("price", priceRange);
-    if (status && status !== "all") params.set("status", status);
 
-    router.push(`/properties?${params.toString()}`);
-  }, [debouncedSearchQuery, propertyType, bedrooms, priceRange, status, router]);
+    // Status handling (for "all" or specific overrides if needed)
+    // Note: If we are on a dedicated route, we generally don't need ?status=... 
+    // UNLESS we are on /properties and selected a specific status that doesn't have a route yet (none in this case).
+    if (status === "all") {
+      // if we are on a specific route but selected "all", we should go to /properties
+    }
 
-  // Sync local state with URL params if they change externally (e.g. back button)
+    // Determine target path
+    let targetPath = pathname;
+
+    if (status === "buy") targetPath = "/for-sale";
+    else if (status === "rent") targetPath = "/for-rent";
+    else if (status === "off_plan") targetPath = "/off-plan";
+    else if (status === "all") targetPath = "/properties";
+
+    // Compare with current full URL to avoid loops or unnecessary pushes
+    const queryString = params.toString();
+    const finalUrl = `${targetPath}${queryString ? `?${queryString}` : ""}`;
+
+    // Only push if different
+    if (finalUrl !== `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`) {
+      router.push(finalUrl);
+    }
+
+  }, [debouncedSearchQuery, propertyType, bedrooms, priceRange, status, router, pathname, searchParams]);
+
+  // Sync from URL/Prop changes
   useEffect(() => {
     setSearchQuery(searchParams.get("search") || "");
     setPropertyType(searchParams.get("type") || "all");
     setBedrooms(searchParams.get("bedrooms") || "all");
     setPriceRange(searchParams.get("price") || "all");
-    setStatus(searchParams.get("status") || "all");
-  }, [searchParams]);
+
+    // If we are on a dedicated page, forcedListingType wins
+    if (forcedListingType) {
+      setStatus(forcedListingType);
+    } else {
+      setStatus(searchParams.get("status") || "all");
+    }
+  }, [searchParams, forcedListingType]);
 
   return (
     <section className="section-bg-light py-4 border-b">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap gap-4 items-center">
-          <Select value={status} onValueChange={setStatus}>
+          <Select
+            value={status}
+            onValueChange={(val) => setStatus(val)} // Just update state, effect handles navigation
+          >
             <SelectTrigger className="w-32 cursor-pointer">
               <SelectValue placeholder="Status" />
             </SelectTrigger>

@@ -157,7 +157,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           </div>
         </Link>
         {property.featured && (
-          <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground">
+          <Badge className="absolute top-3 left-3 bg-golden-accent text-primary-foreground">
             Featured
           </Badge>
         )}
@@ -167,11 +167,11 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         >
           {property.type}
         </Badge>
-        {property.status === "Offplan" && (
+        {/* {property.status === "Offplan" && (
           <Badge className="absolute bottom-3 left-3 bg-golden-accent text-black font-semibold">
             Offplan
           </Badge>
-        )}
+        )} */}
       </div>
 
       <CardContent className="p-4 md:p-6">
