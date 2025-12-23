@@ -4,6 +4,8 @@ import { mediaUploadSchema } from "../validators/media.validator";
 import { saveMedia } from "../services/service";
 import { Media } from "../types/media.types";
 // import { handleActionError } from "@/lib/handleActionError";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/modules/user/routes/auth";
 import { handleServerError } from "@/lib/handleServerError";
 
 export const uploadMedia = async ({
@@ -18,6 +20,8 @@ export const uploadMedia = async ({
   type?: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER";
 }): Promise<Media> => {
   try {
+    const session = await getServerSession(authOptions);
+
     // Validate input
     const parsed = mediaUploadSchema.parse({ file, title, alt, type });
 
@@ -27,6 +31,7 @@ export const uploadMedia = async ({
       title: parsed.title,
       alt: parsed.alt,
       type: parsed.type,
+      uploadedById: session?.user?.id ? Number(session.user.id) : undefined,
     });
 
     return {

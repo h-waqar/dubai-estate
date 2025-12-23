@@ -22,10 +22,10 @@ export const useMedia = () => {
     setError,
   } = useMediaStore();
 
-  const fetchMedia = useCallback(async () => {
+  const fetchMedia = useCallback(async (scope: "USER" | "ADMIN_DASHBOARD" = "USER") => {
     try {
       setLoading(true);
-      const media: Media[] = await listMedia();
+      const media: Media[] = await listMedia(scope);
       setMediaList(media);
     } catch (err: unknown) {
       console.error("Failed to fetch media");

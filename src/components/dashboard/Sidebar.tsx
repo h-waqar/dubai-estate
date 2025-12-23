@@ -64,6 +64,7 @@ const links: SidebarItem[] = [
       { href: "/admin/products", label: "Products", icon: FaBoxOpen },
       { href: "/admin/blog", label: "Blog Posts", icon: FaEnvelope },
       { href: "/admin/categories", label: "Blog Categories", icon: FaTags },
+      { href: "/admin/media", label: "Media Library", icon: FaImage },
     ],
   },
   {

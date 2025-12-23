@@ -14,6 +14,7 @@ interface MediaLibraryButtonProps {
   buttonClassName?: string;
   mode?: "select" | "manage";
   allowDelete?: boolean;
+  scope?: "USER" | "ADMIN_DASHBOARD";
 }
 
 export default function MediaLibraryButton({
@@ -22,6 +23,7 @@ export default function MediaLibraryButton({
   buttonClassName,
   mode = "select",
   allowDelete = false,
+  scope,
 }: MediaLibraryButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -48,6 +50,7 @@ export default function MediaLibraryButton({
         }}
         mode={mode}
         allowDelete={allowDelete}
+        scope={scope}
       />
     </>
   );

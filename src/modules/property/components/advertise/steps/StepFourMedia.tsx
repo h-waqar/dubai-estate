@@ -23,25 +23,72 @@ function MediaPreview({
   onRemove: () => void;
 }) {
   return (
-    <div className="relative group w-40 h-32">
-      <Image
-        src={media.url}
-        alt={media.alt || media.title || "Uploaded media"}
-        fill
-        sizes="160px"
-        className="object-cover rounded-lg border border-border"
-      />
+    <div className="relative group w-40 h-32 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-border">
+      {media.type === "VIDEO" ? (
+        <div className="w-full h-full flex items-center justify-center bg-gray-900">
+          {/* Using Lucide Play icon directly since we can't easily import the other component's styles */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-8 h-8 text-white opacity-80"
+          >
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <video
+            src={media.url}
+            className="absolute inset-0 w-full h-full object-cover opacity-60"
+            muted
+            playsInline
+          />
+        </div>
+      ) : media.type === "DOCUMENT" ? (
+        <div className="w-full h-full flex flex-col items-center justify-center p-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-8 h-8 text-gray-400 mb-1"
+          >
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <p className="text-[10px] text-center text-gray-500 truncate w-full px-1">
+            {media.title || "Document"}
+          </p>
+        </div>
+      ) : (
+        <Image
+          src={media.url}
+          alt={media.alt || media.title || "Uploaded media"}
+          fill
+          sizes="160px"
+          className="object-cover"
+        />
+      )}
+
       <button
         type="button"
         onClick={onRemove}
         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg opacity-0 group-hover:opacity-100 z-40 cursor-pointer"
-        aria-label="Remove image"
+        aria-label="Remove item"
       >
         <X className="w-4 h-4" />
       </button>
-      <p className="text-xs text-muted-foreground mt-1 truncate">
-        {media.title}
-      </p>
+      {/* Title overlay only for images/videos that don't have it inline */}
+      {media.type !== "DOCUMENT" && (
+        <p className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] p-1 truncate">
+          {media.title}
+        </p>
+      )}
     </div>
   );
 }

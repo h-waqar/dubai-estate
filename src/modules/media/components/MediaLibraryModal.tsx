@@ -17,6 +17,7 @@ interface MediaLibraryModalProps {
   onSelect?: (media: Media) => void;
   mode?: "select" | "manage";
   allowDelete?: boolean;
+  scope?: "USER" | "ADMIN_DASHBOARD";
 }
 
 export default function MediaLibraryModal({
@@ -25,6 +26,7 @@ export default function MediaLibraryModal({
   onSelect,
   mode = "select",
   allowDelete = false,
+  scope = "USER",
 }: MediaLibraryModalProps) {
   const { fetchMedia } = useMedia();
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
@@ -32,9 +34,9 @@ export default function MediaLibraryModal({
 
   useEffect(() => {
     if (isOpen) {
-      fetchMedia();
+      fetchMedia(scope);
     }
-  }, [isOpen, fetchMedia]);
+  }, [isOpen, fetchMedia, scope]);
 
   if (!isOpen) return null;
 
