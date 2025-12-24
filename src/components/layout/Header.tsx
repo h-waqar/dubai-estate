@@ -8,6 +8,8 @@ import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/modules/user/hooks/useAuth";
+import { UserProfileDropdown } from "@/components/common/UserProfileDropdown";
 
 interface NavItem {
   title: string;
@@ -47,6 +49,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
 
   const isActive = (href: string) => pathname === href;
 
@@ -115,20 +118,26 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <ThemeToggle />
 
-            <Link href="/login" className="hidden md:block">
-              <Button
-                variant="outline"
-                className="border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-              >
-                Sign In
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <UserProfileDropdown />
+            ) : (
+              <>
+                <Link href="/login" className="hidden md:block">
+                  <Button
+                    variant="outline"
+                    className="border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
 
-            <Link href="/register" className="hidden md:block me-0">
-              <Button className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white">
-                Get Started
-              </Button>
-            </Link>
+                <Link href="/register" className="hidden md:block me-0">
+                  <Button className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
 
             {/* Mobile Menu Toggle */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
