@@ -10,33 +10,29 @@ import type { UseFormSetValue, UseFormWatch } from "react-hook-form";
 import type { PostFormData } from "../types/post.types";
 
 interface TagsInputProps {
-  watch: UseFormWatch<PostFormData>;
-  setValue: UseFormSetValue<PostFormData>;
+  value: string[];
+  onChange: (tags: string[]) => void;
 }
 
-export function TagsInput({ watch, setValue }: TagsInputProps) {
+export function TagsInput({ value = [], onChange }: TagsInputProps) {
   const [input, setInput] = useState("");
-  const tags = watch("tags") || [];
 
   const addTag = () => {
-    if (input.trim() && !tags.includes(input.trim())) {
-      setValue("tags", [...tags, input.trim()]);
+    if (input.trim() && !value.includes(input.trim())) {
+      onChange([...value, input.trim()]);
       setInput("");
     }
   };
 
   const removeTag = (tag: string) => {
-    setValue(
-      "tags",
-      tags.filter((t) => t !== tag)
-    );
+    onChange(value.filter((t) => t !== tag));
   };
 
   return (
     <div>
       <Label className="block text-sm font-medium mb-2">Tags</Label>
       <div className="flex gap-2 flex-wrap mb-2">
-        {tags.map((tag) => (
+        {value.map((tag) => (
           <span
             key={tag}
             className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm"

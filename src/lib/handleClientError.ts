@@ -12,10 +12,12 @@ export function handleClientError(error: unknown): Error {
     const res = error.response?.data;
 
     // Try to extract structured messages
-    if (typeof res?.error === "string") return new Error(res.error);
-    if (typeof res?.message === "string") return new Error(res.message);
+    // Try to extract structured messages
+    if (res?.error && typeof res.error === "string") return new Error(res.error);
+    if (res?.message && typeof res.message === "string") return new Error(res.message);
     if (res?.error?.message && typeof res.error.message === "string")
       return new Error(res.error.message);
+
     if (res?.error?.fieldErrors) {
       const fieldErrors = res.error.fieldErrors;
       const firstField = Object.keys(fieldErrors)[0];

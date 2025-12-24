@@ -2,9 +2,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   useForm,
   FormProvider,
+  Controller,
   type SubmitHandler,
   type SubmitErrorHandler,
 } from "react-hook-form";
@@ -33,6 +35,7 @@ export function PostForm({
   initialData?: Partial<PostFormData> & { id?: number };
   categories: { id: number; name: string }[];
 }) {
+  const router = useRouter();
   const { userId } = useAuth();
   const {
     post,
@@ -45,6 +48,7 @@ export function PostForm({
     startSaving,
     stopSaving,
     markSaved,
+    resetPost,
   } = usePostStore();
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -129,6 +133,12 @@ export function PostForm({
       setSuccess("Post saved successfully!");
       markSaved();
       console.log("✅ Saved Post:", savedPost);
+
+      // Clear the form data from local storage
+      resetPost();
+
+      // Redirect to admin blog list to prevent duplicate submissions
+      router.push("/admin/blog");
     } catch (err: unknown) {
       const error = handleClientError(err);
       setError(error.message);
@@ -150,13 +160,31 @@ export function PostForm({
         {/* --- Header --- */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Write Blog Post</h2>
-          <button
-            type="button"
-            onClick={() => setIsPreviewOpen(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            👁️ Preview
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                console.log("🗑️ Clear button clicked");
+                if (window.confirm("Are you sure you want to clear the form? This action cannot be undone.")) {
+                  console.log("Confirmed clear");
+                  resetPost();
+                  console.log("Resetting form with:", defaultPostFormData);
+                  form.reset({ ...defaultPostFormData, coverImage: undefined });
+                  toast.success("Form cleared successfully");
+                }
+              }}
+              className="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition font-medium"
+            >
+              🗑️ Clear
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              👁️ Preview
+            </button>
+          </div>
         </div>
 
         {/* --- Title --- */}
@@ -203,16 +231,26 @@ export function PostForm({
         />
 
         {/* --- Tags --- */}
-        <TagsInput watch={watch} setValue={setValue} />
+        <Controller
+          control={control}
+          name="tags"
+          render={({ field }) => (
+            <TagsInput value={field.value} onChange={field.onChange} />
+          )}
+        />
 
         {/* --- Content Editor --- */}
         <div>
           <label className="block text-sm font-medium mb-2">Content</label>
-          <BlogEditor
-            value={htmlContent}
-            onChange={(html) =>
-              setValue("content", html, { shouldValidate: true })
-            }
+          <Controller
+            control={control}
+            name="content"
+            render={({ field }) => (
+              <BlogEditor
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
           />
           {formState.errors.content && (
             <p className="text-red-500 text-sm mt-1">

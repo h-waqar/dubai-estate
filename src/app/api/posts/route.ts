@@ -69,6 +69,8 @@ export async function POST(req: NextRequest) {
         slug,
         excerpt: data.excerpt,
         coverImage: data.coverImage,
+        published: data.published ?? false,
+        publishedAt: data.published ? new Date() : null,
         tags: data.tags ?? [],
         author: {
           connect: { id: token.id },

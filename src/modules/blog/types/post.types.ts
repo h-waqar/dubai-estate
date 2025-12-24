@@ -37,7 +37,9 @@ export const defaultPostFormData: PostFormData = {
   slug: "",
   content: "",
   published: false,
+  published: false,
   tags: [],
+  coverImage: "" as string | undefined,
 };
 
 /**

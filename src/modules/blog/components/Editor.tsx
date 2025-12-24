@@ -125,6 +125,13 @@ export function BlogEditor({ value, onChange }: BlogEditorProps) {
     },
   });
 
+  // Sync editor content when value prop changes (e.g. on form reset)
+  React.useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value || "");
+    }
+  }, [value, editor]);
+
   if (!editor) return null;
 
   return (
@@ -313,11 +320,9 @@ function ToolbarButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`px-3 py-1.5 rounded transition-colors text-foreground hover:bg-accent ${
-        active ? "bg-accent" : ""
-      } ${italic ? "italic" : ""} ${strike ? "line-through" : ""} ${
-        mono ? "font-mono text-sm" : ""
-      } disabled:opacity-30 disabled:cursor-not-allowed`}
+      className={`px-3 py-1.5 rounded transition-colors text-foreground hover:bg-accent ${active ? "bg-accent" : ""
+        } ${italic ? "italic" : ""} ${strike ? "line-through" : ""} ${mono ? "font-mono text-sm" : ""
+        } disabled:opacity-30 disabled:cursor-not-allowed`}
     >
       {label}
     </button>
