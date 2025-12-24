@@ -72,9 +72,8 @@ export default function BlogsClient({
       {/* Results Count */}
       <div className="text-sm text-muted-foreground">
         {filteredPosts.length === initialPosts.length
-          ? `${filteredPosts.length} article${
-              filteredPosts.length !== 1 ? "s" : ""
-            }`
+          ? `${filteredPosts.length} article${filteredPosts.length !== 1 ? "s" : ""
+          }`
           : `${filteredPosts.length} of ${initialPosts.length} articles`}
       </div>
       {/* Posts Grid */}
@@ -88,14 +87,13 @@ export default function BlogsClient({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map((post) => (
-            <Link key={post.id} href={`/blogs/${post.slug}`} className="group">
-              <article className="border rounded-lg overflow-hidden bg-card hover:shadow-lg transition-all duration-300">
+            <Link key={post.id} href={`/blogs/${post.slug}`} className="group h-full flex flex-col">
+              <article className="border rounded-lg overflow-hidden bg-card hover:shadow-lg transition-all duration-300 flex flex-col h-full">
                 {/* Cover Image */}
-                <div className="relative h-48 overflow-hidden bg-muted">
+                <div className="relative h-48 overflow-hidden bg-muted flex-shrink-0">
                   {post.coverImage ? (
                     <Image
-                      src="https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg"
-                      // src={post.coverImage}
+                      src={post.coverImage}
                       alt={post.title}
                       fill
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -105,18 +103,18 @@ export default function BlogsClient({
                       <span className="text-muted-foreground">No Image</span>
                     </div>
                   )}
-                  {post.categoryId && (
+                  {post.category && (
                     <Badge
                       className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm"
                       variant="secondary"
                     >
-                      {post.categoryId}
+                      {post.category.name}
                     </Badge>
                   )}
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-6 flex flex-col flex-1">
                   {/* Title */}
                   <h2 className="text-xl font-semibold mb-3 line-clamp-2 group-hover:text-primary transition-colors">
                     {post.title}
@@ -129,44 +127,47 @@ export default function BlogsClient({
                     </p>
                   )}
 
-                  {/* Meta Info */}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-3 w-3" />
-                      <time dateTime={new Date(post.createdAt).toISOString()}>
-                        {new Date(post.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </time>
+                  {/* Spacer to push bottom content down */}
+                  <div className="mt-auto">
+                    {/* Meta Info */}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-3 w-3" />
+                        <time dateTime={new Date(post.createdAt).toISOString()}>
+                          {new Date(post.createdAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </time>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3 w-3" />
+                        <span>5 min read</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3 w-3" />
-                      <span>5 min read</span>
-                    </div>
-                  </div>
 
-                  {/* Tags */}
-                  {post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {post.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {post.tags.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{post.tags.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
+                    {/* Tags */}
+                    {post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {post.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                        {post.tags.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{post.tags.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
 
-                  {/* Read More */}
-                  <div className="flex items-center text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                    Read more
-                    <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    {/* Read More */}
+                    <div className="flex items-center text-sm font-medium text-primary group-hover:gap-2 transition-all">
+                      Read more
+                      <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
                 </div>
               </article>

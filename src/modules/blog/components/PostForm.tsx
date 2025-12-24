@@ -24,16 +24,13 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 import { useAuth } from "@/modules/user/hooks/useAuth";
-// import { AxiosError } from "axios";
-// import { handleActionError } from "@/lib/handleActionError";
-// import { handleServerError } from "@/lib/handleServerError";
 import { handleClientError } from "@/lib/handleClientError";
 
 export function PostForm({
   initialData,
   categories,
 }: {
-  initialData?: Partial<PostFormData>; // ✅ Make it Partial
+  initialData?: Partial<PostFormData> & { id?: number };
   categories: { id: number; name: string }[];
 }) {
   const { userId } = useAuth();
@@ -64,9 +61,21 @@ export function PostForm({
     defaultValues,
   });
 
-  const { watch, setValue, handleSubmit, formState } = form;
+  const { watch, setValue, handleSubmit, formState, control } = form;
 
   const htmlContent = watch("content") || "";
+  const title = watch("title");
+
+  // --- Auto-generate slug from title
+  useEffect(() => {
+    if (title && !initialData?.id) { // Only auto-generate for new posts or if explicit logic added
+      const slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
+      setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [title, setValue, initialData]);
 
   // --- Sync form → Zustand store
   useEffect(() => {
@@ -91,6 +100,11 @@ export function PostForm({
   }, [post, autoSaveEnabled, startSaving, stopSaving, markSaved, setSuccess]);
 
   const onSubmit: SubmitHandler<PostFormData> = async (data) => {
+    if (!userId) {
+      toast.error("You must be logged in to save a post");
+      return;
+    }
+
     const payload = {
       title: data.title,
       slug: data.slug,
@@ -160,14 +174,18 @@ export function PostForm({
           )}
         </div>
 
-        {/* --- Slug --- */}
+        {/* --- Slug (Auto-generated & Read-only) --- */}
         <div>
           <label className="block text-sm font-medium mb-2">Slug</label>
           <input
             {...form.register("slug")}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+            readOnly
+            className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 cursor-not-allowed font-mono text-sm text-muted-foreground"
             placeholder="blog-post-url-slug"
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            Auto-generated from title
+          </p>
           {formState.errors.slug && (
             <p className="text-red-500 text-sm mt-1">
               {formState.errors.slug.message}
@@ -180,8 +198,8 @@ export function PostForm({
 
         {/* --- Cover Image --- */}
         <CoverImageInput
-          register={form.register}
-          error={formState.errors.coverImage}
+          control={form.control}
+          name="coverImage"
         />
 
         {/* --- Tags --- */}
