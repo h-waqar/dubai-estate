@@ -154,12 +154,22 @@ export default function Hero({ propertyTypes }: HeroProps) {
                   <Command
                     shouldFilter={false}
                     className="rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-white/60 dark:bg-gray-800/60 shadow-sm overflow-visible
+                      transition-all duration-200
+                      hover:border-yellow-400/50 hover:bg-white/80
+                      focus-within:ring-1 focus-within:ring-yellow-500 focus-within:border-yellow-500 focus-within:bg-white
                       [&_[data-slot=command-input-wrapper]]:h-full 
                       [&_[data-slot=command-input-wrapper]]:border-none 
                       [&_[data-slot=command-input-wrapper]]:px-0
                       [&_[data-slot=command-input-wrapper]_svg]:hidden"
                   >
-                    <div className="flex items-center px-4" onClick={() => setOpen(true)}>
+                    <div
+                      className="flex items-center px-4 cursor-text"
+                      onClick={(e) => {
+                        setOpen(true);
+                        // Programmatically focus the input if the container is clicked
+                        e.currentTarget.querySelector('input')?.focus();
+                      }}
+                    >
                       {/* Remove manual icon, we'll try to use the CommandInput's icon, OR hiding CommandInput's icon and using ours. 
                             The user complained about "two search icons". default CommandInput has one.
                             Let's hide the Wrapper's border and icon, and use ours for custom styling, 
