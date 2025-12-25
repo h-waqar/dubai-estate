@@ -321,87 +321,6 @@ import {
 } from "lucide-react";
 import { Property, PropertyCardProps } from "@/types/featured-properties";
 
-const properties: Property[] = [
-  {
-    id: 1,
-    image: "/assets/property-1.jpg",
-    alt: "Luxury Apartment in Downtown Dubai",
-    featured: true,
-    type: "Apartment",
-    title: "Luxury Apartment in Downtown Dubai",
-    location: "Downtown Dubai",
-    price: "AED 2,500,000",
-    bedrooms: 3,
-    bathrooms: 2,
-    area: "1,850 sq ft",
-  },
-  {
-    id: 2,
-    image: "/assets/property-2.jpg",
-    alt: "Marina View Villa",
-    featured: true,
-    type: "Villa",
-    title: "Marina View Villa",
-    location: "Dubai Marina",
-    price: "AED 8,900,000",
-    bedrooms: 5,
-    bathrooms: 4,
-    area: "4,200 sq ft",
-  },
-  {
-    id: 3,
-    image: "/assets/property-3.jpg",
-    alt: "Penthouse with City View",
-    featured: false,
-    type: "Penthouse",
-    title: "Penthouse with City View",
-    location: "Business Bay",
-    price: "AED 5,750,000",
-    bedrooms: 4,
-    bathrooms: 3,
-    area: "2,800 sq ft",
-  },
-  {
-    id: 4,
-    image: "/assets/property-1.jpg",
-    alt: "Modern Apartment in JBR",
-    featured: false,
-    type: "Apartment",
-    title: "Modern Apartment in JBR",
-    location: "Jumeirah Beach Residence",
-    price: "AED 3,200,000",
-    bedrooms: 2,
-    bathrooms: 2,
-    area: "1,400 sq ft",
-  },
-  {
-    id: 5,
-    image: "/assets/property-2.jpg",
-    alt: "Beachfront Villa",
-    featured: true,
-    type: "Villa",
-    title: "Beachfront Villa",
-    location: "Palm Jumeirah",
-    price: "AED 12,500,000",
-    bedrooms: 6,
-    bathrooms: 5,
-    area: "5,500 sq ft",
-  },
-  {
-    id: 6,
-    image: "/assets/property-3.jpg",
-    alt: "City Center Apartment",
-    featured: false,
-    type: "Apartment",
-    title: "City Center Apartment",
-    location: "DIFC",
-    price: "AED 4,800,000",
-    bedrooms: 3,
-    bathrooms: 3,
-    area: "2,200 sq ft",
-  },
-];
-
 function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Card className="h-full rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
@@ -453,18 +372,20 @@ function PropertyCard({ property }: PropertyCardProps) {
             {property.area}
           </div>
         </div>
-        <Button
-          variant="outline"
-          className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          View Details
-        </Button>
+        <Link href={`/properties/${property.slug}`} className="w-full">
+          <Button
+            variant="outline"
+            className="w-full border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            View Details
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   );
 }
 
-export default function FeaturedProperties() {
+export default function FeaturedProperties({ properties }: { properties: Property[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slidesPerView, setSlidesPerView] = useState(4);
 
@@ -553,9 +474,8 @@ export default function FeaturedProperties() {
           <div
             className="flex transition-transform duration-500 ease-out py-4"
             style={{
-              transform: `translateX(-${
-                currentIndex * (100 / slidesPerView)
-              }%)`,
+              transform: `translateX(-${currentIndex * (100 / slidesPerView)
+                }%)`,
             }}
           >
             {properties.map((property) => (
@@ -563,9 +483,8 @@ export default function FeaturedProperties() {
                 key={property.id}
                 className="flex-shrink-0 pr-2 last:pr-0"
                 style={{
-                  width: `calc(${100 / slidesPerView}% - ${
-                    (slidesPerView - 1) * 1.5
-                  }rem / ${slidesPerView})`,
+                  width: `calc(${100 / slidesPerView}% - ${(slidesPerView - 1) * 1.5
+                    }rem / ${slidesPerView})`,
                 }}
               >
                 <PropertyCard property={property} />
@@ -580,11 +499,10 @@ export default function FeaturedProperties() {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                Math.floor(currentIndex / slidesPerView) === index
-                  ? "bg-yellow-500 dark:bg-yellow-400 w-8"
-                  : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
-              }`}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${Math.floor(currentIndex / slidesPerView) === index
+                ? "bg-yellow-500 dark:bg-yellow-400 w-8"
+                : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

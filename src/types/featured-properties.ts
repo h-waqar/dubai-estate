@@ -10,6 +10,7 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   area: string;
+  slug?: string;
 }
 
 export interface PropertyCardProps {

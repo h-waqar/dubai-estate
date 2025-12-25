@@ -121,11 +121,14 @@ export default function BlogsClient({
                   </h2>
 
                   {/* Excerpt */}
-                  {post.excerpt && (
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                      {post.excerpt}
-                    </p>
-                  )}
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                    {post.excerpt ||
+                      post.content
+                        .replace(/<[^>]*>/g, "")
+                        .replace(/\s+/g, " ")
+                        .trim()
+                        .substring(0, 150) + "..."}
+                  </p>
 
                   {/* Spacer to push bottom content down */}
                   <div className="mt-auto">

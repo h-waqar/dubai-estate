@@ -202,6 +202,17 @@ export function PostForm({
           )}
         </div>
 
+        {/* --- Excerpt --- */}
+        <div>
+          <label className="block text-sm font-medium mb-2">Excerpt (Optional)</label>
+          <textarea
+            {...form.register("excerpt")}
+            rows={3}
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            placeholder="Brief summary of the post..."
+          />
+        </div>
+
         {/* --- Slug (Auto-generated & Read-only) --- */}
         <div>
           <label className="block text-sm font-medium mb-2">Slug</label>

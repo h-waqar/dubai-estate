@@ -3,8 +3,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/sections/Hero";
 import Categories from "@/components/sections/Categories";
-import FeaturedProperties from "@/components/sections/FeaturedProperties";
-import FeaturedArticles from "@/components/sections/FeaturedArticles";
+import { FeaturedPropertiesSection } from "@/components/sections/FeaturedPropertiesSection";
+import { FeaturedArticlesSection } from "@/components/sections/FeaturedArticlesSection";
 import Newsletter from "@/components/sections/Newsletter";
 import { StatsFeatureSection } from "@/components/sections/StatsFeatureSection";
 import { DevelopersCarousel } from "@/components/sections/DevelopersCarousel";
@@ -22,11 +22,11 @@ export default async function HomePage() {
       <main className="relative">
         <Hero propertyTypes={propertyTypes} />
         {/* <Categories /> */}
-        <FeaturedProperties />
+        <FeaturedPropertiesSection />
         <DevelopersCarousel />
         <FeaturedProjectsSection />
         <StatsFeatureSection />
-        <FeaturedArticles />
+        <FeaturedArticlesSection />
         <Newsletter />
       </main>
       <Footer />
