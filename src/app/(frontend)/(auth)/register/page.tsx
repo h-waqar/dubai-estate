@@ -13,11 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner"; // <-- use toast function
 import { Toaster } from "@/components/ui/sonner";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -28,7 +30,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, captchaToken }),
       });
       const data = await res.json();
       setLoading(false);
@@ -43,6 +45,7 @@ export default function RegisterPage() {
       toast.error("Server error");
     }
   };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -88,6 +91,9 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+            <div className="flex justify-center">
+              <TurnstileWidget onSuccess={setCaptchaToken} />
             </div>
             <Button className="w-full" type="submit" disabled={loading}>
               {loading ? "Registering..." : "Register"}

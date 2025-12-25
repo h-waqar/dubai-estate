@@ -35,6 +35,7 @@ import {
   type CallbackRequestInput,
 } from "../validators/callbackRequestSchema";
 import createCallbackRequest from "../actions/createCallbackRequest";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 function CallbackRequestForm() {
   const form = useForm<CallbackRequestInput>({
@@ -49,6 +50,7 @@ function CallbackRequestForm() {
       budget: undefined,
       location: "",
       message: "",
+      captchaToken: "",
     },
   });
 
@@ -310,6 +312,20 @@ function CallbackRequestForm() {
                     </FormItem>
                   )}
                 />
+
+                {/* Turnstile / Captcha */}
+                <div className="flex justify-center">
+                  <TurnstileWidget
+                    onSuccess={(token) => {
+                      form.setValue("captchaToken", token, { shouldValidate: true });
+                    }}
+                  />
+                </div>
+                {form.formState.errors.captchaToken && (
+                  <p className="text-sm font-medium text-destructive text-center">
+                    {form.formState.errors.captchaToken.message}
+                  </p>
+                )}
 
                 {/* Submit */}
                 <Button

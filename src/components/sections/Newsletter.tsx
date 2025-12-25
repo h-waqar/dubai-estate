@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { subscribeToNewsletter } from "@/app/actions/newsletter";
 import { CheckCircle2 } from "lucide-react";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 interface StatProps {
   number: string;
@@ -27,6 +28,7 @@ const Stat = ({ number, label }: StatProps) => {
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -43,6 +45,7 @@ export default function Newsletter() {
     try {
       const formData = new FormData();
       formData.append("email", email);
+      formData.append("captchaToken", captchaToken);
 
       const result = await subscribeToNewsletter(formData);
 
@@ -50,6 +53,7 @@ export default function Newsletter() {
         setIsSuccess(true);
         // toast.success(result.message || "Successfully subscribed!");
         setEmail("");
+        setCaptchaToken(""); // Reset token on success
       } else {
         toast.error(result.error);
       }
@@ -112,6 +116,9 @@ export default function Newsletter() {
                     >
                       {isSubmitting ? "Subscribing..." : "Subscribe"}
                     </Button>
+                  </div>
+                  <div className="mt-4 flex justify-center">
+                    <TurnstileWidget onSuccess={setCaptchaToken} />
                   </div>
                 </form>
 

@@ -8,10 +8,30 @@ const subscribeValidator = z.object({
     email: z.string().email("Please enter a valid email address"),
 });
 
+import { verifyTurnstile } from "@/lib/verifyTurnstile";
+
 export async function subscribeToNewsletter(formData: FormData) {
     const rawData = {
         email: formData.get("email"),
+        captchaToken: formData.get("captchaToken")?.toString(),
     };
+
+    // 0. Verify Captcha
+    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+        if (!rawData.captchaToken) {
+            return {
+                success: false,
+                error: "Please complete the CAPTCHA",
+            };
+        }
+        const isCaptchaValid = await verifyTurnstile(rawData.captchaToken);
+        if (!isCaptchaValid) {
+            return {
+                success: false,
+                error: "CAPTCHA validation failed",
+            };
+        }
+    }
 
     // 1. Validate
     const validation = subscribeValidator.safeParse(rawData);

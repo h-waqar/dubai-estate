@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { subscribeToNewsletter } from "@/app/actions/newsletter";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -25,6 +27,7 @@ export function Newsletter() {
     try {
       const formData = new FormData();
       formData.append("email", email);
+      formData.append("captchaToken", captchaToken);
 
       const result = await subscribeToNewsletter(formData);
 
@@ -88,6 +91,9 @@ export function Newsletter() {
                 {loading ? "Subscribing..." : "Subscribe"}
               </Button>
             </form>
+            <div className="mt-4 flex justify-center">
+              <TurnstileWidget onSuccess={setCaptchaToken} />
+            </div>
             <p className="text-xs text-muted-foreground mt-3">
               We respect your privacy. Unsubscribe at any time.
             </p>
