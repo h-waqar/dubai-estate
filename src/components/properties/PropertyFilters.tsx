@@ -25,7 +25,10 @@ const PropertyFilters = ({ propertyTypes, forcedListingType }: PropertyFiltersPr
   const pathname = usePathname();
 
   // Initialize state
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  // We map 'location' param to 'search' state so it appears in the input and isn't lost
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || searchParams.get("location") || ""
+  );
   const [propertyType, setPropertyType] = useState(searchParams.get("type") || "all");
   const [bedrooms, setBedrooms] = useState(searchParams.get("bedrooms") || "all");
   const [priceRange, setPriceRange] = useState(searchParams.get("price") || "all");
@@ -76,7 +79,7 @@ const PropertyFilters = ({ propertyTypes, forcedListingType }: PropertyFiltersPr
 
   // Sync from URL/Prop changes
   useEffect(() => {
-    setSearchQuery(searchParams.get("search") || "");
+    setSearchQuery(searchParams.get("search") || searchParams.get("location") || "");
     setPropertyType(searchParams.get("type") || "all");
     setBedrooms(searchParams.get("bedrooms") || "all");
     setPriceRange(searchParams.get("price") || "all");

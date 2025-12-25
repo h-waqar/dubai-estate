@@ -58,7 +58,7 @@ export default function Hero({ propertyTypes }: HeroProps) {
     const fetchSuggestions = async () => {
       // Fetch even if empty (for initial suggestions)
       try {
-        const results = await searchLocations(query);
+        const results = await searchLocations(query, purpose); // Pass purpose filter
         setSuggestions(results);
       } catch (error) {
         console.error("Failed to fetch location suggestions", error);
@@ -67,7 +67,7 @@ export default function Hero({ propertyTypes }: HeroProps) {
 
     const timeoutId = setTimeout(fetchSuggestions, 300); // Debounce
     return () => clearTimeout(timeoutId);
-  }, [query, open]);
+  }, [query, open, purpose]); // Re-fetch when purpose changes
 
   const handleLocationSelect = (loc: string) => {
     setLocation(loc);

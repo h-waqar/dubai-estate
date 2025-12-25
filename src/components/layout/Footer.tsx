@@ -211,7 +211,7 @@ const footerSections: FooterSection[] = [
   {
     title: "Resources",
     links: [
-      { name: "Blog", href: "/blog" },
+      { name: "Blogs", href: "/blogs" },
       { name: "Guides", href: "/guides" },
       { name: "Market Insights", href: "/insights" },
       { name: "Investment Tips", href: "/investment" },
