@@ -25,6 +25,7 @@ const PropertyListings = async ({ searchParams, forcedListingType }: PropertyLis
         propertyType: typeof resolvedParams.type === "string" ? resolvedParams.type : undefined,
         bedrooms: typeof resolvedParams.bedrooms === "string" ? resolvedParams.bedrooms : undefined,
         priceRange: typeof resolvedParams.price === "string" ? resolvedParams.price : undefined,
+        location: typeof resolvedParams.location === "string" ? resolvedParams.location : undefined,
         sort: typeof resolvedParams.sort === "string" ? resolvedParams.sort : undefined,
     };
 
