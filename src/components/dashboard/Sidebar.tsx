@@ -4,24 +4,36 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
-  FaHome,
-  FaUsers,
-  FaUser,
-  FaBoxOpen,
-  FaEnvelope,
-  FaCog,
-  FaChevronLeft,
-  FaChevronRight,
-  FaTags,
-  FaStar,
-  FaChevronDown,
-  FaImage,
-  FaCheckCircle,
-  FaFileAlt,
-  FaList,
-  FaBuilding,
-} from "react-icons/fa";
-import { IconType } from "react-icons";
+  LayoutDashboard,
+  Users,
+  User,
+  Package,
+  FileText,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Tags,
+  Star,
+  ChevronDown,
+  Image as ImageIcon,
+  CheckCircle,
+  Building,
+  Home,
+  Briefcase,
+  Construction,
+  Key,
+  FolderTree,
+  ClipboardCheck,
+  BadgeCheck,
+  ShieldCheck,
+  PenTool,
+  Hash,
+  Library,
+  ShoppingBag,
+  DollarSign,
+  TrendingUp,
+  LucideIcon,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
@@ -34,7 +46,7 @@ import {
 // --- Types ---
 type SidebarItem = {
   label: string;
-  icon: IconType;
+  icon: LucideIcon;
   href?: string;
   subItems?: SidebarItem[];
 };
@@ -43,48 +55,56 @@ type SidebarItem = {
 const links: SidebarItem[] = [
   {
     label: "System",
-    icon: FaCog, // Generic system icon
+    icon: Settings,
     subItems: [
-      { href: "/admin/dashboard", label: "Dashboard", icon: FaHome },
-      { href: "/admin/settings", label: "Settings", icon: FaCog },
+      { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/settings", label: "Settings", icon: Settings },
     ],
   },
   {
     label: "User Management",
-    icon: FaUsers,
+    icon: Users,
     subItems: [
-      { href: "/admin/users", label: "Users", icon: FaUsers },
-      { href: "/admin/admins", label: "Admins", icon: FaUser },
+      { href: "/admin/users", label: "Users", icon: User },
+      { href: "/admin/admins", label: "Admins", icon: ShieldCheck },
+    ],
+  },
+  {
+    label: "Finance",
+    icon: DollarSign,
+    subItems: [
+      { href: "/admin/revenue", label: "Revenue", icon: TrendingUp },
+      { href: "/admin/pricing", label: "Pricing Plans", icon: ShoppingBag },
     ],
   },
   {
     label: "Content",
-    icon: FaBoxOpen,
+    icon: Library,
     subItems: [
-      { href: "/admin/products", label: "Products", icon: FaBoxOpen },
-      { href: "/admin/blog", label: "Blog Posts", icon: FaEnvelope },
-      { href: "/admin/categories", label: "Blog Categories", icon: FaTags },
-      { href: "/admin/media", label: "Media Library", icon: FaImage },
+      { href: "/admin/products", label: "Products", icon: ShoppingBag },
+      { href: "/admin/blog", label: "Blog Posts", icon: PenTool },
+      { href: "/admin/categories", label: "Blog Categories", icon: Hash },
+      { href: "/admin/media", label: "Media Library", icon: ImageIcon },
     ],
   },
   {
     label: "Property",
-    icon: FaImage,
+    icon: Home,
     subItems: [
-      { href: "/admin/approvals", label: "Approvals", icon: FaCheckCircle },
-      { href: "/admin/properties", label: "All Properties", icon: FaList },
-      { href: "/admin/property-types", label: "Property Types", icon: FaTags },
-      { href: "/admin/categories", label: "Categories", icon: FaTags },
-      { href: "/admin/features", label: "Features", icon: FaStar },
-      { href: "/admin/developers", label: "Developers", icon: FaBuilding },
+      { href: "/admin/approvals", label: "Approvals", icon: BadgeCheck },
+      { href: "/admin/properties", label: "All Properties", icon: Building },
+      { href: "/admin/property-types", label: "Property Types", icon: Key },
+      { href: "/admin/categories", label: "Categories", icon: Tags },
+      { href: "/admin/features", label: "Features", icon: Star },
+      { href: "/admin/developers", label: "Developers", icon: Construction },
     ],
   },
   {
     label: "Projects",
-    icon: FaBoxOpen,
+    icon: FolderTree,
     subItems: [
-      { href: "/admin/project-approvals", label: "Approvals", icon: FaCheckCircle },
-      { href: "/admin/projects", label: "All Projects", icon: FaImage },
+      { href: "/admin/project-approvals", label: "Approvals", icon: ClipboardCheck },
+      { href: "/admin/projects", label: "All Projects", icon: Briefcase },
     ],
   },
 ];
@@ -202,7 +222,7 @@ function SidebarItemRender({
               animate={{ rotate: isExpanded ? 180 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              <FaChevronDown className="h-3 w-3 opacity-50" />
+              <ChevronDown className="h-3 w-3 opacity-50" />
             </motion.div>
           </button>
           <AnimatePresence initial={false}>
@@ -332,9 +352,9 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <FaChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" />
           ) : (
-            <FaChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
           )}
         </button>
       </div>

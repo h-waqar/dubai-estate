@@ -40,7 +40,6 @@ const navigation: NavItem[] = [
   // },
 
   { title: "Blog", href: "/blogs" },
-  // { title: "Guides", href: "/guides" },
   { title: "About Us", href: "/about" },
   { title: "Contact", href: "/contact" },
 ];

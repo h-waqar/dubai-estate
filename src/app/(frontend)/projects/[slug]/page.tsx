@@ -15,6 +15,7 @@ import { FeaturesAmenitiesSection } from "@/components/project/sections/Features
 import { PaymentPlanSection } from "@/components/project/sections/PaymentPlanSection";
 import { LocationSection } from "@/components/project/sections/LocationSection";
 import { ProjectProgressSection } from "@/components/project/sections/ProjectProgressSection";
+import { ProjectViewCounter } from "@/modules/project/components/ProjectViewCounter";
 import "leaflet/dist/leaflet.css";
 import type { Metadata } from "next";
 
@@ -208,6 +209,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
                     nearbyAttractions={project.nearbyAttractions}
                 />
             </div>
+            <ProjectViewCounter projectId={project.id} />
         </>
     );
 }

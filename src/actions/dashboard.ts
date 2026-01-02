@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export interface DashboardStats {
     users: { total: number; newThisMonth: number };
+    revenue: { total: number; newThisMonth: number };
     properties: {
         total: number;
         newThisMonth: number;
@@ -62,14 +63,33 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     };
 
     // 1. Fetch Stats in parallel
-    const [users, properties, projects, developers, posts, leads] = await Promise.all([
+    const [users, properties, projects, developers, posts, leads, plansWithUserCount] = await Promise.all([
         getBasicStat(prisma.user),
         getStatusStat(prisma.property),
         getStatusStat(prisma.project),
         getBasicStat(prisma.developer),
         getBasicStat(prisma.post),
         getBasicStat(prisma.callbackRequest),
+        prisma.pricingPlan.findMany({
+            select: {
+                priceMonthly: true,
+                _count: {
+                    select: { users: true }
+                }
+            }
+        }),
     ]);
+
+    const totalMonthlyRevenue = plansWithUserCount.reduce((acc, plan) => {
+        return acc + (Number(plan.priceMonthly) * plan._count.users);
+    }, 0);
+
+    // For simplicity, we'll assume revenue this month is the same as total monthly revenue
+    // unless we have a Transaction model to track precisely.
+    const revenue = {
+        total: totalMonthlyRevenue,
+        newThisMonth: totalMonthlyRevenue // Placeholder until transaction history is implemented
+    };
 
     // 2. Fetch Recent Activity (Limit 5 from each, then sort & slice)
     const [recentUsers, recentProperties, recentPosts, recentLeads] = await Promise.all([
@@ -126,6 +146,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
     return {
         users,
+        revenue,
         properties,
         projects: {
             total: projects.total,

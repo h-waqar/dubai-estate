@@ -99,6 +99,8 @@ export default function AdvertiseWizard({
         bathrooms: initialData.bathrooms,
         propertySize: initialData.builtUpArea ? Number(initialData.builtUpArea) : undefined,
         furnishing: initialData.furnishing,
+        developerId: initialData.developerId,
+        proposedDeveloperName: initialData.proposedDeveloperName,
         features: initialData.features?.map((f: any) => f.feature?.name).filter(Boolean) || [],
         keywords: [],
         coverImage: initialData.mediaUsages?.find((m: any) => m.role === "COVER")?.media || null,

@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageGallery } from "@/components/properties/ImageGallery";
 import { PropertyLocationSection } from "@/components/property/PropertyLocationSection";
+import { ViewCounter } from "@/modules/property/components/ViewCounter";
 
 // Helper to format currency
 const formatCurrency = (amount: number, currency: string = "AED") => {
@@ -368,6 +369,7 @@ export default async function PropertyPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+      <ViewCounter propertyId={property.id} />
     </div>
   );
 }

@@ -59,6 +59,7 @@ model User {
   updatedAt          DateTime     @updatedAt
   Media              Media[]
   createdDevelopers  Developer[]
+  leads              CallbackRequest[] @relation("AgentLeads")
 }
 
 // --- Categories ---
@@ -119,8 +120,19 @@ model CallbackRequest {
   budget          Int?
   location        String?
   message         String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+
+  // Link to Listing
+  propertyId Int?
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  projectId  Int?
+  project    Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // Link to Agent
+  agentId Int?
+  agent   User? @relation("AgentLeads", fields: [agentId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --- Enums ---
@@ -233,9 +245,11 @@ model Property {
   furnishing   FurnishingStatus     @default(UNFURNISHED)
   availability PropertyAvailability @default(AVAILABLE)
   status       PropertyStatus       @default(DRAFT)
+  views        Int                  @default(0)
   features     PropertyFeature[]
   images       PropertyImage[]
   videos       PropertyVideo[]
+  leads        CallbackRequest[]
 
   // Owner (Agent / User)
   createdById Int
@@ -400,6 +414,7 @@ model Project {
   projectType ProjectType   @default(CURRENT)
   status      ProjectStatus @default(DRAFT)
   isFeatured  Boolean       @default(false)
+  views       Int           @default(0)
 
   // Location
   community String? // e.g., "Al Furjan"
@@ -443,6 +458,7 @@ model Project {
   nearbyAttractions  NearbyAttraction[]
   progressTimeline   ProjectProgress[] // NEW
   faqs               ProjectFAQ[]
+  leads              CallbackRequest[]
 
   // Moderation & Ownership
   createdById  Int

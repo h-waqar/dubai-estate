@@ -28,13 +28,14 @@ function ArticleListItem({ article }: ArticleListItemProps) {
   return (
     <Card className="group overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
       <div className="flex">
-        <div className="w-32 shrink-0 relative overflow-hidden">
+        <div className="w-32 shrink-0 relative overflow-hidden bg-gray-200 dark:bg-gray-800">
           <Image
             src={article.image}
             alt={article.alt}
-            width={128}
-            height={160}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            fill
+            sizes="256px"
+            quality={90}
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
         </div>
         <CardContent className="flex-1 p-4">
@@ -102,11 +103,14 @@ export default function FeaturedArticles({ articles }: { articles: Article[] }) 
           {/* Featured Article */}
           <Link href={`/${featured.slug}`} className="block lg:row-span-2">
             <Card className="h-full overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-300">
-              <div className="relative h-64 lg:h-80">
+              <div className="relative h-64 lg:h-80 bg-gray-200 dark:bg-gray-800">
                 <Image
                   src={featured.image}
                   alt={featured.alt}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  quality={90}
+                  priority
                   className="object-cover"
                 />
                 <Badge className="absolute top-4 left-4 bg-yellow-500 hover:bg-yellow-600 text-white border-0">

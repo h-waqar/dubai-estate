@@ -193,28 +193,19 @@ const footerSections: FooterSection[] = [
   {
     title: "Properties",
     links: [
-      { name: "For Sale", href: "/properties/sale" },
-      { name: "For Rent", href: "/properties/rent" },
-      { name: "Off-Plan", href: "/properties/off-plan" },
-      { name: "Luxury Properties", href: "/properties/luxury" },
+      { name: "For Sale", href: "/for-sale" },
+      { name: "For Rent", href: "/for-rent" },
+      { name: "Off-Plan", href: "/off-plan" },
+      { name: "All Properties", href: "/properties" },
     ],
   },
   {
-    title: "Areas",
+    title: "Services",
     links: [
-      { name: "Dubai Marina", href: "/areas/dubai-marina" },
-      { name: "Downtown Dubai", href: "/areas/downtown" },
-      { name: "Palm Jumeirah", href: "/areas/palm-jumeirah" },
-      { name: "Business Bay", href: "/areas/business-bay" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { name: "Blogs", href: "/blogs" },
-      { name: "Guides", href: "/guides" },
-      { name: "Market Insights", href: "/insights" },
-      { name: "Investment Tips", href: "/investment" },
+      { name: "List Property", href: "/advertise" },
+      { name: "Off-Plan Projects", href: "/projects" },
+      { name: "Investment Guides", href: "/blogs" },
+      { name: "Market Reports", href: "/blogs" },
     ],
   },
   {
@@ -222,8 +213,8 @@ const footerSections: FooterSection[] = [
     links: [
       { name: "About Us", href: "/about" },
       { name: "Contact", href: "/contact" },
-      { name: "Careers", href: "/careers" },
-      { name: "Partners", href: "/partners" },
+      { name: "Privacy Policy", href: "/privacy" },
+      { name: "Terms of Service", href: "/terms" },
     ],
   },
 ];

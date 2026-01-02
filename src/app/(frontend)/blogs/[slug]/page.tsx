@@ -107,11 +107,12 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <div className="flex items-center gap-2">
                     {post.author && post.author.image ? (
                       <Image
-                        width={32}
-                        height={32}
+                        width={64}
+                        height={64}
                         src={post.author.image}
                         alt={post.author.name || "Author"}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-8 h-8 rounded-full object-cover bg-muted"
+                        quality={90}
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -200,11 +201,12 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <div className="flex items-start gap-4">
                     {post.author && post.author.image ? (
                       <Image
-                        width={64}
-                        height={64}
+                        width={128}
+                        height={128}
                         src={post.author.image}
                         alt={post.author.name || "Author"}
-                        className="w-16 h-16 rounded-full object-cover"
+                        className="w-16 h-16 rounded-full object-cover bg-muted"
+                        quality={90}
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -334,11 +336,12 @@ export default async function BlogPostPage({ params }: PageProps) {
                           <div className="flex gap-3">
                             {featured.coverImage ? (
                               <Image
-                                width={80}
-                                height={80}
+                                width={160}
+                                height={160}
                                 src={featured.coverImage}
                                 alt={featured.title}
-                                className="w-20 h-20 object-cover rounded-lg shrink-0"
+                                className="w-20 h-20 object-cover rounded-lg shrink-0 bg-muted"
+                                quality={90}
                               />
                             ) : (
                               <div className="w-20 h-20 bg-muted rounded-lg shrink-0 flex items-center justify-center">

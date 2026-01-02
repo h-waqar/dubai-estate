@@ -6,6 +6,7 @@ import { listProperties } from "@/modules/property/services/listProperties";
 import { ProjectService } from "@/modules/project/services/project.service";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
+import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,11 +46,24 @@ export default async function AgentDashboardPage() {
     });
     const projects = serializeDecimals(rawProjects);
 
-    // Calculate stats
+    // Fetch real leads for this agent
+    const leadsCount = await prisma.callbackRequest.count({
+        where: {
+            OR: [
+                { agentId: session.user.id as number },
+                { property: { createdById: session.user.id as number } },
+                { project: { createdById: session.user.id as number } }
+            ]
+        }
+    });
+
+    // Calculate real stats
     const totalListings = properties.length + projects.length;
-    // Mock data for views/leads as we don't have that yet
-    const activeViews = (properties.length * 120 + 45) + (projects.length * 450);
-    const totalLeads = Math.floor(activeViews * 0.05);
+    
+    const propertyViews = properties.reduce((acc: number, curr: any) => acc + (curr.views || 0), 0);
+    const projectViews = projects.reduce((acc: number, curr: any) => acc + (curr.views || 0), 0);
+    const totalViews = propertyViews + projectViews;
+    const totalLeads = leadsCount;
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -107,11 +121,11 @@ export default async function AgentDashboardPage() {
                     <p className="text-2xl font-bold mt-2">{totalListings}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border shadow-sm">
-                    <h3 className="text-sm font-medium text-muted-foreground">Total Views (Est.)</h3>
-                    <p className="text-2xl font-bold mt-2">{activeViews.toLocaleString()}</p>
+                    <h3 className="text-sm font-medium text-muted-foreground">Total Views</h3>
+                    <p className="text-2xl font-bold mt-2">{totalViews.toLocaleString()}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border shadow-sm">
-                    <h3 className="text-sm font-medium text-muted-foreground">Total Leads (Est.)</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">Total Leads</h3>
                     <p className="text-2xl font-bold mt-2">{totalLeads.toLocaleString()}</p>
                 </div>
             </div>

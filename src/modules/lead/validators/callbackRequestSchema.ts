@@ -13,5 +13,8 @@ export const callbackRequestSchema = z.object({
   location: z.string().optional(),
   message: z.string().optional(),
   captchaToken: z.string().min(1, "Please complete the CAPTCHA"),
+  agentId: z.number().optional(),
+  propertyId: z.number().optional(),
+  projectId: z.number().optional(),
 });
 export type CallbackRequestInput = z.infer<typeof callbackRequestSchema>;

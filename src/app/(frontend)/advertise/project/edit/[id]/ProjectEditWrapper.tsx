@@ -20,6 +20,7 @@ export default function ProjectEditWrapper({
 }: ProjectEditWrapperProps) {
     const updateStore = useProjectAdvertiseStore((state) => state.update);
     const resetSteps = useProjectStepStore((state) => state.reset);
+    const [isLoaded, setIsLoaded] = React.useState(false);
 
     useEffect(() => {
         // Hydrate store with project data
@@ -60,7 +61,7 @@ export default function ProjectEditWrapper({
             description: project.description || "",
             aboutContent: project.aboutContent || "",
             highlights: [], // Schema doesn't have highlights array? It was in validator but maybe not in Prisma model? 
-            // Checked schema: Project model doesn't have `highlights` array field. It might be computed or missing?
+            // Checked schema: Project model doesn't have `highlights` array field. It might be computed or missing? 
             // Validator had `highlights: z.array(z.string())`.
             // Let's leave empty if not in project object.
 
@@ -125,8 +126,17 @@ export default function ProjectEditWrapper({
 
         // Reset to first step
         resetSteps();
+        setIsLoaded(true);
 
     }, [project, mediaUsages, updateStore, resetSteps]);
+
+    if (!isLoaded) {
+        return (
+            <div className="min-h-[400px] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
 
     return (
         <ProjectAdvertiseWizard

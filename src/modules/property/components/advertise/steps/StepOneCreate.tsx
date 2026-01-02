@@ -75,10 +75,10 @@ function StepOneCreate({ propertyTypes }: StepOneCreateProps) {
 
   // Sync Store -> Form for location (updated by LocationSelector)
   useEffect(() => {
-    if (location) {
-      setValue("location", location, { shouldValidate: true });
+    if (location && location !== watch("location")) {
+      setValue("location", location, { shouldValidate: true, shouldDirty: true });
     }
-  }, [location, setValue]);
+  }, [location, setValue, watch]);
 
 
 

@@ -107,6 +107,7 @@ NEXTAUTH_URL="http://localhost:3000"
 *   **State Management:** Prefer Server State (RSC) where possible. Use `zustand` for complex client state if needed.
 *   **Data Fetching:** Server Components fetch data directly via Prisma or cached services. Client components use API routes or Server Actions.
 *   **Imports:** Use absolute imports (e.g., `@/components/...`).
+*   **Scripts:** Any temporary, diagnostic, or database-related scripts MUST be placed in `src/scripts/` instead of the project root.
 
 <!-- Imported from: docs/MODE_Index.md -->
 # /sg:index - Project Documentation

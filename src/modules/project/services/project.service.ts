@@ -258,6 +258,8 @@ export class ProjectService {
                         amenities: true,
                     },
                 },
+                createdBy: { select: { id: true, name: true, email: true } },
+                approvedBy: { select: { id: true, name: true } },
             },
             orderBy: { createdAt: "desc" },
         });

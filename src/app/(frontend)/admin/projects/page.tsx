@@ -39,6 +39,8 @@ export default async function AdminProjectsPage() {
                             <TableHead>Type</TableHead>
                             <TableHead>Developer</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead>Added By</TableHead>
+                            <TableHead>Approved By</TableHead>
                             <TableHead>Published</TableHead>
                             <TableHead>Featured</TableHead>
                             <TableHead>Actions</TableHead>
@@ -61,6 +63,13 @@ export default async function AdminProjectsPage() {
                                     >
                                         {project.status}
                                     </span>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="text-sm">{(project as any).createdBy?.name || "Unknown"}</div>
+                                    <div className="text-xs text-muted-foreground">{(project as any).createdBy?.email}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="text-sm">{(project as any).approvedBy?.name || "-"}</div>
                                 </TableCell>
                                 <TableCell>{project.published ? "Yes" : "No"}</TableCell>
                                 <TableCell>

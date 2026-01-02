@@ -1,6 +1,16 @@
 import Link from "next/link"; // For navigation
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FaBoxOpen, FaChartLine, FaFileAlt, FaUsers } from "react-icons/fa";
+import { 
+    Users, 
+    Building2, 
+    FileText, 
+    TrendingUp, 
+    DollarSign,
+    LayoutDashboard,
+    PlusCircle,
+    UserPlus,
+    MessageSquare
+} from "lucide-react";
 import { getDashboardStats } from "@/actions/dashboard";
 import { formatDistanceToNow } from "date-fns";
 
@@ -9,9 +19,17 @@ export default async function DashboardPage() {
 
     const stats = [
         {
+            title: "Total Revenue",
+            value: `AED ${data.revenue.total.toLocaleString()}`,
+            icon: DollarSign,
+            trend: "Monthly recurring revenue",
+            color: "text-emerald-500",
+            details: null
+        },
+        {
             title: "Total Users",
             value: data.users.total.toLocaleString(),
-            icon: FaUsers,
+            icon: Users,
             trend: `+${data.users.newThisMonth} new this month`,
             color: "text-blue-500",
             details: null
@@ -19,7 +37,7 @@ export default async function DashboardPage() {
         {
             title: "Properties",
             value: data.properties.total.toLocaleString(),
-            icon: FaBoxOpen,
+            icon: Building2,
             trend: `+${data.properties.newThisMonth} new this month`,
             color: "text-green-500",
             details: [
@@ -31,7 +49,7 @@ export default async function DashboardPage() {
         {
             title: "Projects",
             value: data.projects.total.toLocaleString(),
-            icon: FaBoxOpen,
+            icon: Building2,
             trend: "Total Projects",
             color: "text-cyan-500",
             details: [
@@ -43,7 +61,7 @@ export default async function DashboardPage() {
         {
             title: "Developers",
             value: data.developers.total.toLocaleString(),
-            icon: FaUsers,
+            icon: Users,
             trend: "Total Developers",
             color: "text-indigo-500",
             details: null
@@ -51,7 +69,7 @@ export default async function DashboardPage() {
         {
             title: "Blog Posts",
             value: data.posts.total.toLocaleString(),
-            icon: FaFileAlt,
+            icon: FileText,
             trend: `+${data.posts.newThisMonth} new this month`,
             color: "text-purple-500",
             details: null
@@ -59,7 +77,7 @@ export default async function DashboardPage() {
         {
             title: "Total Leads",
             value: data.leads.total.toLocaleString(),
-            icon: FaChartLine,
+            icon: TrendingUp,
             trend: `+${data.leads.newThisMonth} new this month`,
             color: "text-orange-500",
             details: null
@@ -75,7 +93,7 @@ export default async function DashboardPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {stats.map((stat) => {
                     const Icon = stat.icon;
                     return (
@@ -143,27 +161,39 @@ export default async function DashboardPage() {
                     <CardContent>
                         <div className="grid grid-cols-2 gap-3">
                             <Link href="/admin/users" className="block">
-                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                    <p className="font-medium">Manage Users</p>
-                                    <p className="text-xs text-muted-foreground mt-1">View all users</p>
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left flex items-start gap-3">
+                                    <Users className="h-5 w-5 text-blue-500 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium">Manage Users</p>
+                                        <p className="text-xs text-muted-foreground mt-1">View all users</p>
+                                    </div>
                                 </button>
                             </Link>
                             <Link href="/advertise" className="block">
-                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                    <p className="font-medium">New Property</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Add to inventory</p>
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left flex items-start gap-3">
+                                    <PlusCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium">New Property</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Add to inventory</p>
+                                    </div>
                                 </button>
                             </Link>
                             <Link href="/admin/blog/new" className="block">
-                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                    <p className="font-medium">Write Post</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Create blog content</p>
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left flex items-start gap-3">
+                                    <FileText className="h-5 w-5 text-purple-500 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium">Write Post</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Create blog content</p>
+                                    </div>
                                 </button>
                             </Link>
                             <Link href="/lead" className="block">
-                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                    <p className="font-medium">View Leads</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Callback requests</p>
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left flex items-start gap-3">
+                                    <MessageSquare className="h-5 w-5 text-orange-500 mt-0.5" />
+                                    <div>
+                                        <p className="font-medium">View Leads</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Callback requests</p>
+                                    </div>
                                 </button>
                             </Link>
                         </div>

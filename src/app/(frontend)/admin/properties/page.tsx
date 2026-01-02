@@ -89,6 +89,9 @@ export default function AdminPropertiesPage() {
                                 <TableHead>Type</TableHead>
                                 <TableHead>Price</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead>Views</TableHead>
+                                <TableHead>Added By</TableHead>
+                                <TableHead>Approved By</TableHead>
                                 <TableHead>Featured</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -120,6 +123,16 @@ export default function AdminPropertiesPage() {
                                         >
                                             {property.status}
                                         </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="text-sm font-medium">{property.views || 0}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="text-sm">{property.createdBy?.name || "Unknown"}</div>
+                                        <div className="text-xs text-muted-foreground">{property.createdBy?.email}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="text-sm">{property.approvedBy?.name || "-"}</div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center space-x-2">
