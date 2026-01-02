@@ -11,32 +11,51 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { submitContactForm } from "@/app/actions/contact";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ContactFormInput, contactFormSchema } from "@/validators/contact";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState("");
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const form = useForm<ContactFormInput>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      message: "",
+      captchaToken: "",
+    },
+  });
+
+  async function onSubmit(data: ContactFormInput) {
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    formData.append("captchaToken", captchaToken);
-
     try {
-      const result = await submitContactForm(formData);
+      const result = await submitContactForm(data);
 
       if (result.success) {
         toast.success(result.message);
-        (e.target as HTMLFormElement).reset();
-        setCaptchaToken("");
+        form.reset();
+        // Reset captcha manually if needed, or component does it? 
+        // The TurnstileWidget receives a key or ref to reset? 
+        // For simplicity, we just reset the form value.
       } else {
-        // Handle generic or field-specific errors
         if (typeof result.error === 'string') {
           toast.error(result.error);
         } else {
-          // Just show the first error found for simplicity, or generic
-          toast.error("Please check your input and try again.");
+          // Field errors
+          Object.entries(result.error || {}).forEach(([key, errors]) => {
+            const message = Array.isArray(errors) ? errors[0] : errors;
+            if (key in data) {
+              form.setError(key as keyof ContactFormInput, { type: "server", message });
+            } else {
+              toast.error(message);
+            }
+          });
         }
       }
     } catch (err) {
@@ -57,42 +76,101 @@ export default function ContactPage() {
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               We'd love to hear from you. Please fill out the form below.
             </p>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="first-name">First Name</Label>
-                  <Input id="first-name" name="firstName" placeholder="John" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="last-name">Last Name</Label>
-                  <Input id="last-name" name="lastName" placeholder="Doe" required />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="john@example.com" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input id="phone" name="phone" placeholder="+1 (555) 000-0000" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea id="message" name="message" placeholder="Your Message" rows={5} required />
-              </div>
 
-              <div className="flex justify-center">
-                <TurnstileWidget onSuccess={setCaptchaToken} />
-              </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-              >
-                {loading ? "Sending..." : "Send Message"}
-              </Button>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="john@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+1 (555) 000-0000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Message</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Your Message" rows={5} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-center flex-col items-center">
+                  <TurnstileWidget onSuccess={(token) => {
+                    form.setValue("captchaToken", token);
+                    form.clearErrors("captchaToken");
+                  }} />
+                  {form.formState.errors.captchaToken && (
+                    <p className="text-sm font-medium text-destructive mt-2">
+                      {form.formState.errors.captchaToken.message}
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
+                  {loading ? "Sending..." : "Send Message"}
+                </Button>
+              </form>
+            </Form>
           </div>
 
           {/* Image */}

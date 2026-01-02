@@ -1,30 +1,12 @@
 "use server";
 
-import { z } from "zod";
 import { verifyTurnstile } from "@/lib/verifyTurnstile";
+import { contactFormSchema } from "@/validators/contact";
 
-// Basic schema for contact form
-const contactFormSchema = z.object({
-    firstName: z.string().min(2, "First name is too short"),
-    lastName: z.string().min(2, "Last name is too short"),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().optional(),
-    message: z.string().min(10, "Message is too short"),
-    captchaToken: z.string().min(1, "Please complete the CAPTCHA"),
-});
-
-export async function submitContactForm(formData: FormData) {
-    const rawData = {
-        firstName: formData.get("firstName"),
-        lastName: formData.get("lastName"),
-        email: formData.get("email"),
-        phone: formData.get("phone"),
-        message: formData.get("message"),
-        captchaToken: formData.get("captchaToken"),
-    };
-
+export async function submitContactForm(formData: unknown) {
     // 1. Validate Input
-    const validation = contactFormSchema.safeParse(rawData);
+    const validation = contactFormSchema.safeParse(formData);
+
     if (!validation.success) {
         return {
             success: false,
@@ -32,9 +14,25 @@ export async function submitContactForm(formData: FormData) {
         };
     }
 
-    // 2. Verify Captcha
-    if (process.env.NODE_ENV === 'production' || process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
-        const isCaptchaValid = await verifyTurnstile(validation.data.captchaToken);
+    const { captchaToken, ...data } = validation.data;
+
+    // 2. Verify Captcha logic
+    const isCaptchaEnabled = process.env.NEXT_PUBLIC_CAPTCHA_ENABLE !== 'false';
+
+    if (isCaptchaEnabled) {
+        if (!captchaToken) {
+            return {
+                success: false,
+                error: "Please complete the CAPTCHA",
+            };
+        }
+
+        // Server-side environment might use different var or same, safe to check standard key
+        // Also verifyTurnstile utility checks PUBLIC_CAPTCHA_ENABLE, let's align implementation.
+        // The utility function verifyTurnstile already includes a check for PUBLIC_CAPTCHA_ENABLE.
+        // However, we need to pass a valid string to it.
+
+        const isCaptchaValid = await verifyTurnstile(captchaToken);
         if (!isCaptchaValid) {
             return {
                 success: false,

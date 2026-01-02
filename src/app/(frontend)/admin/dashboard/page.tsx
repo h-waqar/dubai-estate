@@ -1,39 +1,70 @@
-// src/app/(frontend)/admin/page.tsx:1
+import Link from "next/link"; // For navigation
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FaBoxOpen, FaChartLine, FaFileAlt, FaUsers } from "react-icons/fa";
+import { getDashboardStats } from "@/actions/dashboard";
+import { formatDistanceToNow } from "date-fns";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
-import {FaBoxOpen, FaChartLine, FaFileAlt, FaUsers} from "react-icons/fa";
+export default async function DashboardPage() {
+    const data = await getDashboardStats();
 
-export default function DashboardPage() {
     const stats = [
         {
             title: "Total Users",
-            value: "1,024",
+            value: data.users.total.toLocaleString(),
             icon: FaUsers,
-            trend: "+12% from last month",
-            color: "text-blue-500"
+            trend: `+${data.users.newThisMonth} new this month`,
+            color: "text-blue-500",
+            details: null
         },
         {
-            title: "Products",
-            value: "256",
+            title: "Properties",
+            value: data.properties.total.toLocaleString(),
             icon: FaBoxOpen,
-            trend: "+8% from last month",
-            color: "text-green-500"
+            trend: `+${data.properties.newThisMonth} new this month`,
+            color: "text-green-500",
+            details: [
+                { label: "Approved", value: data.properties.approved, color: "text-green-600" },
+                { label: "Pending", value: data.properties.pending, color: "text-yellow-600" },
+                { label: "Declined", value: data.properties.declined, color: "text-red-600" },
+            ]
+        },
+        {
+            title: "Projects",
+            value: data.projects.total.toLocaleString(),
+            icon: FaBoxOpen,
+            trend: "Total Projects",
+            color: "text-cyan-500",
+            details: [
+                { label: "Approved", value: data.projects.approved, color: "text-green-600" },
+                { label: "Pending", value: data.projects.pending, color: "text-yellow-600" },
+                { label: "Declined", value: data.projects.declined, color: "text-red-600" },
+            ]
+        },
+        {
+            title: "Developers",
+            value: data.developers.total.toLocaleString(),
+            icon: FaUsers,
+            trend: "Total Developers",
+            color: "text-indigo-500",
+            details: null
         },
         {
             title: "Blog Posts",
-            value: "42",
+            value: data.posts.total.toLocaleString(),
             icon: FaFileAlt,
-            trend: "+3 new this week",
-            color: "text-purple-500"
+            trend: `+${data.posts.newThisMonth} new this month`,
+            color: "text-purple-500",
+            details: null
         },
         {
-            title: "Revenue",
-            value: "$24,500",
+            title: "Total Leads",
+            value: data.leads.total.toLocaleString(),
             icon: FaChartLine,
-            trend: "+18% from last month",
-            color: "text-orange-500"
+            trend: `+${data.leads.newThisMonth} new this month`,
+            color: "text-orange-500",
+            details: null
         }
-    ]
+    ];
 
     return (
         <div className="space-y-6">
@@ -44,25 +75,35 @@ export default function DashboardPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {stats.map((stat) => {
-                    const Icon = stat.icon
+                    const Icon = stat.icon;
                     return (
                         <Card key={stat.title} className="hover:shadow-lg transition-shadow">
                             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     {stat.title}
                                 </CardTitle>
-                                <Icon className={`h-4 w-4 ${stat.color}`}/>
+                                <Icon className={`h-4 w-4 ${stat.color}`} />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stat.value}</div>
-                                <p className="text-xs text-muted-foreground mt-1">
+                                <p className="text-xs text-muted-foreground mt-1 mb-3">
                                     {stat.trend}
                                 </p>
+                                {stat.details && (
+                                    <div className="pt-2 border-t grid grid-cols-3 gap-2 text-center">
+                                        {stat.details.map((detail) => (
+                                            <div key={detail.label} className="flex flex-col">
+                                                <span className={`text-xs font-bold ${detail.color}`}>{detail.value}</span>
+                                                <span className="text-[10px] text-muted-foreground">{detail.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
-                    )
+                    );
                 })}
             </div>
 
@@ -73,17 +114,24 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-3">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex items-center gap-3 pb-3 border-b last:border-0 last:pb-0">
-                                    <div className="h-2 w-2 rounded-full bg-primary"/>
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium">Activity item {i}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {i} hour{i > 1 ? 's' : ''} ago
-                                        </p>
+                            {data.recentActivity.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No recent activity.</p>
+                            ) : (
+                                data.recentActivity.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-3 pb-3 border-b last:border-0 last:pb-0">
+                                        <div className={`h-2 w-2 rounded-full ${item.type === 'LEAD' ? 'bg-orange-500' :
+                                            item.type === 'PROPERTY' ? 'bg-green-500' :
+                                                item.type === 'USER' ? 'bg-blue-500' : 'bg-purple-500'
+                                            }`} />
+                                        <div className="flex-1 space-y-1">
+                                            <p className="text-sm font-medium">{item.message}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -94,30 +142,34 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-3">
-                            <button
-                                className="p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                <p className="font-medium">Add User</p>
-                                <p className="text-xs text-muted-foreground mt-1">Create new account</p>
-                            </button>
-                            <button
-                                className="p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                <p className="font-medium">New Product</p>
-                                <p className="text-xs text-muted-foreground mt-1">Add to inventory</p>
-                            </button>
-                            <button
-                                className="p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                <p className="font-medium">Write Post</p>
-                                <p className="text-xs text-muted-foreground mt-1">Create blog content</p>
-                            </button>
-                            <button
-                                className="p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
-                                <p className="font-medium">View Reports</p>
-                                <p className="text-xs text-muted-foreground mt-1">Analytics & insights</p>
-                            </button>
+                            <Link href="/admin/users" className="block">
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                                    <p className="font-medium">Manage Users</p>
+                                    <p className="text-xs text-muted-foreground mt-1">View all users</p>
+                                </button>
+                            </Link>
+                            <Link href="/advertise" className="block">
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                                    <p className="font-medium">New Property</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Add to inventory</p>
+                                </button>
+                            </Link>
+                            <Link href="/admin/blog/new" className="block">
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                                    <p className="font-medium">Write Post</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Create blog content</p>
+                                </button>
+                            </Link>
+                            <Link href="/lead" className="block">
+                                <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left">
+                                    <p className="font-medium">View Leads</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Callback requests</p>
+                                </button>
+                            </Link>
                         </div>
                     </CardContent>
                 </Card>
             </div>
         </div>
-    )
+    );
 }
