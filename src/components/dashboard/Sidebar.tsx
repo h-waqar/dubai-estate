@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/sheet";
 
 // --- Types ---
-type SidebarItem = {
+export type SidebarItem = {
   label: string;
   icon: LucideIcon;
   href?: string;
@@ -52,7 +52,7 @@ type SidebarItem = {
 };
 
 // --- Data ---
-const links: SidebarItem[] = [
+export const adminLinks: SidebarItem[] = [
   {
     label: "System",
     icon: Settings,
@@ -279,10 +279,11 @@ function SidebarItemRender({
 
 interface SidebarLinksProps {
   isCollapsed: boolean;
+  links: SidebarItem[];
   onLinkClick?: () => void;
 }
 
-function SidebarLinks({ isCollapsed, onLinkClick }: SidebarLinksProps) {
+function SidebarLinks({ isCollapsed, links, onLinkClick }: SidebarLinksProps) {
   const pathname = usePathname();
   // State to track which categories are expanded
   // Initialize with the category containing the current route
@@ -298,7 +299,7 @@ function SidebarLinks({ isCollapsed, onLinkClick }: SidebarLinksProps) {
         });
       }
     });
-  }, [pathname]);
+  }, [pathname, links]);
 
 
   const toggleExpand = (label: string) => {
@@ -329,9 +330,11 @@ function SidebarLinks({ isCollapsed, onLinkClick }: SidebarLinksProps) {
 interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  links?: SidebarItem[];
+  title?: string;
 }
 
-export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ isCollapsed, onToggleCollapse, links = adminLinks, title = "Admin Dashboard" }: SidebarProps) {
   return (
     <aside
       className={cn(
@@ -341,7 +344,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
     >
       <div className="flex items-center justify-between p-4 border-b min-h-16">
         {!isCollapsed && (
-          <div className="text-lg font-bold truncate">Admin Dashboard</div>
+          <div className="text-lg font-bold truncate">{title}</div>
         )}
         <button
           onClick={onToggleCollapse}
@@ -360,7 +363,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
       </div>
 
       <div className="flex flex-col flex-1 p-3 overflow-y-auto overflow-x-hidden">
-        <SidebarLinks isCollapsed={isCollapsed} />
+        <SidebarLinks isCollapsed={isCollapsed} links={links} />
       </div>
     </aside>
   );
@@ -369,18 +372,21 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
 interface MobileSidebarProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  links?: SidebarItem[];
+  title?: string;
 }
 
-export function MobileSidebar({ open, onOpenChange }: MobileSidebarProps) {
+export function MobileSidebar({ open, onOpenChange, links = adminLinks, title = "Admin Dashboard" }: MobileSidebarProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-64 p-0">
         <SheetHeader className="p-4 border-b">
-          <SheetTitle className="text-left">Admin Dashboard</SheetTitle>
+          <SheetTitle className="text-left">{title}</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col h-[calc(100%-4rem)] p-3 overflow-y-auto">
           <SidebarLinks
             isCollapsed={false}
+            links={links}
             onLinkClick={() => onOpenChange(false)}
           />
         </div>
