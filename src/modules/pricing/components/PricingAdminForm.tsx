@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createPricingSchema, CreatePricingInput } from "../validators/createPricing.validator";
-import { createPlan, updatePlan } from "../actions/createPlan"; // Wait, update is in updatePlan.ts
+import { createPlan } from "../actions/createPlan";
 import { updatePlan as updatePlanAction } from "../actions/updatePlan";
 import { Button } from "@/components/ui/button";
 import {

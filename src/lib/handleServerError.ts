@@ -23,7 +23,8 @@ export function handleServerError(error: unknown): Error {
 
   // Validation errors
   if (error instanceof ZodError) {
-    return new Error("Validation failed");
+    const issues = error.errors.map((e) => e.message).join(", ");
+    return new Error(`Validation failed: ${issues}`);
   }
 
   // Axios (server-side fetch or API calls)
@@ -38,6 +39,14 @@ export function handleServerError(error: unknown): Error {
 
   // Already an Error
   if (error instanceof Error) return error;
+
+  // Handle generic objects with message/error properties (common in SDKs like Cloudinary)
+  if (typeof error === "object" && error !== null) {
+    const errObj = error as any;
+    if (typeof errObj.message === "string") return new Error(errObj.message);
+    if (typeof errObj.error === "string") return new Error(errObj.error);
+    if (typeof errObj.error?.message === "string") return new Error(errObj.error.message);
+  }
 
   // Fallback
   return new Error("Unexpected server-side error");

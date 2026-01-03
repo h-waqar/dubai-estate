@@ -5,6 +5,7 @@ export type MediaType = "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER";
 export interface Media {
   id: number;
   url: string;
+  publicId?: string; // Cloudinary Public ID
   type: MediaType;
   title?: string;
   alt?: string;

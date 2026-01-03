@@ -8,8 +8,8 @@ export default function AdminMediaPage() {
     const { fetchMedia } = useMedia();
 
     useEffect(() => {
-        // Pass "ADMIN_DASHBOARD" scope to see ALL media
-        fetchMedia("ADMIN_DASHBOARD");
+        // Pass "GLOBAL" scope to see ALL media
+        fetchMedia("GLOBAL");
     }, [fetchMedia]);
 
     return (

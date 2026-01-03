@@ -23,6 +23,7 @@ export default function MediaUploadView({
   const [uploadType, setUploadType] = useState<MediaType | "AUTO">("AUTO");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
 
   useEffect(() => {
     return () => {
@@ -41,35 +42,56 @@ export default function MediaUploadView({
     if (!e.target.files?.[0]) return;
 
     setUploadError(null);
+    setVideoDuration(null); // Reset duration
     const selected = e.target.files[0];
 
     const allowedTypes = [
       "image/png",
       "image/jpeg",
       "image/jpg",
+      "image/webp",
       "video/mp4",
       "application/pdf",
     ];
     if (!allowedTypes.includes(selected.type)) {
       setUploadError(
-        "Unsupported file type. Allowed: PNG, JPEG, JPG, MP4, PDF"
+        "Unsupported file type. Allowed: PNG, JPEG, JPG, WEBP, MP4, PDF"
       );
       return;
     }
 
-    if (selected.size > 50_000_000) {
-      setUploadError("File is too large. Maximum size is 50MB");
+    if (selected.size > 75 * 1024 * 1024) {
+      setUploadError("File is too large. Maximum size is 75MB");
       return;
     }
 
     setFile(selected);
-    setPreviewUrl(URL.createObjectURL(selected));
+    const objectUrl = URL.createObjectURL(selected);
+    setPreviewUrl(objectUrl);
     setTitle(selected.name.replace(/\.[^/.]+$/, ""));
     if (uploadType === "AUTO") setUploadType(getMediaType(selected));
+
+    // Video Duration Check
+    if (selected.type.startsWith("video/")) {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = function() {
+        window.URL.revokeObjectURL(video.src);
+        setVideoDuration(video.duration);
+        if (video.duration > 90) {
+           setUploadError("Video duration exceeds limit (90s). Please choose a shorter video.");
+        }
+      }
+      video.src = objectUrl;
+    }
   };
 
   const onUpload = async () => {
     if (!file) return;
+    if (file.type.startsWith("video/") && videoDuration && videoDuration > 90) {
+        setUploadError("Video duration exceeds limit (90s). Cannot upload.");
+        return;
+    }
 
     setIsUploading(true);
     setUploadError(null);
@@ -127,11 +149,20 @@ export default function MediaUploadView({
                   Click to upload or drag and drop
                 </span>
                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  PNG, JPEG, JPG, MP4, PDF (max 50MB)
+                  Images (max 1920x1080), Videos (max 90s, 75MB)
                 </p>
               </div>
             </label>
           </div>
+
+          {videoDuration && videoDuration > 90 && (
+             <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-yellow-600 dark:text-yellow-400">
+                Warning: Video duration is {Math.round(videoDuration)}s. Limit is 90s.
+              </p>
+            </div>
+          )}
 
           {uploadError && (
             <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
@@ -234,7 +265,7 @@ export default function MediaUploadView({
 
               <button
                 onClick={onUpload}
-                disabled={!file || isUploading || !title.trim()}
+                disabled={!file || isUploading || !title.trim() || !!uploadError || (videoDuration !== null && videoDuration > 90)}
                 className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 font-medium"
               >
                 {isUploading ? (

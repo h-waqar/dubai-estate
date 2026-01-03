@@ -17,7 +17,7 @@ interface MediaLibraryModalProps {
   onSelect?: (media: Media) => void;
   mode?: "select" | "manage";
   allowDelete?: boolean;
-  scope?: "USER" | "ADMIN_DASHBOARD";
+  scope?: "USER" | "GLOBAL";
 }
 
 export default function MediaLibraryModal({

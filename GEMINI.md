@@ -103,9 +103,10 @@ NEXTAUTH_URL="http://localhost:3000"
 ## Coding Conventions
 
 *   **Components:** Functional components with strict TypeScript typing.
-*   **Styling:** Utility-first with Tailwind CSS. Use `cn()` utility for class merging.
+*   **Styling:** Utility-first with Tailwind CSS. Use `cn()` utility for class merging. You can also look into `docs/styles.md` for more information.
 *   **State Management:** Prefer Server State (RSC) where possible. Use `zustand` for complex client state if needed.
 *   **Data Fetching:** Server Components fetch data directly via Prisma or cached services. Client components use API routes or Server Actions.
+*   **Tips:** You can look into `docs/tips.md` & `docs/system-role.md` for suggested developing practices and best practices for this project.
 *   **Imports:** Use absolute imports (e.g., `@/components/...`).
 *   **Scripts:** Any temporary, diagnostic, or database-related scripts MUST be placed in `src/scripts/` instead of the project root.
 

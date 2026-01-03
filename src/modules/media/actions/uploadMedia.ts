@@ -37,6 +37,7 @@ export const uploadMedia = async ({
     return {
       id: media.id,
       url: media.url,
+      publicId: media.publicId ?? undefined,
       type: media.type,
       title: media.title ?? undefined,
       alt: media.alt ?? undefined,

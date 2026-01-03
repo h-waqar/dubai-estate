@@ -22,13 +22,13 @@ export const useMedia = () => {
     setError,
   } = useMediaStore();
 
-  const fetchMedia = useCallback(async (scope: "USER" | "ADMIN_DASHBOARD" = "USER") => {
+  const fetchMedia = useCallback(async (scope: "GLOBAL" | "USER" = "USER") => {
     try {
       setLoading(true);
       const media: Media[] = await listMedia(scope);
       setMediaList(media);
     } catch (err: unknown) {
-      console.error("Failed to fetch media");
+      console.error("Failed to fetch media:", err);
       // const error = handleServerError(err);
       const error = handleClientError(err);
       setError(error.message);
@@ -55,7 +55,7 @@ export const useMedia = () => {
         addMedia(newMedia);
         return newMedia;
       } catch (err: unknown) {
-        console.error("Upload failed");
+        console.error("Upload failed details:", err);
         // const error = handleServerError(err);
         const error = handleClientError(err);
         setError(error.message);

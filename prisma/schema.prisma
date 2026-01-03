@@ -307,6 +307,7 @@ model PropertyVideo {
 model Media {
   id           Int       @id @default(autoincrement())
   url          String
+  publicId     String?   // Store Cloudinary Public ID for deletion
   type         MediaType @default(IMAGE)
   alt          String?
   title        String?

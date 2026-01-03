@@ -14,7 +14,7 @@ interface MediaLibraryButtonProps {
   buttonClassName?: string;
   mode?: "select" | "manage";
   allowDelete?: boolean;
-  scope?: "USER" | "ADMIN_DASHBOARD";
+  scope?: "USER" | "GLOBAL";
 }
 
 export default function MediaLibraryButton({
