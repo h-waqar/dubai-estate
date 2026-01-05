@@ -45,8 +45,6 @@ next-env.d.ts
 # system
 .idea
 .next
-/docs
-docs/*
 
 #uploads
 
