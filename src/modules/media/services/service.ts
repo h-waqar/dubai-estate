@@ -87,24 +87,24 @@ export const saveMedia = async ({
     }
 
     if (isVideo) {
-      // Use INCOMING transformation with async: true
-      // This ensures we ONLY store the transformed version (not original)
-      // async: true prevents the "too large" error
+      // Revert to EAGER Async approach
+      // 1. Uploads ORIGINAL file to Cloudinary (fast, no waiting for processing)
+      // 2. Starts generating optimized versions in background (eager_async)
+      // 3. Allows us to construct the optimized URL immediately for the DB
       
-      // Force format at top level to ensure storage as WebM
-      uploadOptions.format = "webm";
-      
-      uploadOptions.transformation = [
+      uploadOptions.eager = [
         {
           width: MEDIA_CONFIG.VIDEO.MAX_WIDTH,
           height: MEDIA_CONFIG.VIDEO.MAX_HEIGHT,
           crop: "limit",
           quality: MEDIA_CONFIG.VIDEO.QUALITY,
-          bit_rate: "1000k", // Use k suffix for clarity (1Mbps)
-          // Removed fetch_format and audio_codec to let Cloudinary defaults for WebM take over
+          bit_rate: MEDIA_CONFIG.VIDEO.BIT_RATE,
+          format: MEDIA_CONFIG.VIDEO.FETCH_FORMAT, 
+          audio_codec: MEDIA_CONFIG.VIDEO.AUDIO_CODEC,
         },
       ];
-      uploadOptions.async = true; 
+      uploadOptions.eager_async = true; 
+      // Removed uploadOptions.async = true to ensure we get the immediate response with public_id
     }
 
     const uploadResult = await new Promise<any>((resolve, reject) => {
@@ -121,34 +121,25 @@ export const saveMedia = async ({
     console.log("Cloudinary Upload Result:", JSON.stringify(uploadResult, null, 2));
 
     // 3️⃣ Post-Upload Validation (Duration)
-    // For async, duration might be missing. We rely on frontend check.
+    // Now that we are synchronous (for the upload part), we get duration immediately
     if (uploadResult.duration && isVideo && uploadResult.duration > MEDIA_CONFIG.MAX_VIDEO_DURATION_SECONDS) {
-       await cloudinary.uploader.destroy(uploadResult.public_id || `${folder}/${customPublicId}`, { resource_type: "video" });
+       await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: "video" });
        throw new Error(`Video duration exceeds limit (${MEDIA_CONFIG.MAX_VIDEO_DURATION_SECONDS}s)`);
     }
 
     // 4️⃣ Save record in DB
     let finalUrl = uploadResult.secure_url;
-    const effectivePublicId = uploadResult.public_id || `${folder}/${customPublicId}`;
 
-    // Handle missing secure_url for async pending uploads
-    if (!finalUrl) {
-       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-       if (cloudName) {
-          // Manually construct URL. 
-          // Note: When using async + format:webm, the pending result might not show the new extension yet.
-          // We force .webm
-          finalUrl = `https://res.cloudinary.com/${cloudName}/${isVideo ? 'video' : 'image'}/upload/${effectivePublicId}.webm`;
-       }
-    }
-
-    if (!finalUrl) {
-       throw new Error(`Failed to retrieve or construct media URL. Result: ${JSON.stringify(uploadResult)}`);
-    }
-
-    // Double check extension for videos
-    if (isVideo && !finalUrl.endsWith(".webm")) {
-        finalUrl = finalUrl.replace(/\.[^/.]+$/, ".webm");
+    // Inject transformation parameters into the URL for immediate optimization upon request
+    if (isVideo) {
+        // Pattern: /upload/ -> /upload/transformations/
+        const transformation = `c_limit,h_${MEDIA_CONFIG.VIDEO.MAX_HEIGHT},w_${MEDIA_CONFIG.VIDEO.MAX_WIDTH},q_${MEDIA_CONFIG.VIDEO.QUALITY},br_${MEDIA_CONFIG.VIDEO.BIT_RATE},f_${MEDIA_CONFIG.VIDEO.FETCH_FORMAT}`;
+        
+        if (finalUrl.includes("/upload/")) {
+            finalUrl = finalUrl.replace("/upload/", `/upload/${transformation}/`);
+            // Force extension to match fetch format (webm) so browsers treat it correctly
+            finalUrl = finalUrl.replace(/\.[^/.]+$/, `.${MEDIA_CONFIG.VIDEO.FETCH_FORMAT}`);
+        }
     }
     
     // For images
@@ -156,17 +147,17 @@ export const saveMedia = async ({
        finalUrl = finalUrl.replace(/\.[^/.]+$/, ".webp");
     }
 
-    console.log("Saving Media (Async/Manual):", {
-        status: uploadResult.status,
+    console.log("Saving Media (Sync):", {
         originalUrl: uploadResult.secure_url,
         finalUrl,
-        publicId: effectivePublicId,
+        publicId: uploadResult.public_id,
+        bytes: uploadResult.bytes
     });
 
     const media = await prisma.media.create({
       data: {
         url: finalUrl,
-        publicId: effectivePublicId,
+        publicId: uploadResult.public_id,
         title,
         alt,
         type:

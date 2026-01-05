@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { Check, Trash2, Play, FileText } from "lucide-react";
+import { Check, Trash2, Play, FileText, Loader2, Video as VideoIcon } from "lucide-react";
 import { Media } from "../types/media.types";
 import { useMedia } from "../hooks/useMedia";
 import { getMediaIcon } from "../utils/getMediaIcon";
@@ -20,6 +21,8 @@ export default function MediaPreview({
   allowDelete,
 }: MediaPreviewProps) {
   const { handleDelete } = useMedia();
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isVideoError, setIsVideoError] = useState(false);
 
   const onDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -31,6 +34,11 @@ export default function MediaPreview({
       console.error("Delete failed:", err);
     }
   };
+
+  // Construct thumbnail URL for video (replace extension with .jpg)
+  const videoThumbnail = media.type === "VIDEO" 
+    ? media.url.replace(/\.[^/.]+$/, ".jpg")
+    : null;
 
   const baseClasses = `relative rounded-lg overflow-hidden transition-all duration-200 ${isSelected
     ? "ring-2 ring-blue-500"
@@ -49,17 +57,52 @@ export default function MediaPreview({
           />
         )}
         {media.type === "VIDEO" && (
-          <div className="w-full h-full flex items-center justify-center bg-gray-900 group">
-            <video
-              src={`${media.url}#t=0.1`}
-              className="absolute inset-0 w-full h-full object-cover"
-              muted
-              playsInline
-              preload="metadata"
-            />
-            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-              <Play className="w-12 h-12 text-white/90" />
-            </div>
+          <div className="w-full h-full flex items-center justify-center bg-gray-900 group relative">
+            {!isVideoError ? (
+              <video
+                src={media.url}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isVideoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                muted
+                playsInline
+                preload="metadata"
+                onLoadedData={() => setIsVideoLoaded(true)}
+                onError={() => setIsVideoError(true)}
+                poster={videoThumbnail || undefined}
+              />
+            ) : (
+               /* Processing State / Fallback */
+               <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-gray-900/50">
+                  {videoThumbnail ? (
+                     // If we have a thumbnail, show it with a processing overlay
+                     <>
+                       <Image 
+                         src={videoThumbnail} 
+                         alt="Video processing" 
+                         fill 
+                         className="object-cover opacity-50"
+                         onError={() => { /* If thumb fails, just show icon */ }}
+                       />
+                       <div className="z-10 flex flex-col items-center">
+                         <Loader2 className="w-8 h-8 text-white animate-spin mb-2" />
+                         <span className="text-xs text-white font-medium bg-black/50 px-2 py-1 rounded">Processing...</span>
+                       </div>
+                     </>
+                  ) : (
+                     // No thumbnail yet (very early processing)
+                     <div className="flex flex-col items-center">
+                       <Loader2 className="w-8 h-8 text-gray-400 animate-spin mb-2" />
+                       <span className="text-xs text-gray-400">Processing Video...</span>
+                     </div>
+                  )}
+               </div>
+            )}
+            
+            {/* Play Button Overlay (only when loaded) */}
+            {isVideoLoaded && !isVideoError && (
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center pointer-events-none">
+                <Play className="w-12 h-12 text-white/90" />
+              </div>
+            )}
           </div>
         )}
         {(media.type === "DOCUMENT" || media.type === "OTHER") && (
