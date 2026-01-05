@@ -35,9 +35,10 @@ export default async function AgentDashboardPage() {
     }
 
     // Fetch properties for the current user
-    const properties = await listProperties({
+    const { data: properties } = await listProperties({
         userId: session.user.id as number,
         approvalStatus: "ALL",
+        limit: 1000,
     });
 
     // Fetch projects for the current user

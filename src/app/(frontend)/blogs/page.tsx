@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogsPage() {
-  const posts = await getPublishedPosts();
+  const { data: posts, total } = await getPublishedPosts({ page: 1, limit: 3 });
   const categories = await getAllCategories();
 
   return (
@@ -120,7 +120,7 @@ export default async function BlogsPage() {
             </div>
           </div>
         ) : (
-          <BlogsClient initialPosts={posts} categories={categories} />
+          <BlogsClient initialPosts={posts} initialTotal={total} categories={categories} />
         )}
       </div>
 

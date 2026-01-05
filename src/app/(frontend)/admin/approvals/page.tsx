@@ -33,7 +33,7 @@ export default function ApprovalsPage() {
     const fetchProperties = async () => {
         try {
             setLoading(true);
-            const data = await listProperties({ approvalStatus: filterStatus });
+            const { data } = await listProperties({ approvalStatus: filterStatus, limit: 1000 });
             setProperties(data as any);
         } catch (error) {
             toast.error("Failed to fetch properties");

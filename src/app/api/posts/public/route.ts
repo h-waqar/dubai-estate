@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const limitParam = searchParams.get("limit");
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
-    const posts = await getPublishedPosts(category, limit);
+    const { data: posts } = await getPublishedPosts({ category, limit });
 
     return NextResponse.json(posts, { status: 200 });
   } catch (err) {

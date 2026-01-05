@@ -3,50 +3,78 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { PostWithRelations } from "../types/post.types";
 
-export async function getPublishedPosts(
-  category?: string,
-  limit?: number
-): Promise<PostWithRelations[]> {
+export async function getPublishedPosts({
+  category,
+  limit = 3,
+  page = 1,
+  search,
+}: {
+  category?: string;
+  limit?: number;
+  page?: number;
+  search?: string;
+} = {}): Promise<{ data: PostWithRelations[]; total: number }> {
   const where: Prisma.PostWhereInput = { published: true };
-  if (category) {
-    where.category = {
-      is: {
-        name: category,
-      },
-    };
+  
+  if (category && category !== "all") {
+    // If category is a number string (ID), filter by ID, else by name
+    const categoryId = parseInt(category);
+    if (!isNaN(categoryId)) {
+       where.categoryId = categoryId;
+    } else {
+       where.category = {
+         is: {
+           name: category,
+         },
+       };
+    }
   }
 
-  const posts = await prisma.post.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: limit,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      coverImage: true,
-      category: true,
-      tags: true,
-      createdAt: true,
-      updatedAt: true,
-      author: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-        },
-      },
-      content: true,
-      published: true,
-      authorId: true,
-      publishedAt: true,
-      categoryId: true,
-    },
-  });
+  if (search) {
+    where.OR = [
+      { title: { contains: search, mode: "insensitive" } },
+      { excerpt: { contains: search, mode: "insensitive" } },
+      { content: { contains: search, mode: "insensitive" } },
+    ];
+  }
 
-  return posts;
+  const skip = (page - 1) * limit;
+
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      skip,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        coverImage: true,
+        category: true,
+        tags: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+        content: true,
+        published: true,
+        authorId: true,
+        publishedAt: true,
+        categoryId: true,
+      },
+    }),
+    prisma.post.count({ where }),
+  ]);
+
+  return { data: posts, total };
 }
 
 export async function getPostBySlug(

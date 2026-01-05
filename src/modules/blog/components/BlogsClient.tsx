@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,34 +12,82 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, Clock, ArrowRight, Search } from "lucide-react";
+import { Calendar, Clock, ArrowRight, Search, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { PostWithRelations } from "@/modules/blog/types/post.types";
+import { fetchPosts } from "@/app/(frontend)/blogs/actions";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface BlogsClientProps {
   initialPosts: PostWithRelations[];
+  initialTotal: number;
   categories: { id: number; name: string }[];
 }
 
 export default function BlogsClient({
   initialPosts,
+  initialTotal,
   categories,
 }: BlogsClientProps) {
+  const [posts, setPosts] = useState<PostWithRelations[]>(initialPosts);
+  const [total, setTotal] = useState(initialTotal);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  
+  const debouncedSearch = useDebounce(searchQuery, 500);
 
-  // Filter posts
-  const filteredPosts = initialPosts.filter((post) => {
-    const matchesSearch =
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+  // Fetch posts when filters change (search or category)
+  useEffect(() => {
+    // Skip initial load
+    if (page === 1 && searchQuery === "" && selectedCategory === "all" && posts === initialPosts) return;
 
-    const matchesCategory =
-      selectedCategory === "all" ||
-      post.categoryId === Number(selectedCategory);
+    const loadPosts = async () => {
+      setLoading(true);
+      try {
+        const result = await fetchPosts({
+          category: selectedCategory,
+          search: debouncedSearch,
+          page: 1, // Reset to page 1 on filter change
+          limit: 3, // Using 3 for testing as requested
+        });
+        setPosts(result.data);
+        setTotal(result.total);
+        setPage(1);
+      } catch (error) {
+        console.error("Failed to fetch posts", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return matchesSearch && matchesCategory;
-  });
+    loadPosts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, selectedCategory]);
+
+  const loadMore = async () => {
+    setLoading(true);
+    try {
+      const nextPage = page + 1;
+      const result = await fetchPosts({
+        category: selectedCategory,
+        search: debouncedSearch,
+        page: nextPage,
+        limit: 3,
+      });
+
+      setPosts((prev) => [...prev, ...result.data]);
+      setPage(nextPage);
+      setTotal(result.total);
+    } catch (error) {
+      console.error("Failed to load more posts", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasMore = posts.length < total;
 
   return (
     <div className="space-y-8">
@@ -71,13 +120,20 @@ export default function BlogsClient({
 
       {/* Results Count */}
       <div className="text-sm text-muted-foreground">
-        {filteredPosts.length === initialPosts.length
-          ? `${filteredPosts.length} article${filteredPosts.length !== 1 ? "s" : ""
-          }`
-          : `${filteredPosts.length} of ${initialPosts.length} articles`}
+        {loading && page === 1 ? (
+            <div className="flex items-center gap-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Loading...
+            </div>
+        ) : (
+            posts.length === total
+            ? `${posts.length} article${posts.length !== 1 ? "s" : ""}`
+            : `${posts.length} of ${total} articles`
+        )}
       </div>
+
       {/* Posts Grid */}
-      {filteredPosts.length === 0 ? (
+      {posts.length === 0 && !loading ? (
         <div className="text-center py-20">
           <h3 className="text-xl font-semibold mb-2">No articles found</h3>
           <p className="text-muted-foreground">
@@ -86,7 +142,7 @@ export default function BlogsClient({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post) => (
+          {posts.map((post, index) => (
             <Link key={post.id} href={`/blogs/${post.slug}`} className="group h-full flex flex-col">
               <article className="border rounded-lg overflow-hidden bg-card hover:shadow-lg transition-all duration-300 flex flex-col h-full">
                 {/* Cover Image */}
@@ -96,6 +152,8 @@ export default function BlogsClient({
                       src={post.coverImage}
                       alt={post.title}
                       fill
+                      priority={index < 6}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
@@ -176,6 +234,31 @@ export default function BlogsClient({
               </article>
             </Link>
           ))}
+        </div>
+      )}
+      
+      {/* Load More Button */}
+      {hasMore && (
+        <div className="text-center mt-12">
+          <Button
+            size="lg"
+            variant="outline"
+            className="px-8 min-w-[200px]"
+            onClick={loadMore}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Load More Articles"
+            )}
+          </Button>
+          <div className="mt-2 text-sm text-muted-foreground">
+            Showing {posts.length} of {total} articles
+          </div>
         </div>
       )}
     </div>

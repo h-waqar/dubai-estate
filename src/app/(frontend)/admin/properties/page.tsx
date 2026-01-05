@@ -25,7 +25,7 @@ export default function AdminPropertiesPage() {
     const fetchProperties = async () => {
         try {
             setLoading(true);
-            const data = await listProperties({ approvalStatus: "ALL" });
+            const { data } = await listProperties({ approvalStatus: "ALL", limit: 1000 });
             setProperties(data);
         } catch (error) {
             toast.error("Failed to fetch properties");

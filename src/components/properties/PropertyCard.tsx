@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PropertyCardProps } from "@/types/sections";
 
-const PropertyCard = ({ property }: PropertyCardProps) => {
+const PropertyCard = ({ property, priority = false }: PropertyCardProps & { priority?: boolean }) => {
   if (!property) {
     return null;
   }
@@ -25,6 +25,8 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
               alt={property.alt}
               width={500}
               height={300}
+              priority={priority}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </div>

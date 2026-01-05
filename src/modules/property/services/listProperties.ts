@@ -13,6 +13,8 @@ export type PropertyFilters = {
   location?: string;
   sort?: string;
   userId?: number;
+  page?: number;
+  limit?: number;
 };
 
 export async function listProperties(filters: PropertyFilters = {}) {
@@ -26,6 +28,8 @@ export async function listProperties(filters: PropertyFilters = {}) {
     location,
     sort,
     userId, // Add userId to destructuring
+    page = 1,
+    limit = 3,
   } = filters;
 
   const where: any = {};
@@ -136,10 +140,7 @@ export async function listProperties(filters: PropertyFilters = {}) {
         orderBy = { createdAt: "desc" };
         break;
       case "featured":
-        orderBy = [
-          { isFeatured: "desc" },
-          { createdAt: "desc" }
-        ];
+        orderBy = [{ isFeatured: "desc" }, { createdAt: "desc" }];
         break;
       case "relevance":
       default:
@@ -148,35 +149,44 @@ export async function listProperties(filters: PropertyFilters = {}) {
     }
   }
 
-  const properties = await prisma.property.findMany({
-    where,
-    orderBy,
-    include: {
-      propertyType: true,
-      images: true,
-      createdBy: true, // Needed for displaying agent info
-      approvedBy: true, // Needed for displaying who declined/approved
-      // Remove the relation include since it's broken
-    }
-  });
+  const skip = (page - 1) * limit;
+
+  const [properties, total] = await Promise.all([
+    prisma.property.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        propertyType: true,
+        images: true,
+        createdBy: true,
+        approvedBy: true,
+      },
+    }),
+    prisma.property.count({ where }),
+  ]);
 
   // Manually fetch media usages for these properties
-  const propertyIds = properties.map(p => p.id);
+  const propertyIds = properties.map((p) => p.id);
   const mediaUsages = await prisma.mediaUsage.findMany({
     where: {
       entityType: "PROPERTY",
-      entityId: { in: propertyIds }
+      entityId: { in: propertyIds },
     },
     include: {
-      media: true
-    }
+      media: true,
+    },
   });
 
   // Attach media usages to properties
-  const result = properties.map(p => ({
+  const result = properties.map((p) => ({
     ...p,
-    mediaUsages: mediaUsages.filter(mu => mu.entityId === p.id)
+    mediaUsages: mediaUsages.filter((mu) => mu.entityId === p.id),
   }));
 
-  return serializeDecimals(result);
+  return {
+    data: serializeDecimals(result),
+    total,
+  };
 }
