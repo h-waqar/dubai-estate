@@ -1,0 +1,122 @@
+services:
+  # Service 1: The Database (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: dubai-estate-db
+    environment:
+      # We set up a fresh database user/pass for the Docker container.
+      # You don't need to change these to match your local machine!
+      # Inside Docker, these are the credentials the database will expect.
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dubai_estate
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Service 2: The Web Application (Next.js)
+  app:
+    build: .
+    container_name: dubai-estate-app
+    ports:
+      - "3000:3000"
+    environment:
+      # --- 1. Database Connection (The Important Part) ---
+      # Why hardcode this here?
+      # On your host, you use 'localhost'. But inside this container, 'localhost' is the container itself!
+      # We must point it to the 'db' service we defined above.
+      DATABASE_LOCAL_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+
+      # --- 2. Public URLs ---
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true" # Forces Next.js to check for file changes (Reliable Hot Reloading)
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_API_BASE: http://localhost:3000/api
+      API_INTERNAL_BASE: http://localhost:3000/api
+
+      # --- 3. Secrets & Keys (Read from your .env file) ---
+      # The syntax ${VAR} tells Docker: "Look in the real .env file on the computer
+      # and paste the value here." This keeps your secrets safe!
+      
+      # Auth
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      
+      # PayPal
+      NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${NEXT_PUBLIC_PAYPAL_CLIENT_ID}
+      
+      # Turnstile / Captcha
+      NEXT_PUBLIC_CAPTCHA_ENABLE: ${NEXT_PUBLIC_CAPTCHA_ENABLE}
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
+      
+      # Cloudinary (Media)
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: ${NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      CLOUDINARY_URL: ${CLOUDINARY_URL}
+
+      #Google
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      #Brevo Emails
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_SMTP_USER: ${BREVO_SMTP_USER}
+      BREVO_SMTP_KEY: ${BREVO_SMTP_KEY}
+
+      BREVO_SMTP_HOST: ${BREVO_SMTP_HOST}
+      BREVO_SMTP_PORT: ${REVO_SMTP_PORT}
+      BREVO_SMTP_PASSWORD: ${REVO_SMTP_PASSWORD}
+      SENDER_NAME: ${ENDER_NAME}
+      SENDER_EMAIL: ${ENDER_EMAIL}
+
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    # Generate Prisma Client -> Push DB Schema -> Start Dev Server
+    command: sh -c "npx prisma generate && npx prisma db push && npm run dev"
+
+  # Service 3: Adminer (Database Viewer)
+  # A lightweight GUI to view/edit your database tables.
+  adminer:
+    image: adminer
+    container_name: dubai-estate-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Service 4: Prisma Studio (Alternative DB Viewer)
+  # The default viewer provided by Prisma.
+  studio:
+    build: .
+    container_name: dubai-estate-studio
+    ports:
+      - "5555:5555"
+    environment:
+      # Needs the same DB connection string to find the data
+      DATABASE_LOCAL_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+    volumes:
+      - .:/app
+      - /app/node_modules
+    # We use 0.0.0.0 so it's accessible from outside the container
+    command: npx prisma studio --hostname 0.0.0.0
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

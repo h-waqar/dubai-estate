@@ -2,6 +2,7 @@
 
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -11,6 +12,24 @@ export const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   adapter: PrismaAdapter(prisma),
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
+          email: profile.email,
+          image: profile.picture,
+          role: "USER", // Default role
+          // Generate a unique-ish username: "john.doe" + random 4 chars
+          username: `${profile.email.split("@")[0]}_${Math.random().toString(36).slice(2, 6)}`,
+        };
+      },
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -36,9 +55,10 @@ export const authOptions: AuthOptions = {
         // Return a user object with id and role
         const returnedUser = {
           id: user.id,
-          name: user.name ?? null,
+          name: user.name,
           email: user.email,
           role: user.role,
+          image: user.image,
         };
         console.log("Returned user from authorize:", returnedUser);
         return returnedUser;
@@ -54,17 +74,25 @@ export const authOptions: AuthOptions = {
       if (session.user) {
         session.user.id = token.id as number;
         session.user.role = token.role as string;
+        session.user.image = token.picture as string | null | undefined; // Ensure image is passed
       }
       return session;
     },
 
     // Existing jwt callback
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       // console.log("User in JWT callback:", user);
       // console.log("Token in JWT callback (before modification):", token);
+      
+      if (trigger === "update" && session?.user) {
+         // Allow updating session from client
+         return { ...token, ...session.user };
+      }
+
       if (user) {
         token.id = Number(user.id);
         token.role = user.role;
+        token.picture = user.image;
       }
       // console.log("Token in JWT callback (after modification):", token);
       return token;
@@ -84,6 +112,7 @@ export const authOptions: AuthOptions = {
 
   pages: {
     signIn: "/login", // Custom login page
+    error: "/login", // Error code passed in query string as ?error=
   },
   debug: process.env.NODE_ENV === "development",
 };
