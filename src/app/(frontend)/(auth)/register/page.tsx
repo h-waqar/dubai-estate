@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { SocialAuth } from "@/components/auth/SocialAuth";
-import { registerUser } from "@/actions/auth";
+import { registerUser } from "@/modules/user/actions/register.action";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -32,11 +33,11 @@ export default function RegisterPage() {
       if (res.error) {
         toast.error(res.error);
       } else {
-        toast.success("Account created successfully! Please login.");
+        toast.success(res.message || "Please check your email to verify your account.");
         // Redirect to login after delay
         setTimeout(() => {
           window.location.href = "/login";
-        }, 1500);
+        }, 3000);
       }
     } catch (err) {
       toast.error("An unexpected error occurred.");
@@ -53,6 +54,8 @@ export default function RegisterPage() {
       <Toaster richColors />
       <div className="grid gap-6">
         <form onSubmit={handleSubmit} className="grid gap-4">
+          {/* ... existing fields ... */}
+          
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="firstName">First Name</Label>
@@ -136,6 +139,13 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox id="newsletter" name="newsletter" defaultChecked />
+            <Label htmlFor="newsletter" className="text-sm font-normal text-muted-foreground">
+              Subscribe to our newsletter for updates
+            </Label>
           </div>
 
           <TurnstileWidget

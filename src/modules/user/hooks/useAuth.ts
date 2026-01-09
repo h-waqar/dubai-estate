@@ -4,7 +4,7 @@
 import { useSession } from "next-auth/react";
 
 export function useAuth() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   const userId = session?.user?.id;
   const userRole = session?.user?.role;
@@ -17,5 +17,6 @@ export function useAuth() {
     isAuthenticated,
     isLoading,
     session,
+    update,
   };
 }

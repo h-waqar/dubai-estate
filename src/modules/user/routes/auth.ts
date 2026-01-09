@@ -52,6 +52,11 @@ export const authOptions: AuthOptions = {
         );
         if (!isValid) return null;
 
+        // Check Email Verification
+        if (!user.emailVerified) {
+           throw new Error("Email not verified. Please check your inbox.");
+        }
+
         // Return a user object with id and role
         const returnedUser = {
           id: user.id,
@@ -74,7 +79,8 @@ export const authOptions: AuthOptions = {
       if (session.user) {
         session.user.id = token.id as number;
         session.user.role = token.role as string;
-        session.user.image = token.picture as string | null | undefined; // Ensure image is passed
+        // Prioritize token.image if we set it, otherwise fallback to picture
+        session.user.image = (token.image as string) || (token.picture as string | null | undefined); 
       }
       return session;
     },
@@ -82,7 +88,6 @@ export const authOptions: AuthOptions = {
     // Existing jwt callback
     async jwt({ token, user, trigger, session }) {
       // console.log("User in JWT callback:", user);
-      // console.log("Token in JWT callback (before modification):", token);
       
       if (trigger === "update" && session?.user) {
          // Allow updating session from client
@@ -92,9 +97,10 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = Number(user.id);
         token.role = user.role;
-        token.picture = user.image;
+        // Map user.image to token.picture (standard NextAuth) or token.image
+        token.picture = user.image; 
+        token.image = user.image; // Redundant but safe
       }
-      // console.log("Token in JWT callback (after modification):", token);
       return token;
     },
 

@@ -2,7 +2,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import AccountForm from "./AccountForm"; // Client component
+import AccountForm from "./AccountForm";
+import ChangePasswordForm from "./ChangePasswordForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -16,6 +17,7 @@ export default async function AccountPage() {
   // Fetch fresh user data
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
+    include: { profile: true },
   });
 
   if (!user) {
@@ -51,7 +53,7 @@ export default async function AccountPage() {
                     <CardDescription>Manage your password and security preferences.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-muted-foreground">Password change functionality coming soon.</p>
+                    <ChangePasswordForm />
                 </CardContent>
             </Card>
         </TabsContent>
