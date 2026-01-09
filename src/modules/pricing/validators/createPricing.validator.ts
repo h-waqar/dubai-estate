@@ -7,7 +7,7 @@ export const createPricingSchema = z.object({
   maxListings: z.number().int().min(1, "Must allow at least 1 listing"),
   priceMonthly: z.number().min(0, "Price cannot be negative"),
   priceYearly: z.number().min(0, "Price cannot be negative"),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(),
 });
 
 export type CreatePricingInput = z.infer<typeof createPricingSchema>;

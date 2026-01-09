@@ -23,7 +23,7 @@ export function handleServerError(error: unknown): Error {
 
   // Validation errors
   if (error instanceof ZodError) {
-    const issues = error.errors.map((e) => e.message).join(", ");
+    const issues = error.issues.map((e) => e.message).join(", ");
     return new Error(`Validation failed: ${issues}`);
   }
 
