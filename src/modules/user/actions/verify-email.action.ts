@@ -12,24 +12,16 @@ export async function sendVerificationEmail(email: string) {
 
     if (!user) return { error: "User not found" };
 
+    // Invalidate previous tokens
+    await prisma.verificationToken.deleteMany({
+      where: { identifier: email },
+    });
+
     // Generate Verification Token
     const token = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    const expires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-    // We can reuse the VerificationToken model or add a verificationToken field to User.
-    // The Schema has a VerificationToken model:
-    // model VerificationToken {
-    //   identifier String
-    //   token      String   @unique
-    //   expires    DateTime
-    //   @@unique([identifier, token])
-    // }
-    // It's usually for NextAuth magic links, but we can reuse it or use a custom field.
-    // Given the previous schema discussion, let's use the standard VerificationToken model to be cleaner
-    // OR we can add `verificationToken` to User if we want simplicity.
-    // Let's check schema again. `User` doesn't have `verificationToken`.
-    // But `VerificationToken` model exists. Let's use that.
-
+    // Store in VerificationToken model
     await prisma.verificationToken.create({
       data: {
         identifier: email,
@@ -38,7 +30,8 @@ export async function sendVerificationEmail(email: string) {
       },
     });
 
-    const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const verificationUrl = `${baseUrl}/verify-email?token=${token}`;
 
     const subject = "Verify your email address - Dubai Estate";
     const html = `
@@ -47,7 +40,7 @@ export async function sendVerificationEmail(email: string) {
         <p>Thanks for signing up for Dubai Estate! Please click the button below to verify your email address:</p>
         <p><a href="${verificationUrl}" style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verify Email</a></p>
         <p>If you didn't create an account, you can ignore this email.</p>
-        <p>This link will expire in 24 hours.</p>
+        <p>This link will expire in 30 minutes.</p>
       </div>
     `;
 
@@ -62,9 +55,11 @@ export async function sendVerificationEmail(email: string) {
 
 export async function verifyEmailAction(token: string) {
   try {
+    console.log("Verifying token:", token);
     const verificationToken = await prisma.verificationToken.findUnique({
       where: { token },
     });
+    console.log("Token found in DB:", verificationToken);
 
     if (!verificationToken) {
       return { error: "Invalid token" };
@@ -100,4 +95,16 @@ export async function verifyEmailAction(token: string) {
     console.error("Verification error:", error);
     return { error: "Verification failed" };
   }
+}
+
+export async function resendVerificationEmailAction(email: string) {
+    // Simple rate limiting could be added here
+    if (!email) return { error: "Email is required" };
+    
+    // Check if user is already verified?
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return { error: "User not found" };
+    if (user.emailVerified) return { error: "Email already verified" };
+
+    return await sendVerificationEmail(email);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { verifyEmailAction } from "@/modules/user/actions/verify-email.action";
 import { AuthLayout } from "@/components/auth/AuthLayout";
@@ -13,6 +13,7 @@ function VerifyEmailContent() {
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Verifying your email...");
+  const verifyingTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -20,6 +21,10 @@ function VerifyEmailContent() {
       setMessage("No verification token provided.");
       return;
     }
+
+    // Prevent double-invocation (Strict Mode)
+    if (verifyingTokenRef.current === token) return;
+    verifyingTokenRef.current = token;
 
     verifyEmailAction(token).then((res) => {
       if (res.error) {

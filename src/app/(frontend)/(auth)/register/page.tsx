@@ -34,10 +34,11 @@ export default function RegisterPage() {
         toast.error(res.error);
       } else {
         toast.success(res.message || "Please check your email to verify your account.");
-        // Redirect to login after delay
+        // Redirect to verify-email-sent page
+        const email = formData.get("email") as string;
         setTimeout(() => {
-          window.location.href = "/login";
-        }, 3000);
+          window.location.href = `/verify-email-sent?email=${encodeURIComponent(email)}`;
+        }, 1000);
       }
     } catch (err) {
       toast.error("An unexpected error occurred.");

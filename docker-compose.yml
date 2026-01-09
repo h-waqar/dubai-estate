@@ -31,7 +31,8 @@ services:
       # Why hardcode this here?
       # On your host, you use 'localhost'. But inside this container, 'localhost' is the container itself!
       # We must point it to the 'db' service we defined above.
-      DATABASE_LOCAL_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+      DATABASE_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+      DIRECT_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
 
       # --- 2. Public URLs ---
       NODE_ENV: development
@@ -47,6 +48,7 @@ services:
       
       # Auth
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
       
       # PayPal
       NEXT_PUBLIC_PAYPAL_CLIENT_ID: ${NEXT_PUBLIC_PAYPAL_CLIENT_ID}
@@ -107,7 +109,8 @@ services:
       - "5555:5555"
     environment:
       # Needs the same DB connection string to find the data
-      DATABASE_LOCAL_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+      DATABASE_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+      DIRECT_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
     volumes:
       - .:/app
       - /app/node_modules

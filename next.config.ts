@@ -3,6 +3,9 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  env: {
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+  },
   // cacheComponents: true,
   images: {
     remotePatterns: [

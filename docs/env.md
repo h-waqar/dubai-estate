@@ -1,7 +1,8 @@
 # Environment Variables
 
 ## Database
-DATABASE_LOCAL_URL="postgresql://user:password@localhost:5432/dubai_estate?schema=public"
+DATABASE_URL="postgresql://user:password@localhost:5432/dubai_estate?schema=public"
+DIRECT_URL="postgresql://user:password@localhost:5432/dubai_estate?schema=public"
 
 ## NextAuth
 NEXTAUTH_URL="http://localhost:3000"
