@@ -21,6 +21,7 @@ interface AdvertiseWizardProps {
   propertyTypes: { id: number; name: string; slug: string }[];
   serverData: {
     features?: { id: number; name: string; slug: string }[];
+    plans?: any[];
   };
   isEditMode?: boolean;
   initialData?: any;

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -42,8 +43,9 @@ export default async function PricingAdminPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Name</TableHead>
-                                    <TableHead>Monthly Price</TableHead>
-                                    <TableHead>Yearly Price</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Monthly/One-Time</TableHead>
+                                    <TableHead>Yearly</TableHead>
                                     <TableHead className="text-center">Max Listings</TableHead>
                                     <TableHead className="text-center">Users</TableHead>
                                     <TableHead className="text-center">Status</TableHead>
@@ -53,7 +55,7 @@ export default async function PricingAdminPage() {
                             <TableBody>
                                 {plans.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                        <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                                             No pricing plans found. Create your first plan to get started.
                                         </TableCell>
                                     </TableRow>
@@ -61,8 +63,17 @@ export default async function PricingAdminPage() {
                                     plans.map((plan) => (
                                         <TableRow key={plan.id}>
                                             <TableCell className="font-medium">{plan.name}</TableCell>
-                                            <TableCell>AED {Number(plan.priceMonthly).toLocaleString()}</TableCell>
-                                            <TableCell>AED {Number(plan.priceYearly).toLocaleString()}</TableCell>
+                                            <TableCell><Badge variant="outline">{plan.type}</Badge></TableCell>
+                                            <TableCell>
+                                                {plan.type === "SUBSCRIPTION" 
+                                                    ? `AED ${Number(plan.priceMonthly).toLocaleString()}` 
+                                                    : `AED ${Number(plan.priceOneTime).toLocaleString()}`}
+                                            </TableCell>
+                                            <TableCell>
+                                                {plan.type === "SUBSCRIPTION" 
+                                                    ? `AED ${Number(plan.priceYearly).toLocaleString()}` 
+                                                    : "-"}
+                                            </TableCell>
                                             <TableCell className="text-center">{plan.maxListings}</TableCell>
                                             <TableCell className="text-center">{plan._count?.users || 0}</TableCell>
                                             <TableCell>

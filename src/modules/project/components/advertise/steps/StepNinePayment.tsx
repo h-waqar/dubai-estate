@@ -86,16 +86,17 @@ const PaymentMethodCard = ({ value, icon: Icon, title, description, selected, on
     </div>
 );
 
-export default function StepNinePayment() {
+export default function StepNinePayment({ projectPlan }: { projectPlan?: any }) {
     const { next, prev } = useProjectStepStore();
     const store = useProjectAdvertiseStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const LISTING_FEE = 100;
+    const LISTING_FEE = projectPlan?.priceOneTime || 100;
 
     const initialPayPalOptions = {
         "clientId": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
         currency: "USD",
         intent: "capture",
+        debug: process.env.NEXT_PUBLIC_PAYPAL_SANDBOX === "true",
     };
 
     const {

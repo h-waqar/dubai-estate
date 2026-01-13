@@ -5,6 +5,7 @@ import { createPropertyServerValidator } from "../validators/createProperty.vali
 import * as propertyService from "../services/createProperty";
 import { authOptions } from "@/modules/user/routes/auth";
 import { getServerSession } from "next-auth";
+import { prisma } from "@/lib/prisma";
 // import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createPropertyAction(formData: FormData) {
@@ -48,6 +49,10 @@ export async function createPropertyAction(formData: FormData) {
     developerId: formData.get("developerId") ? Number(formData.get("developerId")) : undefined,
     proposedDeveloperName: formData.get("proposedDeveloperName")?.toString() || undefined,
   };
+  
+  const planSlug = formData.get("planSlug")?.toString();
+  const subscriptionId = formData.get("subscriptionId")?.toString();
+
   // console.log("Parsed data for Zod:", data);
   // 3. Validate using the SERVER validator (with z.coerce)
   const validation = createPropertyServerValidator.safeParse(data);
@@ -60,6 +65,24 @@ export async function createPropertyAction(formData: FormData) {
   }
   // 4. Create property in database
   try {
+    // If subscription data is present, update the user's plan
+    if (planSlug && subscriptionId) {
+      const plan = await prisma.pricingPlan.findUnique({
+        where: { slug: planSlug },
+      });
+
+      if (plan) {
+        await prisma.user.update({
+          where: { id: session.user.id },
+          data: {
+            pricingPlanId: plan.id,
+            subscriptionId: subscriptionId,
+            subscriptionStatus: "ACTIVE", // Assumed active upon successful creation
+          },
+        });
+      }
+    }
+
     // We need to pass status to the service or handle it there.
     // Since createProperty service takes validation.data which matches the schema roughly,
     // we might need to inject status into it.

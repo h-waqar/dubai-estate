@@ -21,6 +21,7 @@ import StepNineSuccess from "./steps/StepNineSuccess";
 interface ProjectAdvertiseWizardProps {
     developers: { id: number; name: string; slug: string }[];
     amenities: { id: number; name: string; icon?: string }[];
+    projectPlan?: any;
 }
 
 const allSteps = [
@@ -40,6 +41,7 @@ const allSteps = [
 export default function ProjectAdvertiseWizard({
     developers,
     amenities,
+    projectPlan
 }: ProjectAdvertiseWizardProps) {
     const { step, goTo } = useProjectStepStore();
     const StepComponent = allSteps[step] as React.ComponentType<any>;
@@ -71,7 +73,7 @@ export default function ProjectAdvertiseWizard({
                         exit={{ opacity: 0, x: -100 * direction }}
                         transition={{ duration: 0.3 }}
                     >
-                        <StepComponent developers={developers} amenities={amenities} />
+                        <StepComponent developers={developers} amenities={amenities} projectPlan={projectPlan} />
                     </motion.div>
                 </AnimatePresence>
             </div>

@@ -70,7 +70,9 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
   const initialPayPalOptions = {
     "clientId": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
     currency: "USD",
-    intent: "capture",
+    intent: "subscription",
+    vault: true,
+    debug: process.env.NEXT_PUBLIC_PAYPAL_SANDBOX === "true",
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -168,7 +170,15 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
       if (developerId) formData.append("developerId", developerId.toString());
       if (proposedDeveloperName) formData.append("proposedDeveloperName", proposedDeveloperName);
 
-      // Add other fields if needed by the action
+      // Pass subscription data
+      if (plan) formData.append("planSlug", plan);
+      // We need to capture this from the PayPal response, but onSubmit is called with `watch()` values.
+      // We should update the store or pass it as argument.
+      // Let's assume we update the store or pass it to onSubmit.
+      // Actually, let's allow passing override data to onSubmit.
+      if ((data as any).subscriptionId) {
+         formData.append("subscriptionId", (data as any).subscriptionId);
+      }
 
       const result = await createPropertyAction(formData);
 
@@ -541,24 +551,26 @@ function StepSixPayment({ propertyTypes, serverData }: StepSixPaymentProps) {
               </div>
               <div className="max-w-[300px] mx-auto relative z-0">
                 <PayPalButtons
-                  style={{ layout: "vertical", shape: "rect", label: "pay" }}
-                  createOrder={(data, actions) => {
-                    return actions.order.create({
-                      intent: "CAPTURE",
-                      purchase_units: [{
-                        amount: {
-                          currency_code: "USD",
-                          value: plan === "gold" ? "25" : "10"
-                        }
-                      }]
+                  style={{ layout: "vertical", shape: "rect", label: "subscribe" }}
+                  createSubscription={(data, actions) => {
+                    const planId = plan === "gold" 
+                      ? process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD 
+                      : process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER;
+                    
+                    if (!planId) {
+                      toast.error("PayPal configuration missing for this plan");
+                      throw new Error("Missing Plan ID");
+                    }
+
+                    return actions.subscription.create({
+                      plan_id: planId
                     });
                   }}
                   onApprove={async (data, actions) => {
-                    const details = await actions.order?.capture();
-                    if (details?.status === "COMPLETED") {
-                      toast.success("Payment successful!");
-                      onSubmit({ ...watch(), paymentMethod: "paypal" });
-                      // onSubmit handles the reset
+                    // For subscription, we get subscriptionID, not capture
+                    if (data.subscriptionID) {
+                      toast.success("Subscription successful!");
+                      onSubmit({ ...watch(), paymentMethod: "paypal", subscriptionId: data.subscriptionID } as any);
                     }
                   }}
                 />

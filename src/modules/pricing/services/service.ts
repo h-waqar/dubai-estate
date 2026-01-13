@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { CreatePricingInput } from "../validators/createPricing.validator";
 import { UpdatePricingInput } from "../validators/updatePricing.validator";
+import { PlanType } from "@prisma/client";
 
 export class PricingService {
   static async listPlans() {
@@ -25,12 +26,21 @@ export class PricingService {
     });
   }
 
+  static async getPlanBySlug(slug: string) {
+    return prisma.pricingPlan.findUnique({
+      where: { slug },
+    });
+  }
+
   static async createPlan(data: CreatePricingInput) {
     return prisma.pricingPlan.create({
       data: {
         ...data,
-        priceMonthly: data.priceMonthly.toString(),
-        priceYearly: data.priceYearly.toString(),
+        type: data.type as PlanType,
+        maxListings: data.maxListings ?? 3,
+        priceMonthly: data.priceMonthly?.toString(),
+        priceYearly: data.priceYearly?.toString(),
+        priceOneTime: data.priceOneTime?.toString(),
       },
     });
   }
@@ -40,8 +50,10 @@ export class PricingService {
       where: { id },
       data: {
         ...data,
+        type: data.type as PlanType,
         priceMonthly: data.priceMonthly?.toString(),
         priceYearly: data.priceYearly?.toString(),
+        priceOneTime: data.priceOneTime?.toString(),
       },
     });
   }
@@ -49,6 +61,35 @@ export class PricingService {
   static async deletePlan(id: number) {
     return prisma.pricingPlan.delete({
       where: { id },
+    });
+  }
+
+  static async getSubscribers() {
+    return prisma.user.findMany({
+      where: {
+        pricingPlanId: {
+          not: null
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        subscriptionId: true,
+        subscriptionStatus: true,
+        pricingPlan: {
+            select: {
+                name: true,
+                priceMonthly: true,
+                priceYearly: true,
+                type: true
+            }
+        },
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
   }
 }

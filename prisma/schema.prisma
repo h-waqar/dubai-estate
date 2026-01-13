@@ -72,6 +72,10 @@ model User {
   leads              CallbackRequest[] @relation("AgentLeads")
   accounts        Account[]
   sessions        Session[]
+  
+  // Subscription Info
+  subscriptionId     String? // PayPal Subscription ID
+  subscriptionStatus String? // e.g. ACTIVE, SUSPENDED, CANCELLED
 }
 
 model Account {
@@ -245,15 +249,22 @@ enum UnitType {
 }
 
 
+enum PlanType {
+  SUBSCRIPTION
+  ONE_TIME
+}
+
 // --- Pricing Plan & Quotas ---
 model PricingPlan {
   id           Int      @id @default(autoincrement())
   name         String   @unique
   slug         String   @unique
   description  String?
+  type         PlanType @default(SUBSCRIPTION)
   maxListings  Int      @default(3) // e.g., 3, 5, 10
-  priceMonthly Decimal  @db.Decimal(10, 2)
-  priceYearly  Decimal  @db.Decimal(10, 2)
+  priceMonthly Decimal? @db.Decimal(10, 2)
+  priceYearly  Decimal? @db.Decimal(10, 2)
+  priceOneTime Decimal? @db.Decimal(10, 2)
   isActive     Boolean  @default(true)
   users        User[]
   createdAt    DateTime @default(now())

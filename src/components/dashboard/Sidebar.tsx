@@ -75,6 +75,7 @@ export const adminLinks: SidebarItem[] = [
     subItems: [
       { href: "/admin/revenue", label: "Revenue", icon: TrendingUp },
       { href: "/admin/pricing", label: "Pricing Plans", icon: ShoppingBag },
+      { href: "/admin/subscribers", label: "Subscribers", icon: Users },
     ],
   },
   {

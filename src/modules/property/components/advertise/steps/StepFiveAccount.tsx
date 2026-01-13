@@ -25,13 +25,14 @@ interface StepFiveAccountProps {
   propertyTypes: { id: number; name: string; slug: string }[];
   serverData: {
     features?: { id: number; name: string; slug: string }[];
+    plans?: any[];
   };
 }
 
 // We use the Auth schema for the type as it allows optional fields (compatible with both)
 type StepFiveData = z.infer<typeof stepFiveAuthSchema>;
 
-function StepFiveAccount({}: StepFiveAccountProps) {
+function StepFiveAccount({ serverData }: StepFiveAccountProps) {
   const { next, prev } = useStepStore();
   const {
     username,
@@ -208,52 +209,37 @@ function StepFiveAccount({}: StepFiveAccountProps) {
                 defaultValue={field.value}
                 value={field.value}
               >
-                {/* Silver Package Card */}
-                <Label
-                  htmlFor="plan-silver"
-                  className={cn(
-                    "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                    (field.value === "silver" || !field.value) &&
-                      "border-primary bg-muted"
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <RadioGroupItem value="silver" id="plan-silver" />
-                    <div>
-                      <p className="font-semibold">Silver Package</p>
-                      <p className="text-sm text-muted-foreground">
-                        $10 monthly ad display.
-                      </p>
+                {serverData.plans?.filter((p: any) => p.type === 'SUBSCRIPTION').map((plan: any) => (
+                  <Label
+                    key={plan.id}
+                    htmlFor={`plan-${plan.slug}`}
+                    className={cn(
+                      "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
+                      (field.value === plan.slug || (!field.value && plan.slug === 'silver')) &&
+                        "border-primary bg-muted"
+                    )}
+                  >
+                    <div className="flex items-center gap-4">
+                      <RadioGroupItem value={plan.slug} id={`plan-${plan.slug}`} />
+                      <div>
+                        <p className="font-semibold">{plan.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {plan.description || `Monthly ad display.`}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">$10</span>
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </Label>
-
-                {/* Gold Package Card */}
-                <Label
-                  htmlFor="plan-gold"
-                  className={cn(
-                    "flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-                    field.value === "gold" && "border-primary bg-muted"
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <RadioGroupItem value="gold" id="plan-gold" />
-                    <div>
-                      <p className="font-semibold">Gold Package</p>
-                      <p className="text-sm text-muted-foreground">
-                        $25 monthly featured display.
-                      </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold">AED {Number(plan.priceMonthly).toLocaleString()}</span>
+                      <Clock className="w-4 h-4 text-muted-foreground" />
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">$25</span>
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </Label>
+                  </Label>
+                ))}
+                
+                {(!serverData.plans || serverData.plans.length === 0) && (
+                    <div className="text-center p-4 text-muted-foreground">
+                        No subscription plans available.
+                    </div>
+                )}
               </RadioGroup>
             )}
           />
