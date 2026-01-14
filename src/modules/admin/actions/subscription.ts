@@ -12,9 +12,10 @@ export async function syncSubscriptionStatus(userId: number, subscriptionId: str
     const details = await getSubscriptionDetails(subscriptionId);
     const status = details.status; // ACTIVE, SUSPENDED, CANCELLED, EXPIRED
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { subscriptionStatus: status },
+    // Update Subscription Record
+    await prisma.subscription.update({
+      where: { paypalSubscriptionId: subscriptionId },
+      data: { status: status },
     });
 
     revalidatePath("/admin/subscribers");
@@ -31,10 +32,13 @@ export async function cancelUserSubscription(userId: number, subscriptionId: str
   try {
     await cancelSubscription(subscriptionId, "Admin cancelled via Dashboard");
     
-    // Update local DB
-    await prisma.user.update({
-      where: { id: userId },
-      data: { subscriptionStatus: "CANCELLED" },
+    // Update Subscription Record
+    await prisma.subscription.update({
+      where: { paypalSubscriptionId: subscriptionId },
+      data: { 
+        status: "CANCELLED",
+        endDate: new Date() // Set end date to now
+      },
     });
 
     revalidatePath("/admin/subscribers");

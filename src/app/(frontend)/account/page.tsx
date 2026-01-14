@@ -7,14 +7,16 @@ import ChangePasswordForm from "./ChangePasswordForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default async function AccountPage() {
+export default async function AccountPage(props: { searchParams?: Promise<{ tab?: string }> }) {
+  const searchParams = await props.searchParams;
+  const tab = searchParams?.tab || "profile";
+  
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
     redirect("/login?callbackUrl=/account");
   }
 
-  // Fetch fresh user data
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     include: { profile: true },
@@ -25,10 +27,10 @@ export default async function AccountPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Profile Settings</h1>
       
-      <Tabs defaultValue="profile" className="space-y-4">
+      <Tabs defaultValue={tab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>

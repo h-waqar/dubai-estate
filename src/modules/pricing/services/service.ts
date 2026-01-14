@@ -65,27 +65,24 @@ export class PricingService {
   }
 
   static async getSubscribers() {
-    return prisma.user.findMany({
-      where: {
-        pricingPlanId: {
-          not: null
-        }
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        subscriptionId: true,
-        subscriptionStatus: true,
-        pricingPlan: {
+    return prisma.subscription.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          }
+        },
+        plan: {
             select: {
                 name: true,
                 priceMonthly: true,
                 priceYearly: true,
-                type: true
+                type: true,
+                priceOneTime: true
             }
-        },
-        createdAt: true
+        }
       },
       orderBy: {
         createdAt: 'desc'

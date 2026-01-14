@@ -13,20 +13,20 @@ import { format } from "date-fns";
 import SubscriptionActions from "@/modules/admin/components/SubscriptionActions";
 
 export default async function SubscribersPage() {
-  const subscribers = await getSubscribers();
+  const subscriptions = await getSubscribers();
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Subscribers</h1>
         <p className="text-muted-foreground mt-2">
-          List of users with active pricing plans.
+          List of all active and past subscriptions.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Active Payers ({subscribers.length})</CardTitle>
+          <CardTitle>Total Subscriptions ({subscriptions.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border overflow-hidden">
@@ -40,49 +40,49 @@ export default async function SubscribersPage() {
                   <TableHead>Price</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Sub ID</TableHead>
-                  <TableHead>Joined Date</TableHead>
+                  <TableHead>Created Date</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {subscribers.length === 0 ? (
+                {subscriptions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
-                      No active subscribers found.
+                      No subscriptions found.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  subscribers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name || "N/A"}</TableCell>
-                      <TableCell>{user.email}</TableCell>
+                  subscriptions.map((sub) => (
+                    <TableRow key={sub.id}>
+                      <TableCell className="font-medium">{sub.user.name || "N/A"}</TableCell>
+                      <TableCell>{sub.user.email}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{user.pricingPlan?.name}</Badge>
+                        <Badge variant="outline">{sub.plan?.name}</Badge>
                       </TableCell>
-                      <TableCell>{user.pricingPlan?.type}</TableCell>
+                      <TableCell>{sub.plan?.type}</TableCell>
                       <TableCell>
-                        {user.pricingPlan?.type === "SUBSCRIPTION" ? (
-                            <>AED {Number(user.pricingPlan?.priceMonthly).toLocaleString()} /mo</>
+                        {sub.plan?.type === "SUBSCRIPTION" ? (
+                            <>AED {Number(sub.plan?.priceMonthly).toLocaleString()} /mo</>
                         ) : (
-                            <>AED {Number(user.pricingPlan?.priceOneTime || 0).toLocaleString()} (One-Time)</>
+                            <>AED {Number(sub.plan?.priceOneTime || 0).toLocaleString()} (One-Time)</>
                         )}
                       </TableCell>
                       <TableCell>
-                        {user.subscriptionStatus ? (
-                          <Badge variant={user.subscriptionStatus === 'ACTIVE' ? 'default' : 'secondary'}>
-                            {user.subscriptionStatus}
+                        {sub.status ? (
+                          <Badge variant={sub.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                            {sub.status}
                           </Badge>
                         ) : '-'}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
-                        {user.subscriptionId ? user.subscriptionId.substring(0, 8) + '...' : '-'}
+                        {sub.paypalSubscriptionId ? sub.paypalSubscriptionId.substring(0, 8) + '...' : '-'}
                       </TableCell>
-                      <TableCell>{format(new Date(user.createdAt), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{format(new Date(sub.createdAt), "MMM d, yyyy")}</TableCell>
                       <TableCell className="text-right">
                         <SubscriptionActions 
-                          userId={user.id} 
-                          subscriptionId={user.subscriptionId} 
-                          status={user.subscriptionStatus} 
+                          userId={sub.user.id} 
+                          subscriptionId={sub.paypalSubscriptionId} 
+                          status={sub.status} 
                         />
                       </TableCell>
                     </TableRow>

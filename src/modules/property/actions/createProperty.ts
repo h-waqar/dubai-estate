@@ -6,6 +6,7 @@ import * as propertyService from "../services/createProperty";
 import { authOptions } from "@/modules/user/routes/auth";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
+import { SubscriptionStatus, PaymentStatus } from "@/generated/prisma";
 // import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createPropertyAction(formData: FormData) {
@@ -65,21 +66,41 @@ export async function createPropertyAction(formData: FormData) {
   }
   // 4. Create property in database
   try {
-    // If subscription data is present, update the user's plan
+    // If subscription data is present, create a new Subscription record
+    // Refactored to support multiple subscriptions (1-to-Many)
     if (planSlug && subscriptionId) {
       const plan = await prisma.pricingPlan.findUnique({
         where: { slug: planSlug },
       });
 
       if (plan) {
-        await prisma.user.update({
-          where: { id: session.user.id },
+        // Create Subscription Record
+        const subscription = await prisma.subscription.create({
           data: {
-            pricingPlanId: plan.id,
-            subscriptionId: subscriptionId,
-            subscriptionStatus: "ACTIVE", // Assumed active upon successful creation
-          },
+            userId: session.user.id,
+            planId: plan.id,
+            paypalSubscriptionId: subscriptionId,
+            status: SubscriptionStatus.ACTIVE, // Assumed active upon successful creation via PayPal
+            priceAtSubscription: plan.priceMonthly || 0, // Fallback if null
+            currency: "USD", // Should ideally come from plan or config
+          }
         });
+
+        // Record Initial Payment
+        // Since PayPal subscription usually charges immediately or starts billing cycle
+        // We'll record a payment record for history tracking
+        // Note: For subscriptions, capture ID might not be available immediately in this flow unless we passed it.
+        // If we don't have a transaction ID yet, we might skip creating Payment here and rely on Webhooks or Sync.
+        // But for now, we'll log it if we can, or just rely on the Subscription record.
+        // Let's create a 'PENDING' payment or skip it?
+        // Better to wait for Webhook/Sync to create confirmed payments.
+        // However, user expects to see something in history.
+        // We can create a "Setup Fee" or "First Month" payment placeholder if we want.
+        
+        // Update User's current active plan pointer (optional, if we still use it for quick access)
+        // But we are moving away from single fields.
+        // We might still want to know "which plan is active for *this* user context" (e.g. limits).
+        // Usually, we check `user.subscriptions.find(s => s.status === ACTIVE)`.
       }
     }
 

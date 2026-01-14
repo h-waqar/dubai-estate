@@ -73,9 +73,78 @@ model User {
   accounts        Account[]
   sessions        Session[]
   
-  // Subscription Info
+  // Subscription Info (Deprecated - use subscriptions relation)
   subscriptionId     String? // PayPal Subscription ID
   subscriptionStatus String? // e.g. ACTIVE, SUSPENDED, CANCELLED
+  
+  subscriptions      Subscription[]
+  payments           Payment[]
+}
+
+// --- Subscriptions & Payments ---
+
+enum SubscriptionStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  EXPIRED
+  PENDING
+}
+
+enum PaymentStatus {
+  COMPLETED
+  PENDING
+  FAILED
+  REFUNDED
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  
+  userId               Int
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId               Int
+  plan                 PricingPlan        @relation(fields: [planId], references: [id])
+  
+  paypalSubscriptionId String             @unique
+  status               SubscriptionStatus @default(PENDING)
+  
+  startDate            DateTime           @default(now())
+  endDate              DateTime?
+  nextBillingDate      DateTime?
+  
+  priceAtSubscription  Decimal            @db.Decimal(10, 2)
+  currency             String             @default("USD")
+
+  payments             Payment[]
+  
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  
+  userId                Int
+  user                  User          @relation(fields: [userId], references: [id])
+  subscriptionId        String?
+  subscription          Subscription? @relation(fields: [subscriptionId], references: [id])
+  
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("USD")
+  providerTransactionId String        @unique
+  status                PaymentStatus @default(PENDING)
+  
+  type                  String        @default("SUBSCRIPTION_PAYMENT")
+  metadata              Json?
+  
+  createdAt             DateTime      @default(now())
+  
+  @@index([userId])
+  @@index([subscriptionId])
 }
 
 model Account {
@@ -267,6 +336,7 @@ model PricingPlan {
   priceOneTime Decimal? @db.Decimal(10, 2)
   isActive     Boolean  @default(true)
   users        User[]
+  subscriptions Subscription[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
