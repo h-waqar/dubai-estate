@@ -10,6 +10,8 @@ export const createPricingSchema = z.object({
   priceYearly: z.number().min(0, "Price cannot be negative").optional(),
   priceOneTime: z.number().min(0, "Price cannot be negative").optional(),
   isActive: z.boolean(),
+  paypalPlanId: z.string().optional(),
+  paypalProductId: z.string().optional(),
 });
 
 export type CreatePricingInput = z.infer<typeof createPricingSchema>;

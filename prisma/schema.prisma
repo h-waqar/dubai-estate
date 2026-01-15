@@ -51,7 +51,7 @@ model User {
   emailVerified      DateTime?
   image              String?
   password           String? // For credentials login (optional if only OAuth)
-  role               Role     @default(USER)
+  roles              Role[]   @default([USER])
   profile            Profile?
   admin              Admin?
   posts              Post[]
@@ -115,6 +115,8 @@ model Subscription {
   
   priceAtSubscription  Decimal            @db.Decimal(10, 2)
   currency             String             @default("USD")
+  
+  featuredCreditsUsed  Int                @default(0)
 
   payments             Payment[]
   
@@ -331,10 +333,16 @@ model PricingPlan {
   description  String?
   type         PlanType @default(SUBSCRIPTION)
   maxListings  Int      @default(3) // e.g., 3, 5, 10
+  maxFeaturedListings Int @default(0)
   priceMonthly Decimal? @db.Decimal(10, 2)
   priceYearly  Decimal? @db.Decimal(10, 2)
   priceOneTime Decimal? @db.Decimal(10, 2)
   isActive     Boolean  @default(true)
+  
+  // PayPal Integration
+  paypalPlanId    String? // ID from PayPal API (e.g., P-...)
+  paypalProductId String? // ID from PayPal API (e.g., PROD-...)
+  
   users        User[]
   subscriptions Subscription[]
   createdAt    DateTime @default(now())

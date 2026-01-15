@@ -35,3 +35,14 @@ export async function getPlanAction(id: number) {
         return null;
     }
 }
+
+export async function deletePlanAction(id: number) {
+  try {
+    const result = await PricingService.deletePlan(id);
+    revalidatePath("/admin/pricing");
+    return result;
+  } catch (error) {
+    console.error("Failed to delete plan:", error);
+    return { success: false, error: "Failed to delete plan" };
+  }
+}

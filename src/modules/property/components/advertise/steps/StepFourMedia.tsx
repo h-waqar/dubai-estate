@@ -207,7 +207,7 @@ export default function StepFourMedia({ isEditMode, propertyId, serverData }: St
         if (result.success) {
           toast.success("Property updated successfully!");
           useAdvertiseFormStore.getState().reset(); // Reset form data
-          router.push("/agent/dashboard");
+          router.push("/account/dashboard");
           return;
         } else {
           toast.error("Failed to update property: " + JSON.stringify(result.error));

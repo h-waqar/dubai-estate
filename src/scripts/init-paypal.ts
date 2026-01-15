@@ -48,7 +48,7 @@ async function createProduct(accessToken: string) {
       'Prefer': 'return=representation'
     },
     body: JSON.stringify({
-      name: 'Dubai Estate Subscription',
+      name: 'DubaiEstateGuide Subscription',
       description: 'Monthly subscription for property listing',
       type: 'SERVICE',
       category: 'SOFTWARE',

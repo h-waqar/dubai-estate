@@ -17,12 +17,16 @@ import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 
 export function UserProfileDropdown() {
-    const { session, userRole } = useAuth();
+
+    const { session, userRoles } = useAuth();
+
     const { resetPost } = usePostStore();
+
+
 
     const user = session?.user;
 
-    const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
+    const isAdmin = userRoles?.includes("ADMIN") || userRoles?.includes("SUPER_ADMIN");
 
     if (!user) return null;
 
@@ -82,7 +86,7 @@ export function UserProfileDropdown() {
                     </DropdownMenuItem>
                 ) : (
                     <DropdownMenuItem asChild>
-                        <Link href="/agent/dashboard" className="cursor-pointer flex items-center">
+                        <Link href="/account/dashboard" className="cursor-pointer flex items-center">
                             <User className="mr-2 h-4 w-4" />
                             <span>Agent Dashboard</span>
                         </Link>

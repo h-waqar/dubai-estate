@@ -18,6 +18,7 @@ export default async function EditPlanPage({ params }: EditPlanPageProps) {
   // Transform Prisma decimals to numbers for the form
   const formattedPlan = {
     ...plan,
+    description: plan.description || undefined,
     priceMonthly: plan.priceMonthly ? Number(plan.priceMonthly) : 0,
     priceYearly: plan.priceYearly ? Number(plan.priceYearly) : 0,
     priceOneTime: plan.priceOneTime ? Number(plan.priceOneTime) : 0,

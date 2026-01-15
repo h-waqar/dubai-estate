@@ -24,12 +24,12 @@ export function checkAccess(token: JWT | null, pathname: string): boolean {
 
     // Admin-only routes
     if (pathname.startsWith("/admin")) {
-        return token.role === "ADMIN";
+        return token.roles?.includes("ADMIN") || token.roles?.includes("SUPER_ADMIN");
     }
 
     // Example: agent-only routes
     if (pathname.startsWith("/agent")) {
-        return token.role === "AGENT" || token.role === "ADMIN";
+        return token.roles?.includes("AGENT") || token.roles?.includes("ADMIN") || token.roles?.includes("SUPER_ADMIN");
     }
 
     // Default: any logged-in user

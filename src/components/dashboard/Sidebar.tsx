@@ -49,6 +49,7 @@ export type SidebarItem = {
   icon: LucideIcon;
   href?: string;
   subItems?: SidebarItem[];
+  roles?: string[];
 };
 
 // --- Data ---

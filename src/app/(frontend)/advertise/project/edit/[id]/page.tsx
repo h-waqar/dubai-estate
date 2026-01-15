@@ -33,7 +33,7 @@ export default async function ProjectEditPage(props: PageProps) {
     }
 
     // Authorization check
-    if (project.createdById !== session.user.id && session.user.role !== "ADMIN") {
+    if (project.createdById !== session.user.id && !session.user.roles.includes("ADMIN")) {
         return (
             <div className="container mx-auto py-20 text-center">
                 <h1 className="text-2xl font-bold text-red-600">Unauthorized</h1>

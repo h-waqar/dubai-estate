@@ -11,9 +11,9 @@ export const listMedia = async (scope: "GLOBAL" | "USER" = "USER"): Promise<Medi
     const user = session?.user;
 
     const userId = user?.id ? Number(user.id) : undefined;
-    const userRole = user?.role;
+    const userRoles = user?.roles;
 
-    return await mediaService.listMedia(scope, userId, userRole);
+    return await mediaService.listMedia(scope, userId, userRoles);
   } catch (error: unknown) {
     console.error("Failed to list media action error:", error);
     throw handleServerError(error);

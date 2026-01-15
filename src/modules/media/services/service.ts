@@ -186,13 +186,13 @@ export const saveMedia = async ({
 export const listMedia = async (
   scope: "GLOBAL" | "USER" = "USER",
   userId?: number,
-  userRole?: string
+  userRoles?: string[]
 ): Promise<Media[]> => {
   try {
     let whereClause: any = {};
 
     if (scope === "GLOBAL") {
-      if (userRole !== "ADMIN" && userRole !== "SUPER_ADMIN") {
+      if (!userRoles?.includes("ADMIN") && !userRoles?.includes("SUPER_ADMIN")) {
         if (userId) {
           whereClause = { uploadedById: userId };
         } else {

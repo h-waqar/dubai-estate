@@ -31,7 +31,7 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<CreatePricingInput>({
-    resolver: zodResolver(createPricingSchema),
+    resolver: zodResolver(createPricingSchema) as any,
     defaultValues: initialData ? {
       name: initialData.name,
       slug: initialData.slug,

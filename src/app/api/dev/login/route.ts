@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     // const token: JWT = {sub: user.id.toString(), role: user.role};
     const token: JWT = {
       id: user.id,
-      role: user.role,
+      roles: user.roles,
       sub: user.id.toString(), // keep it for NextAuth compatibility
     };
 

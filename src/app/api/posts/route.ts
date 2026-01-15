@@ -11,7 +11,7 @@ import { handleApiError } from "@/lib/errorHandler";
 
 interface SessionUser {
   id: number;
-  role: string;
+  roles: string[];
   email?: string | null;
   name?: string | null;
   image?: string | null;
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
           token: authHeader.split(" ")[1],
           secret,
         });
-        if (decoded && decoded.sub && decoded.role) {
-          token = { id: parseInt(decoded.sub), role: decoded.role as string };
+        if (decoded && decoded.sub && decoded.roles) {
+          token = { id: parseInt(decoded.sub), roles: decoded.roles as string[] };
         } else {
           token = null;
         }
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!["ADMIN", "EDITOR", "WRITER"].includes(token.role)) {
+    if (!token.roles.some(role => ["ADMIN", "EDITOR", "WRITER"].includes(role))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -105,8 +105,8 @@ export async function GET(req: Request) {
           token: authHeader.split(" ")[1],
           secret,
         });
-        if (decoded && decoded.sub && decoded.role) {
-          token = { id: parseInt(decoded.sub), role: decoded.role as string };
+        if (decoded && decoded.sub && decoded.roles) {
+          token = { id: parseInt(decoded.sub), roles: decoded.roles as string[] };
         } else {
           token = null;
         }
@@ -118,7 +118,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!["ADMIN", "EDITOR", "WRITER"].includes(token.role)) {
+    if (!token.roles.some(role => ["ADMIN", "EDITOR", "WRITER"].includes(role))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

@@ -10,7 +10,7 @@ import {
   ProjectStatus,
   UnitType,
   ContactMethod 
-} from "../src/generated/prisma";
+} from "../src/generated/prisma/index.js";
 
 const prisma = new PrismaClient();
 
@@ -53,7 +53,8 @@ async function main() {
       slug: "silver",
       description: "Standard visibility for agents.",
       type: PlanType.SUBSCRIPTION,
-      maxListings: 3,
+      maxListings: 10,
+      maxFeaturedListings: 1,
       priceMonthly: "10",
       priceYearly: "100",
       priceOneTime: "0",
@@ -64,7 +65,8 @@ async function main() {
       slug: "gold",
       description: "Premium visibility and more listings.",
       type: PlanType.SUBSCRIPTION,
-      maxListings: 10,
+      maxListings: 50,
+      maxFeaturedListings: 5,
       priceMonthly: "25",
       priceYearly: "250",
       priceOneTime: "0",
@@ -76,6 +78,7 @@ async function main() {
       description: "One-time fee for listing a project.",
       type: PlanType.ONE_TIME,
       maxListings: 1,
+      maxFeaturedListings: 1,
       priceMonthly: "0",
       priceYearly: "0",
       priceOneTime: "100",
@@ -102,7 +105,7 @@ async function main() {
       email: adminEmail,
       name: "Super Admin",
       username: "super_admin",
-      role: Role.SUPER_ADMIN,
+      roles: [Role.SUPER_ADMIN],
       // In a real app, use hashed passwords. For seed/dev, we might leave password null if using NextAuth w/o credentials, or set a dummy.
       // We'll set a dummy "password" if your auth system uses it, but usually standard is to rely on providers or a specific dev login flow.
       password: "password123", 
@@ -119,7 +122,7 @@ async function main() {
       email: agentEmail,
       name: "John Agent",
       username: "john_agent",
-      role: Role.USER,
+      roles: [Role.USER],
       password: "password123",
       pricingPlan: {
         connect: { slug: "gold" }

@@ -25,19 +25,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Search,
   Filter,
@@ -45,23 +39,22 @@ import {
   ChevronRight,
   X,
   Eye,
-  MoreVertical,
   UserCog,
   Calendar,
+  Loader2,
 } from "lucide-react";
-// import { handleServerError } from "@/lib/handleServerError";
 import { handleClientError } from "@/lib/handleClientError";
+import { toast } from "sonner";
 
 interface User {
   id: string;
   name: string | null;
   email: string;
-  role: string;
+  roles: string[];
   createdAt: string;
 }
 
 const ROLES = [
-  "ALL",
   "SUPER_ADMIN",
   "ADMIN",
   "EDITOR",
@@ -78,13 +71,18 @@ export default function UsersPage() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRole, setSelectedRole] = useState("ALL");
+  const [selectedRoleFilter, setSelectedRoleFilter] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  
+  // Dialog States
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [rolesToUpdate, setRolesToUpdate] = useState<string[]>([]);
+  const [isUpdatingRoles, setIsUpdatingRoles] = useState(false);
 
   useEffect(() => {
     axios
@@ -113,8 +111,8 @@ export default function UsersPage() {
     }
 
     // Filter by role
-    if (selectedRole !== "ALL") {
-      result = result.filter((u) => u.role === selectedRole);
+    if (selectedRoleFilter !== "ALL") {
+      result = result.filter((u) => u.roles.includes(selectedRoleFilter));
     }
 
     // Filter by date range
@@ -129,7 +127,7 @@ export default function UsersPage() {
 
     setFilteredUsers(result);
     setCurrentPage(1);
-  }, [searchQuery, selectedRole, dateFrom, dateTo, users]);
+  }, [searchQuery, selectedRoleFilter, dateFrom, dateTo, users]);
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -152,26 +150,49 @@ export default function UsersPage() {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setSelectedRole("ALL");
+    setSelectedRoleFilter("ALL");
     setDateFrom("");
     setDateTo("");
   };
 
   const hasActiveFilters =
-    searchQuery || selectedRole !== "ALL" || dateFrom || dateTo;
+    searchQuery || selectedRoleFilter !== "ALL" || dateFrom || dateTo;
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
+  // --- Role Management ---
+  const openRoleDialog = (user: User) => {
+    setSelectedUser(user);
+    setRolesToUpdate([...user.roles]);
+    setRoleDialogOpen(true);
+  };
+
+  const toggleRoleSelection = (role: string) => {
+    setRolesToUpdate((prev) => 
+      prev.includes(role) 
+        ? prev.filter((r) => r !== role)
+        : [...prev, role]
+    );
+  };
+
+  const saveRoles = async () => {
+    if (!selectedUser) return;
+    setIsUpdatingRoles(true);
     try {
-      await axios.patch(`/api/admin/users/${userId}`, { role: newRole });
+      await axios.patch(`/api/admin/users/${selectedUser.id}`, { roles: rolesToUpdate });
+      
       setUsers(
-        users.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+        users.map((u) => (u.id === selectedUser.id ? { ...u, roles: rolesToUpdate } : u))
       );
+      toast.success("Roles updated successfully");
+      setRoleDialogOpen(false);
     } catch (error: unknown) {
-      console.error("Failed to update user role", error);
-      // Optionally, set an error state to display a message to the user
+      console.error("Failed to update user roles", error);
+      toast.error("Failed to update roles");
+    } finally {
+      setIsUpdatingRoles(false);
     }
   };
 
+  // --- View User ---
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
     setViewDialogOpen(true);
@@ -207,7 +228,7 @@ export default function UsersPage() {
             <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-bold">
               {
                 users.filter(
-                  (u) => u.role === "ADMIN" || u.role === "SUPER_ADMIN"
+                  (u) => u.roles.includes("ADMIN") || u.roles.includes("SUPER_ADMIN")
                 ).length
               }
             </div>
@@ -273,11 +294,12 @@ export default function UsersPage() {
                 </div>
 
                 {/* Role Filter */}
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <Select value={selectedRoleFilter} onValueChange={setSelectedRoleFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="Filter by role" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="ALL">All Roles</SelectItem>
                     {ROLES.map((role) => (
                       <SelectItem key={role} value={role}>
                         {role.replace(/_/g, " ")}
@@ -378,7 +400,7 @@ export default function UsersPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
+                      <TableHead>Roles</TableHead>
                       <TableHead>Created At</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -393,9 +415,13 @@ export default function UsersPage() {
                           {u.email}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getRoleBadgeVariant(u.role)}>
-                            {u.role.replace(/_/g, " ")}
-                          </Badge>
+                          <div className="flex flex-wrap gap-1">
+                            {u.roles.map((role) => (
+                                <Badge key={role} variant={getRoleBadgeVariant(role)} className="text-[10px] px-1 py-0 h-5">
+                                    {role.replace(/_/g, " ")}
+                                </Badge>
+                            ))}
+                          </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {new Date(u.createdAt).toLocaleDateString()}
@@ -409,33 +435,13 @@ export default function UsersPage() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>
-                                  Change Role
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                {ROLES.filter((r) => r !== "ALL").map(
-                                  (role) => (
-                                    <DropdownMenuItem
-                                      key={role}
-                                      onClick={() =>
-                                        handleRoleChange(u.id, role)
-                                      }
-                                      disabled={u.role === role}
-                                    >
-                                      <UserCog className="mr-2 h-4 w-4" />
-                                      {role.replace(/_/g, " ")}
-                                    </DropdownMenuItem>
-                                  )
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openRoleDialog(u)}
+                            >
+                                <UserCog className="h-4 w-4" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -457,12 +463,14 @@ export default function UsersPage() {
                           {u.email}
                         </div>
                       </div>
-                      <Badge
-                        variant={getRoleBadgeVariant(u.role)}
-                        className="shrink-0"
-                      >
-                        {u.role.replace(/_/g, " ")}
-                      </Badge>
+                      <div className="flex flex-col gap-1 shrink-0 items-end">
+                        {u.roles.slice(0, 2).map((role) => (
+                            <Badge key={role} variant={getRoleBadgeVariant(role)} className="text-[10px]">
+                                {role.replace(/_/g, " ")}
+                            </Badge>
+                        ))}
+                        {u.roles.length > 2 && <span className="text-xs text-muted-foreground">+{u.roles.length - 2} more</span>}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="text-xs text-muted-foreground">
@@ -476,27 +484,13 @@ export default function UsersPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Change Role</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {ROLES.filter((r) => r !== "ALL").map((role) => (
-                              <DropdownMenuItem
-                                key={role}
-                                onClick={() => handleRoleChange(u.id, role)}
-                                disabled={u.role === role}
-                              >
-                                <UserCog className="mr-2 h-4 w-4" />
-                                {role.replace(/_/g, " ")}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openRoleDialog(u)}
+                        >
+                            <UserCog className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -583,6 +577,39 @@ export default function UsersPage() {
         </Card>
       </div>
 
+      {/* Role Management Dialog */}
+      <Dialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+                <DialogTitle>Manage Roles</DialogTitle>
+                <DialogDescription>
+                    Assign roles to <strong>{selectedUser?.name || selectedUser?.email}</strong>.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-3">
+                {ROLES.map((role) => (
+                    <div key={role} className="flex items-center space-x-2">
+                        <Checkbox 
+                            id={`role-${role}`} 
+                            checked={rolesToUpdate.includes(role)}
+                            onCheckedChange={() => toggleRoleSelection(role)}
+                        />
+                        <Label htmlFor={`role-${role}`} className="cursor-pointer">
+                            {role.replace(/_/g, " ")}
+                        </Label>
+                    </div>
+                ))}
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setRoleDialogOpen(false)}>Cancel</Button>
+                <Button onClick={saveRoles} disabled={isUpdatingRoles}>
+                    {isUpdatingRoles && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* View User Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
@@ -612,12 +639,14 @@ export default function UsersPage() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-1 text-sm font-medium text-muted-foreground">
-                  Role
+                  Roles
                 </div>
-                <div className="col-span-2">
-                  <Badge variant={getRoleBadgeVariant(selectedUser.role)}>
-                    {selectedUser.role.replace(/_/g, " ")}
-                  </Badge>
+                <div className="col-span-2 flex flex-wrap gap-1">
+                  {selectedUser.roles.map((role) => (
+                    <Badge key={role} variant={getRoleBadgeVariant(role)}>
+                      {role.replace(/_/g, " ")}
+                    </Badge>
+                  ))}
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">

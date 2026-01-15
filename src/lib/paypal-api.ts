@@ -135,3 +135,107 @@ export async function refundPayment(captureId: string, amount?: string, currency
     throw new Error("Failed to refund payment");
   }
 }
+
+/**
+ * Create a Product in PayPal Catalog
+ */
+export async function createPayPalProduct(name: string, description: string, type: "SERVICE" | "PHYSICAL" | "DIGITAL" = "SERVICE", category: string = "SOFTWARE") {
+  const token = await getAccessToken();
+  try {
+    const response = await axios.post(
+      `${PAYPAL_API}/v1/catalogs/products`,
+      {
+        name,
+        description,
+        type,
+        category,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "PayPal-Request-Id": `PROD-${Date.now()}`, // Simple idempotency key
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Create Product Error:", error.response?.data || error.message);
+    throw new Error("Failed to create PayPal product");
+  }
+}
+
+/**
+ * Create a Billing Plan
+ */
+export async function createPayPalPlan(productId: string, name: string, description: string, priceMonthly: string, currency: string = "USD") {
+  const token = await getAccessToken();
+  try {
+    const response = await axios.post(
+      `${PAYPAL_API}/v1/billing/plans`,
+      {
+        product_id: productId,
+        name,
+        description,
+        status: "ACTIVE", // Activate immediately
+        billing_cycles: [
+          {
+            frequency: {
+              interval_unit: "MONTH",
+              interval_count: 1,
+            },
+            tenure_type: "REGULAR",
+            sequence: 1,
+            total_cycles: 0, // 0 means infinite cycles
+            pricing_scheme: {
+              fixed_price: {
+                value: priceMonthly,
+                currency_code: currency,
+              },
+            },
+          },
+        ],
+        payment_preferences: {
+          auto_bill_outstanding: true,
+          setup_fee_failure_action: "CONTINUE",
+          payment_failure_threshold: 3,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "PayPal-Request-Id": `PLAN-${Date.now()}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Create Plan Error:", error.response?.data || error.message);
+    throw new Error("Failed to create PayPal billing plan");
+  }
+}
+
+/**
+ * Deactivate a Billing Plan
+ */
+export async function deactivatePayPalPlan(planId: string) {
+    const token = await getAccessToken();
+    try {
+        await axios.post(
+            `${PAYPAL_API}/v1/billing/plans/${planId}/deactivate`,
+            {},
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return { success: true };
+    } catch (error: any) {
+        console.error("Deactivate Plan Error:", error.response?.data || error.message);
+        // Don't throw, just return false so we can continue deleting locally if needed
+        return { success: false, error: error.message };
+    }
+}

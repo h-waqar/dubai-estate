@@ -39,7 +39,7 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
   const router = useRouter();
 
   const form = useForm<CreatePricingInput>({
-    resolver: zodResolver(createPricingSchema),
+    resolver: zodResolver(createPricingSchema) as any,
     defaultValues: initialData || {
       name: "",
       slug: "",
@@ -50,6 +50,8 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
       priceYearly: 0,
       priceOneTime: 0,
       isActive: true,
+      paypalPlanId: "",
+      paypalProductId: "",
     },
   });
 
@@ -152,7 +154,11 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
                     <Input 
                         type="number" 
                         {...field} 
-                        onChange={e => field.onChange(parseFloat(e.target.value))}
+                        value={field.value ?? ""}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          field.onChange(isNaN(val) ? 0 : val);
+                        }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -169,7 +175,11 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
                     <Input 
                         type="number" 
                         {...field} 
-                        onChange={e => field.onChange(parseFloat(e.target.value))}
+                        value={field.value ?? ""}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          field.onChange(isNaN(val) ? 0 : val);
+                        }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -186,7 +196,11 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
                         <Input 
                             type="number" 
                             {...field} 
-                            onChange={e => field.onChange(parseInt(e.target.value))}
+                            value={field.value ?? ""}
+                            onChange={e => {
+                              const val = parseInt(e.target.value);
+                              field.onChange(isNaN(val) ? 0 : val);
+                            }}
                         />
                     </FormControl>
                     <FormMessage />
@@ -207,7 +221,11 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
                   <Input 
                       type="number" 
                       {...field} 
-                      onChange={e => field.onChange(parseFloat(e.target.value))}
+                      value={field.value ?? ""}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value);
+                        field.onChange(isNaN(val) ? 0 : val);
+                      }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -215,6 +233,36 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
             )}
           />
         )}
+
+        <div className="grid grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/20">
+            <div className="col-span-2 text-sm font-semibold">PayPal Integration (Optional)</div>
+            <FormField
+                control={form.control}
+                name="paypalProductId"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>PayPal Product ID</FormLabel>
+                        <FormControl>
+                            <Input placeholder="PROD-..." {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="paypalPlanId"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>PayPal Plan ID</FormLabel>
+                        <FormControl>
+                            <Input placeholder="P-..." {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        </div>
 
         <FormField
           control={form.control}

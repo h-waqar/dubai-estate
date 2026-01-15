@@ -4,8 +4,6 @@ import { Plus, Edit2, Eye, MapPin, Building2, LayoutTemplate } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { listProperties } from "@/modules/property/services/listProperties";
 import { ProjectService } from "@/modules/project/services/project.service";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/modules/user/routes/auth";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -18,21 +16,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export const dynamic = "force-dynamic";
-
-export default async function AgentDashboardPage() {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-        return (
-            <div className="p-8 text-center">
-                <p className="text-muted-foreground">Please log in to view your dashboard.</p>
-                <Link href="/login" className="text-primary hover:underline mt-2 inline-block">
-                    Login here
-                </Link>
-            </div>
-        );
-    }
+export async function AgentDashboard({ session }: { session: any }) {
+    if (!session?.user?.id) return null;
 
     // Fetch properties for the current user
     const { data: properties } = await listProperties({
@@ -218,7 +203,7 @@ export default async function AgentDashboardPage() {
                                                                 <Eye className="w-4 h-4" />
                                                             </Button>
                                                         </Link>
-                                                        <Link href={`/agent/properties/${property.id}/edit`}>
+                                                        <Link href={`/account/properties/${property.id}/edit`}>
                                                             <Button variant="outline" size="sm" className="h-8 gap-2">
                                                                 <Edit2 className="w-3.5 h-3.5" />
                                                                 Edit

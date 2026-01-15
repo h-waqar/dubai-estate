@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 export async function getAllUsers() {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || !session.user.roles.includes("ADMIN")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -17,7 +17,7 @@ export async function getAllUsers() {
         id: true,
         name: true,
         email: true,
-        role: true,
+        roles: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
@@ -32,7 +32,7 @@ export async function getAllUsers() {
 export async function deleteUser(userId: number) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || !session.user.roles.includes("ADMIN")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

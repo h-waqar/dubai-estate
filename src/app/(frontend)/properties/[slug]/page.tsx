@@ -103,7 +103,7 @@ export default async function PropertyPage({ params }: PageProps) {
     const session = await getServerSession(authOptions);
     const user = session?.user;
 
-    const isAdmin = user?.role === "ADMIN" || user?.role === "MANAGER";
+    const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("MANAGER");
     const isOwner = user?.id === property.createdById;
 
     if (!isAdmin && !isOwner) {

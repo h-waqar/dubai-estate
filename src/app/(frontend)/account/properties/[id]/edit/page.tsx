@@ -46,7 +46,7 @@ export default async function EditPropertyPage(props: EditPropertyPageProps) {
     }
 
     // Check ownership
-    const isAdmin = session.user.role === "ADMIN" || session.user.role === "MANAGER";
+    const isAdmin = session.user.roles.includes("ADMIN") || session.user.roles.includes("MANAGER");
     if (property.createdById !== (session.user.id as number) && !isAdmin) {
         return (
             <div className="p-10 text-center">

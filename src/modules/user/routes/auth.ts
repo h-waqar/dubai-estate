@@ -24,7 +24,7 @@ export const authOptions: AuthOptions = {
           lastName: profile.family_name,
           email: profile.email,
           image: profile.picture,
-          role: "USER", // Default role
+          roles: ["USER"], // Default role
           // Generate a unique-ish username: "john.doe" + random 4 chars
           username: `${profile.email.split("@")[0]}_${Math.random().toString(36).slice(2, 6)}`,
         };
@@ -62,7 +62,7 @@ export const authOptions: AuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role,
+          roles: user.roles,
           image: user.image,
         };
         console.log("Returned user from authorize:", returnedUser);
@@ -78,7 +78,7 @@ export const authOptions: AuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as number;
-        session.user.role = token.role as string;
+        session.user.roles = token.roles as string[];
         // Prioritize token.image if we set it, otherwise fallback to picture
         session.user.image = (token.image as string) || (token.picture as string | null | undefined); 
       }
@@ -96,7 +96,7 @@ export const authOptions: AuthOptions = {
 
       if (user) {
         token.id = Number(user.id);
-        token.role = user.role;
+        token.roles = user.roles;
         // Map user.image to token.picture (standard NextAuth) or token.image
         token.picture = user.image; 
         token.image = user.image; // Redundant but safe

@@ -54,6 +54,25 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "50mb",
     },
   },
+  async redirects() {
+    return [
+      {
+        source: "/agent",
+        destination: "/account",
+        permanent: true,
+      },
+      {
+        source: "/agent/dashboard",
+        destination: "/account/dashboard",
+        permanent: true,
+      },
+      {
+        source: "/agent/properties/:path*",
+        destination: "/account/properties/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

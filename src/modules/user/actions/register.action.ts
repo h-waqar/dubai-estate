@@ -51,7 +51,7 @@ export async function registerUser(formData: FormData) {
         username: email.split("@")[0] + "_" + Math.floor(Math.random() * 10000).toString(),
         phoneNumber: phone,
         password: hashedPassword,
-        role: "USER",
+        roles: ["USER"],
         profile: {
           create: {},
         },

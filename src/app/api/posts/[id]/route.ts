@@ -16,7 +16,7 @@ export async function GET(
   const post = await prisma.post.findUnique({
     where: { id: Number(id) },
     include: {
-      author: { select: { id: true, name: true, role: true } },
+      author: { select: { id: true, name: true, roles: true } },
     },
   });
 
@@ -33,7 +33,7 @@ export async function PUT(
   const session = await getServerSession(authOptions);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "ADMIN")
+  if (!session.user.roles.includes("ADMIN"))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await context.params;
@@ -72,7 +72,7 @@ export async function DELETE(
   const session = await getServerSession(authOptions);
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "ADMIN")
+  if (!session.user.roles.includes("ADMIN"))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await context.params;

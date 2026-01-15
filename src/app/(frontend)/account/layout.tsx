@@ -44,19 +44,26 @@ export default function AccountLayout({
     return null;
   }
 
+  // Filter links based on role
+  const userRoles = session.user?.roles || [];
+  const filteredLinks = accountLinks.filter(link => {
+    if (!link.roles) return true; // No roles defined = visible to all
+    return link.roles.some(allowedRole => userRoles.includes(allowedRole));
+  });
+
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={handleToggleCollapse}
-        links={accountLinks}
+        links={filteredLinks}
         title="My Account"
       />
 
       <MobileSidebar 
         open={mobileMenuOpen} 
         onOpenChange={setMobileMenuOpen} 
-        links={accountLinks}
+        links={filteredLinks}
         title="My Account"
       />
 

@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { CreatePricingInput } from "../validators/createPricing.validator";
 import { UpdatePricingInput } from "../validators/updatePricing.validator";
-import { PlanType } from "@prisma/client";
+import { PlanType } from "@/generated/prisma";
+import { createPayPalProduct, createPayPalPlan, deactivatePayPalPlan } from "@/lib/paypal-api";
 
 export class PricingService {
   static async listPlans() {
@@ -33,6 +34,35 @@ export class PricingService {
   }
 
   static async createPlan(data: CreatePricingInput) {
+    let paypalProductId = data.paypalProductId;
+    let paypalPlanId = data.paypalPlanId;
+
+    // Automatically create PayPal resources if it's a subscription and IDs are missing
+    if (data.type === "SUBSCRIPTION" && !paypalPlanId && data.priceMonthly) {
+      try {
+        // 1. Create Product if needed
+        if (!paypalProductId) {
+          const product = await createPayPalProduct(data.name, data.description || "Subscription Plan");
+          paypalProductId = product.id;
+        }
+
+        // 2. Create Plan
+        if (paypalProductId) {
+            const plan = await createPayPalPlan(
+                paypalProductId,
+                data.name,
+                data.description || "Monthly Subscription",
+                data.priceMonthly.toString()
+            );
+            paypalPlanId = plan.id;
+        }
+      } catch (error) {
+        console.error("Auto-creation of PayPal resources failed:", error);
+        // We continue creating the local plan, but maybe log a warning or could verify if we should throw.
+        // For now, let's allow partial creation so the admin isn't blocked, but IDs will be null.
+      }
+    }
+
     return prisma.pricingPlan.create({
       data: {
         ...data,
@@ -41,6 +71,8 @@ export class PricingService {
         priceMonthly: data.priceMonthly?.toString(),
         priceYearly: data.priceYearly?.toString(),
         priceOneTime: data.priceOneTime?.toString(),
+        paypalPlanId: paypalPlanId,
+        paypalProductId: paypalProductId,
       },
     });
   }
@@ -54,14 +86,50 @@ export class PricingService {
         priceMonthly: data.priceMonthly?.toString(),
         priceYearly: data.priceYearly?.toString(),
         priceOneTime: data.priceOneTime?.toString(),
+        paypalPlanId: data.paypalPlanId,
+        paypalProductId: data.paypalProductId,
       },
     });
   }
 
   static async deletePlan(id: number) {
-    return prisma.pricingPlan.delete({
-      where: { id },
-    });
+    const plan = await prisma.pricingPlan.findUnique({ where: { id } });
+    if (!plan) return { success: false, error: "Plan not found" };
+
+    // 1. Check for existing subscriptions
+    const subCount = await prisma.subscription.count({ where: { planId: id } });
+    if (subCount > 0) {
+        return { success: false, error: `Cannot delete plan with ${subCount} associated subscriptions. Please archive (deactivate) it instead.` };
+    }
+
+    // 2. Determine PayPal Plan ID (DB or Legacy Env)
+    let paypalIdToDeactivate = plan.paypalPlanId;
+    if (!paypalIdToDeactivate) {
+        if (plan.slug === "silver") paypalIdToDeactivate = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER;
+        if (plan.slug === "gold") paypalIdToDeactivate = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD;
+    }
+    
+    // 3. Deactivate on PayPal
+    if (paypalIdToDeactivate) {
+        try {
+            await deactivatePayPalPlan(paypalIdToDeactivate);
+            console.log(`Deactivated PayPal Plan: ${paypalIdToDeactivate}`);
+        } catch (error) {
+            console.error(`Failed to deactivate PayPal plan ${paypalIdToDeactivate}`, error);
+            // Continue with local deletion even if remote fails (it might already be inactive or invalid)
+        }
+    }
+
+    // 4. Delete from DB
+    try {
+        await prisma.pricingPlan.delete({
+            where: { id },
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Delete Plan Error:", error);
+        return { success: false, error: "Database error while deleting plan." };
+    }
   }
 
   static async getSubscribers() {

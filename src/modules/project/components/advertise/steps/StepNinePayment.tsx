@@ -419,7 +419,10 @@ export default function StepNinePayment({ projectPlan }: { projectPlan?: any }) 
                                                                 currency_code: "USD",
                                                                 value: String(LISTING_FEE)
                                                             }
-                                                        }]
+                                                        }],
+                                                        application_context: {
+                                                            brand_name: "DubaiEstateGuide"
+                                                        }
                                                     });
                                                 }}
                                                 onApprove={async (data, actions) => {

@@ -15,7 +15,7 @@ export async function approvePropertyAction(
 
     if (
         !session?.user ||
-        (session.user.role !== "ADMIN" && session.user.role !== "MANAGER")
+        (!session.user.roles.includes("ADMIN") && !session.user.roles.includes("MANAGER"))
     ) {
         return { success: false, error: "Unauthorized" };
     }

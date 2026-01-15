@@ -56,7 +56,7 @@ function StepSevenSuccess({ }: StepSevenSuccessProps) {
   const handleGoToDashboard = () => {
     useStepStore.getState().reset();
     useAdvertiseFormStore.getState().reset();
-    router.push("/agent/dashboard");
+    router.push("/account/dashboard");
   };
 
   useEffect(() => {

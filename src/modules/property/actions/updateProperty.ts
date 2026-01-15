@@ -31,7 +31,7 @@ export async function updatePropertyAction(
         return { success: false, error: "Property not found" };
     }
 
-    const isAdmin = session.user.role === "ADMIN" || session.user.role === "MANAGER";
+    const isAdmin = session.user.roles.includes("ADMIN") || session.user.roles.includes("MANAGER");
 
     if (existingProperty.createdById !== userId && !isAdmin) {
         return { success: false, error: "Unauthorized to edit this property" };
@@ -193,7 +193,7 @@ export async function updatePropertyAction(
             return p;
         });
 
-        revalidatePath("/agent/dashboard");
+        revalidatePath("/account/dashboard");
         revalidatePath(`/properties/${property.slug}`);
 
         return { success: true, property: serializeDecimals(property) };
