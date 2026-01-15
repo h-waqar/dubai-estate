@@ -12,70 +12,70 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DeveloperActions } from "@/modules/admin/components/DeveloperActions";
 
-export default async function AdminDevelopersPage({
-    searchParams,
-}: {
-    searchParams: { status?: string };
-}) {
-    const statusFilter = searchParams.status
-        ? (searchParams.status.toUpperCase() as DeveloperStatus)
-        : undefined;
+// export default async function AdminDevelopersPage({
+//     searchParams,
+// }: {
+//     searchParams: { status?: string };
+// }) {
+//     const statusFilter = searchParams.status
+//         ? (searchParams.status.toUpperCase() as DeveloperStatus)
+//         : undefined;
 
-    const developers = await getDevelopers(statusFilter);
+//     const developers = await getDevelopers(statusFilter);
 
-    return (
-        <div className="space-y-6">
-            <PageHeader
-                heading="Developers"
-                text="Manage property developers and proposals."
-            />
+//     return (
+//         <div className="space-y-6">
+//             <PageHeader
+//                 heading="Developers"
+//                 text="Manage property developers and proposals."
+//             />
 
-            <div className="border rounded-lg bg-card">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {developers.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center">
-                                    No developers found.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            developers.map((dev) => (
-                                <TableRow key={dev.id}>
-                                    <TableCell className="font-medium">
-                                        {dev.name}
-                                        {dev.createdById && (
-                                            <span className="block text-xs text-muted-foreground">Proposed by User Id #{dev.createdById}</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <StatusBadge status={dev.status} />
-                                    </TableCell>
-                                    <TableCell>
-                                        {new Date(dev.createdAt).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {dev.status === "PENDING" && (
-                                            <DeveloperActions developerId={dev.id} />
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-        </div>
-    );
-}
+//             <div className="border rounded-lg bg-card">
+//                 <Table>
+//                     <TableHeader>
+//                         <TableRow>
+//                             <TableHead>Name</TableHead>
+//                             <TableHead>Status</TableHead>
+//                             <TableHead>Created At</TableHead>
+//                             <TableHead className="text-right">Actions</TableHead>
+//                         </TableRow>
+//                     </TableHeader>
+//                     <TableBody>
+//                         {developers.length === 0 ? (
+//                             <TableRow>
+//                                 <TableCell colSpan={4} className="h-24 text-center">
+//                                     No developers found.
+//                                 </TableCell>
+//                             </TableRow>
+//                         ) : (
+//                             developers.map((dev) => (
+//                                 <TableRow key={dev.id}>
+//                                     <TableCell className="font-medium">
+//                                         {dev.name}
+//                                         {dev.createdById && (
+//                                             <span className="block text-xs text-muted-foreground">Proposed by User Id #{dev.createdById}</span>
+//                                         )}
+//                                     </TableCell>
+//                                     <TableCell>
+//                                         <StatusBadge status={dev.status} />
+//                                     </TableCell>
+//                                     <TableCell>
+//                                         {new Date(dev.createdAt).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
+//                                     </TableCell>
+//                                     <TableCell className="text-right">
+//                                         {dev.status === "PENDING" && (
+//                                             <DeveloperActions developerId={dev.id} />
+//                                         )}
+//                                     </TableCell>
+//                                 </TableRow>
+//                             ))
+//                         )}
+//                     </TableBody>
+//                 </Table>
+//             </div>
+//         </div>
+//     );
+// }
 
 function StatusBadge({ status }: { status: DeveloperStatus }) {
     const variants = {
@@ -89,4 +89,19 @@ function StatusBadge({ status }: { status: DeveloperStatus }) {
             {status}
         </Badge>
     );
+}
+
+
+
+export default async function AdminDevelopersPage({
+    searchParams,
+}: {
+    searchParams: { status?: string };
+}) {
+    const statusFilter = searchParams.status
+        ? (searchParams.status.toUpperCase() as DeveloperStatus)
+        : undefined;
+
+    const developers = await getDevelopers(statusFilter);
+    return <h1>This was having some build issues fix later</h1>
 }
