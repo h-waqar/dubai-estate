@@ -103,10 +103,10 @@ export class PricingService {
     }
 
     // 2. Determine PayPal Plan ID (DB or Legacy Env)
-    let paypalIdToDeactivate = plan.paypalPlanId;
+    let paypalIdToDeactivate: string | null | undefined = plan.paypalPlanId;
     if (!paypalIdToDeactivate) {
         if (plan.slug === "silver") paypalIdToDeactivate = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER;
-        if (plan.slug === "gold") paypalIdToDeactivate = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD;
+        else if (plan.slug === "gold") paypalIdToDeactivate = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD;
     }
     
     // 3. Deactivate on PayPal

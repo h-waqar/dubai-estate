@@ -17,13 +17,18 @@ export default async function EditPlanPage({ params }: EditPlanPageProps) {
 
   // Transform Prisma decimals to numbers for the form
   const formattedPlan = {
-    ...plan,
+    id: plan.id,
+    name: plan.name,
+    slug: plan.slug,
     description: plan.description || undefined,
+    type: plan.type as "SUBSCRIPTION" | "ONE_TIME",
+    maxListings: plan.maxListings || undefined,
     priceMonthly: plan.priceMonthly ? Number(plan.priceMonthly) : 0,
     priceYearly: plan.priceYearly ? Number(plan.priceYearly) : 0,
     priceOneTime: plan.priceOneTime ? Number(plan.priceOneTime) : 0,
-    // type cast needed as Prisma enum vs Zod enum
-    type: plan.type as "SUBSCRIPTION" | "ONE_TIME"
+    isActive: plan.isActive,
+    paypalPlanId: plan.paypalPlanId || undefined,
+    paypalProductId: plan.paypalProductId || undefined,
   };
 
   return (
