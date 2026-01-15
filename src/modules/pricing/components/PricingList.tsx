@@ -20,11 +20,11 @@ export default function PricingList({ plans, userId }: PricingListProps) {
 
   return (
     <PayPalScriptProvider options={initialPayPalOptions}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+      <>
         {plans.map((plan) => (
           <PricingCard key={plan.id} plan={plan} userId={userId} />
         ))}
-      </div>
+      </>
     </PayPalScriptProvider>
   );
 }

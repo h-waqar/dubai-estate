@@ -24,7 +24,7 @@ const PAYPAL_PLAN_IDS: Record<string, string | undefined> = {
 export default function PricingCard({ plan, userId }: PricingCardProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
+  const [showPayPal, setShowPayPal] = useState(false);
 
   // Map Plan Slug to PayPal Plan ID, preferring DB value
   const paypalPlanId = plan.paypalPlanId || PAYPAL_PLAN_IDS[plan.slug] || process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER; 
@@ -89,45 +89,40 @@ export default function PricingCard({ plan, userId }: PricingCardProps) {
         {!userId ? (
           <Button 
             className="w-full" 
-            onClick={() => router.push("/api/auth/signin")} // Or toggle LoginModal
+            onClick={() => router.push("/api/auth/signin")}
           >
             Login to Subscribe
           </Button>
         ) : (
           <>
             {!paypalPlanId ? (
-                <Button disabled className="w-full" variant="outline">Not Configured (Plan ID)</Button>
+                <Button disabled className="w-full" variant="outline">Not Configured</Button>
             ) : (
-                <>
-                    {loading ? (
-                        <Button disabled className="w-full">
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing...
-                        </Button>
-                    ) : (
-                        <div className="relative z-0 w-full">
-                             <PayPalButtons
-                                className="w-full"
-                                style={{ layout: "vertical", shape: "rect", label: "subscribe", height: 40 }}
-                                createSubscription={(data, actions) => {
-                                    return actions.subscription.create({
-                                    plan_id: paypalPlanId,
-                                    application_context: {
-                                        brand_name: "DubaiEstateGuide",
-                                        return_url: `${window.location.origin}/account`,
-                                        cancel_url: `${window.location.origin}/pricing`,
-                                    }
-                                    });
-                                }}
-                                onApprove={handleSuccess}
-                                onError={(err) => {
-                                    console.error("PayPal Error:", err);
-                                    toast.error("Payment initialization failed. Please try again.");
-                                }}
-                            />
-                        </div>
-                    )}
-                </>
+                <div className="w-full">
+                    {/* Render a standard button first, or if we want custom UI, we can toggle PayPal buttons visibility */}
+                    {/* For better UI: We show a 'Subscribe' button first. When clicked, we show the PayPal buttons */}
+                     <div className="relative z-0 w-full min-h-[40px]">
+                        <PayPalButtons
+                            className="w-full"
+                            style={{ layout: "vertical", shape: "rect", label: "subscribe", height: 40 }}
+                            createSubscription={(data, actions) => {
+                                return actions.subscription.create({
+                                plan_id: paypalPlanId,
+                                application_context: {
+                                    brand_name: "DubaiEstateGuide",
+                                    return_url: `${window.location.origin}/account`,
+                                    cancel_url: `${window.location.origin}/pricing`,
+                                }
+                                });
+                            }}
+                            onApprove={handleSuccess}
+                            onError={(err) => {
+                                console.error("PayPal Error:", err);
+                                toast.error("Payment initialization failed. Please try again.");
+                            }}
+                        />
+                    </div>
+                </div>
             )}
           </>
         )}
