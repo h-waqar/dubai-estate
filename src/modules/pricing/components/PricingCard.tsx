@@ -2,52 +2,20 @@
 
 import { PricingPlan } from "@/generated/prisma";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2 } from "lucide-react";
-import { PayPalButtons } from "@paypal/react-paypal-js";
-import { toast } from "sonner";
-import { activateSubscription } from "@/modules/user/actions/activateSubscription";
+import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { LoginModal } from "@/modules/user/components/LoginModal";
 
 interface PricingCardProps {
   plan: PricingPlan;
   userId?: number | string | null;
+  onSubscribe: (plan: PricingPlan) => void;
 }
 
-const PAYPAL_PLAN_IDS: Record<string, string | undefined> = {
-  gold: process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD,
-  silver: process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER,
-  // Fallback for other plans if needed, or user must add them here
-};
-
-export default function PricingCard({ plan, userId }: PricingCardProps) {
+export default function PricingCard({ plan, userId, onSubscribe }: PricingCardProps) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [showPayPal, setShowPayPal] = useState(false);
-
-  // Map Plan Slug to PayPal Plan ID, preferring DB value
-  const paypalPlanId = plan.paypalPlanId || PAYPAL_PLAN_IDS[plan.slug] || process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER; 
-
-  const handleSuccess = async (data: any) => {
-    setLoading(true);
-    try {
-      const result = await activateSubscription(data.subscriptionID);
-      if (result.success) {
-        toast.success(`Successfully subscribed to ${result.plan}!`);
-        router.push("/account");
-      } else {
-        toast.error("Subscription activation failed: " + result.error);
-      }
-    } catch (e) {
-      toast.error("An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
-    <div className="flex flex-col p-6 bg-card border rounded-xl shadow-xs hover:shadow-md transition-shadow relative overflow-hidden">
+    <div className="flex flex-col p-6 bg-card border rounded-xl shadow-xs hover:shadow-md transition-shadow relative overflow-hidden h-full">
         {plan.slug === "gold" && (
             <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
                 POPULAR
@@ -94,37 +62,13 @@ export default function PricingCard({ plan, userId }: PricingCardProps) {
             Login to Subscribe
           </Button>
         ) : (
-          <>
-            {!paypalPlanId ? (
-                <Button disabled className="w-full" variant="outline">Not Configured</Button>
-            ) : (
-                <div className="w-full">
-                    {/* Render a standard button first, or if we want custom UI, we can toggle PayPal buttons visibility */}
-                    {/* For better UI: We show a 'Subscribe' button first. When clicked, we show the PayPal buttons */}
-                     <div className="relative z-0 w-full min-h-[40px]">
-                        <PayPalButtons
-                            className="w-full"
-                            style={{ layout: "vertical", shape: "rect", label: "subscribe", height: 40 }}
-                            createSubscription={(data, actions) => {
-                                return actions.subscription.create({
-                                plan_id: paypalPlanId,
-                                application_context: {
-                                    brand_name: "DubaiEstateGuide",
-                                    return_url: `${window.location.origin}/account`,
-                                    cancel_url: `${window.location.origin}/pricing`,
-                                }
-                                });
-                            }}
-                            onApprove={handleSuccess}
-                            onError={(err) => {
-                                console.error("PayPal Error:", err);
-                                toast.error("Payment initialization failed. Please try again.");
-                            }}
-                        />
-                    </div>
-                </div>
-            )}
-          </>
+          <Button 
+            className="w-full" 
+            onClick={() => onSubscribe(plan)}
+            variant={plan.slug === "gold" ? "default" : "outline"}
+          >
+            Subscribe
+          </Button>
         )}
       </div>
     </div>
