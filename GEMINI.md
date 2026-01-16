@@ -103,46 +103,7 @@ NEXTAUTH_URL="http://localhost:3000"
 ## Coding Conventions
 
 *   **Components:** Functional components with strict TypeScript typing.
-*   **Styling:** Utility-first with Tailwind CSS. Use `cn()` utility for class merging. You can also look into `docs/styles.md` for more information.
+*   **Styling:** Utility-first with Tailwind CSS. Use `cn()` utility for class merging.
 *   **State Management:** Prefer Server State (RSC) where possible. Use `zustand` for complex client state if needed.
 *   **Data Fetching:** Server Components fetch data directly via Prisma or cached services. Client components use API routes or Server Actions.
-*   **Tips:** You can look into `docs/tips.md` & `docs/system-role.md` for suggested developing practices and best practices for this project.
 *   **Imports:** Use absolute imports (e.g., `@/components/...`).
-*   **Scripts:** Any temporary, diagnostic, or database-related scripts MUST be placed in `src/scripts/` instead of the project root.
-
-<!-- Imported from: docs/MODE_Index.md -->
-# /sg:index - Project Documentation
-
-## Triggers
-- Project documentation creation and maintenance requirements
-- Knowledge base generation and organization needs
-- API documentation and structure analysis requirements
-- Cross-referencing and navigation enhancement requests
-
-## Usage
-```
-/sg:index [target] [--type docs|api|structure|readme] [--format md|json|yaml]
-```
-
-## Behavioral Flow
-1. **Analyze**: Examine project structure and identify key documentation components
-2. **Organize**: Apply intelligent organization patterns and cross-referencing strategies
-3. **Generate**: Create comprehensive documentation with framework-specific patterns
-4. **Validate**: Ensure documentation completeness and quality standards
-5. **Maintain**: Update existing documentation while preserving manual additions and customizations
-
-## MCP Integration
-- **Sequential MCP**: Complex multi-step project analysis and systematic documentation generation
-- **Context7 MCP**: Framework-specific documentation patterns and documentation standards
-- **Persona Coordination**: Architect (structure), Scribe (content), Quality (validation)
-
-## Tool Coordination
-- **Read/Grep/Glob**: Project structure analysis and content extraction
-- **Write**: Documentation creation with intelligent organization
-- **TodoWrite**: Progress tracking for complex workflows
-- **Task**: Advanced delegation
-
-## Key Patterns
-- **Structure Analysis**: Project examination → component identification → logical organization
-- **Documentation Types**: API docs → Structure docs → README → Knowledge base
-- **Quality Validation**: Completeness → accuracy → standards → maintenance
