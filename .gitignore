@@ -11,6 +11,7 @@ coverage/
 benv
 .env.local
 .env.*
+.env
 !.env.example
 
 # Logs
