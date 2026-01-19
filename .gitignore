@@ -6,6 +6,7 @@ node_modules/
 out/
 build/
 coverage/
+public/ai
 
 # Environment
 benv
