@@ -13,6 +13,7 @@ benv
 .env.local
 .env.*
 .env
+private/
 !.env.example
 
 # Logs
