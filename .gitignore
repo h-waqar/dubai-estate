@@ -8,7 +8,7 @@ build/
 coverage/
 
 # Environment
-.env
+benv
 .env.local
 .env.*
 !.env.example

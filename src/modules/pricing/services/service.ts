@@ -74,6 +74,9 @@ export class PricingService {
         paypalPlanId: paypalPlanId,
         paypalProductId: paypalProductId,
       },
+    }).then(plan => {
+        console.log("Prisma create result:", plan);
+        return plan;
     });
   }
 

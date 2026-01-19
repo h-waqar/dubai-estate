@@ -60,15 +60,25 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
   async function onSubmit(data: CreatePricingInput) {
     setIsSubmitting(true);
     try {
+      let result;
       if (isEditing && initialData?.id) {
-        await updatePlanAction(initialData.id, data);
-        toast.success("Plan updated successfully");
+        result = await updatePlanAction(initialData.id, data);
       } else {
-        await createPlanAction(data);
-        toast.success("Plan created successfully");
+        result = await createPlanAction(data);
       }
-      // Redirect handled by server action
+
+      if (result && !result.success) {
+        toast.error(result.error || "Something went wrong");
+        setIsSubmitting(false);
+        return;
+      }
+
+      toast.success(isEditing ? "Plan updated successfully" : "Plan created successfully");
+      setIsSubmitting(false); // Ensure spinner stops
+      router.push("/admin/pricing");
+      router.refresh(); 
     } catch (error) {
+      console.error(error);
       toast.error("Something went wrong");
       setIsSubmitting(false);
     }
