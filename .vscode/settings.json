@@ -1,8 +1,10 @@
 {
-    "prisma.pinToPrisma6": true,
-    "chat.mcp.serverSampling": {
-        "dubai-estate/.vscode/mcp.json: next-devtools": {
-            "allowedModels": []
-        }
+  "prisma.pinToPrisma6": true,
+  "chat.mcp.serverSampling": {
+    "dubai-estate/.vscode/mcp.json: next-devtools": {
+      "allowedModels": []
     }
+  },
+  "WillLuke.nextjs.addTypesOnSave": true,
+  "WillLuke.nextjs.hasPrompted": true
 }

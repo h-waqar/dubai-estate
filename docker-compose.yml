@@ -86,8 +86,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # Generate Prisma Client -> Push DB Schema -> Start Dev Server
-    command: sh -c "npx prisma generate && npx prisma db push --accept-data-loss && npm run dev"
+    # Sync dependencies -> Generate Prisma Client -> Push DB Schema -> Start Dev Server
+    command: sh -c "npm install && npx prisma generate && npx prisma db push --accept-data-loss && npm run dev"
 
   # Service 3: Adminer (Database Viewer)
   # A lightweight GUI to view/edit your database tables.
@@ -115,7 +115,7 @@ services:
       - .:/app
       - /app/node_modules
     # We use 0.0.0.0 so it's accessible from outside the container
-    command: npx prisma studio --hostname 0.0.0.0
+    command: sh -c "npm install && npx prisma studio --hostname 0.0.0.0"
     depends_on:
       db:
         condition: service_healthy
