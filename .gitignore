@@ -65,4 +65,6 @@ public/uploads/
 # AI / Tooling (important)
 # =====================
 gemini/*
-docs/*
+docs/*.vscode
+.serena
+.next
