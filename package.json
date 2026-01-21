@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma migrate deploy && ts-node --esm prisma/seed.ts && next build --turbopack",
+    "build": "next build --turbopack",
     "start": "next start",
     "db": "npx prisma studio",
     "lint": "eslint",
