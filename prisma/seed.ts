@@ -9,7 +9,7 @@ import {
   ProjectType,
   ProjectStatus,
   UnitType,
-  ContactMethod 
+  ContactMethod,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -109,7 +109,7 @@ async function main() {
       email: adminEmail,
       name: "Super Admin",
       username: "super_admin",
-      roles: [Role.SUPER_ADMIN, Role.ADMIN],
+      roles: [Role.SUPER_ADMIN],
       // In a real app, use hashed passwords. For seed/dev, we might leave password null if using NextAuth w/o credentials, or set a dummy.
       // We'll set a dummy "password" if your auth system uses it, but usually standard is to rely on providers or a specific dev login flow.
       password: "1122",
