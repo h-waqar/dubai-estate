@@ -1,0 +1,42 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'ADMIN', 'EDITOR', 'WRITER', 'MANAGER', 'SUPPORT', 'USER');
+
+-- CreateEnum
+CREATE TYPE "MediaType" AS ENUM ('IMAGE', 'VIDEO', 'DOCUMENT', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'SUSPENDED', 'CANCELLED', 'EXPIRED', 'PENDING');
+
+-- CreateEnum
+CREATE TYPE "PaymentStatus" AS ENUM ('COMPLETED', 'PENDING', 'FAILED', 'REFUNDED');
+
+-- CreateEnum
+CREATE TYPE "ContactMethod" AS ENUM ('Phone', 'Email');
+
+-- CreateEnum
+CREATE TYPE "PropertyStatus" AS ENUM ('DRAFT', 'PENDING_REVIEW', 'APPROVED', 'DECLINED', 'ARCHIVED');
+
+-- CreateEnum
+CREATE TYPE "PropertyAvailability" AS ENUM ('AVAILABLE', 'SOLD', 'RENTED', 'OFFPLAN');
+
+-- CreateEnum
+CREATE TYPE "FurnishingStatus" AS ENUM ('FURNISHED', 'SEMI_FURNISHED', 'UNFURNISHED');
+
+-- CreateEnum
+CREATE TYPE "ListingType" AS ENUM ('SALE', 'RENT', 'OFF_PLAN');
+
+-- CreateEnum
+CREATE TYPE "ProjectType" AS ENUM ('FUTURE', 'CURRENT', 'PAST');
+
+-- CreateEnum
+CREATE TYPE "ProjectStatus" AS ENUM ('DRAFT', 'PENDING_REVIEW', 'APPROVED', 'DECLINED', 'ARCHIVED');
+
+-- CreateEnum
+CREATE TYPE "UnitType" AS ENUM ('STUDIO', 'ONE_BEDROOM', 'ONE_BEDROOM_STUDY', 'TWO_BEDROOM', 'TWO_BEDROOM_STUDY', 'THREE_BEDROOM', 'THREE_BEDROOM_MAID', 'FOUR_BEDROOM', 'PENTHOUSE', 'VILLA', 'TOWNHOUSE');
+
+-- CreateEnum
+CREATE TYPE "PlanType" AS ENUM ('SUBSCRIPTION', 'ONE_TIME');
+
+-- CreateEnum
+CREATE TYPE "DeveloperStatus" AS ENUM ('PENDING', 'APPROVED', 'DECLINED');
+
