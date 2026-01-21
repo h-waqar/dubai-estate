@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { propertyTypeSchema, propertyTypeUpdateSchema } from "../validators/propertyType.validator";
-import { PropertyType } from "@/generated/prisma";
+import { PropertyType } from "@prisma/client";
 import slugify from "slugify";
 
 export async function getAllPropertyTypes() {

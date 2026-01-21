@@ -1,6 +1,6 @@
 "use client";
 
-import { PricingPlan } from "@/generated/prisma";
+import { PricingPlan } from "@prisma/client";
 import { 
     Table, 
     TableBody, 

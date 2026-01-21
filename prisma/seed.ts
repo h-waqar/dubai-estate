@@ -9,8 +9,8 @@ import {
   ProjectType,
   ProjectStatus,
   UnitType,
-  ContactMethod,
-} from "../src/generated/prisma/index.js";
+  ContactMethod 
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 

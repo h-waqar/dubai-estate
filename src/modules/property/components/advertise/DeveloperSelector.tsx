@@ -19,7 +19,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { getDevelopers } from "@/modules/admin/actions/developer.actions";
-import { DeveloperStatus } from "@/generated/prisma";
+import { DeveloperStatus } from "@prisma/client";
 import { useAdvertiseFormStore } from "../../stores/useAdvertiseForm";
 
 interface Developer {

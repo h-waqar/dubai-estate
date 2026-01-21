@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FurnishingStatus } from "@/generated/prisma";
+import { FurnishingStatus } from "@prisma/client";
 import type { Media } from "@/modules/media/types/media.types";
 
 export const stepOneSchema = z.object({

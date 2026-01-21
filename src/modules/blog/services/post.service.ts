@@ -1,6 +1,6 @@
 // src/modules/blog/services/post.service.ts
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@prisma/client";
 import { PostWithRelations } from "../types/post.types";
 
 export async function getPublishedPosts({

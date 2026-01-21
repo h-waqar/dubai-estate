@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PricingPlan } from "@/generated/prisma";
+import { PricingPlan } from "@prisma/client";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { activateSubscription } from "@/modules/user/actions/activateSubscription";
 import { toast } from "sonner";

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { createPropertyServerValidator } from "../validators/createProperty.validator"; // Reuse or create update validator
-import { PropertyStatus } from "@/generated/prisma";
+import { PropertyStatus } from "@prisma/client";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function updatePropertyAction(

@@ -1,6 +1,6 @@
 // src/modules/property/validators/createProperty.validator.ts
 import { z } from "zod";
-import { FurnishingStatus, ListingType } from "@/generated/prisma";
+import { FurnishingStatus, ListingType } from "@prisma/client";
 export const createPropertyValidator = z.object({
   title: z.string().min(10, "Title must be at least 10 characters long."),
   price: z

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { CreatePricingInput } from "../validators/createPricing.validator";
 import { UpdatePricingInput } from "../validators/updatePricing.validator";
-import { PlanType } from "@/generated/prisma";
+import { PlanType } from "@prisma/client";
 import { createPayPalProduct, createPayPalPlan, deactivatePayPalPlan } from "@/lib/paypal-api";
 
 export class PricingService {

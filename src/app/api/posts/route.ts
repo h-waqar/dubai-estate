@@ -1,5 +1,5 @@
 // src\app\api\posts\route.ts
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";

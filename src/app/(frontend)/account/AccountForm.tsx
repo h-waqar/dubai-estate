@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { updateProfile } from "@/modules/user/actions/update-profile.action";
-import { User, Profile } from "@/generated/prisma";
+import { User, Profile } from "@prisma/client";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
 import { useAuth } from "@/modules/user/hooks/useAuth";
 

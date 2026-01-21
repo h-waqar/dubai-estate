@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { getSubscriptionDetails } from "@/lib/paypal-api";
 import { revalidatePath } from "next/cache";
-import { SubscriptionStatus } from "@/generated/prisma/index.js";
+import { SubscriptionStatus } from "@prisma/client";
 
 export async function activateSubscription(paypalSubscriptionId: string) {
   const session = await getServerSession(authOptions);

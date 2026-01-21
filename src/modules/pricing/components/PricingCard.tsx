@@ -1,6 +1,6 @@
 "use client";
 
-import { PricingPlan } from "@/generated/prisma";
+import { PricingPlan } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";

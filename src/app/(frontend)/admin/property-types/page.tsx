@@ -21,7 +21,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { PropertyType } from "@/generated/prisma";
+import { PropertyType } from "@prisma/client";
 
 export default function PropertyTypesPage() {
     const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);

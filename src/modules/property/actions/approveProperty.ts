@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
-import { PropertyStatus } from "@/generated/prisma";
+import { PropertyStatus } from "@prisma/client";
 
 export async function approvePropertyAction(
     propertyId: number,

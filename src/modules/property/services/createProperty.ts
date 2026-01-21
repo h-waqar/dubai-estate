@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { CreatePropertyInput } from "../types/property.types";
 import { generateUniqueSlug } from "@/utils/slug";
-import { PropertyStatus, ListingType } from "@/generated/prisma";
+import { PropertyStatus, ListingType } from "@prisma/client";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function createProperty(

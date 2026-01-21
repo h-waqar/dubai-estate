@@ -20,7 +20,7 @@
  * - Fallback IDs in `PayPalSubscriptionModal` are used if the DB field is empty.
  */
 
-import { PricingPlan } from "@/generated/prisma";
+import { PricingPlan } from "@prisma/client";
 import PricingCard from "./PricingCard";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useState } from "react";

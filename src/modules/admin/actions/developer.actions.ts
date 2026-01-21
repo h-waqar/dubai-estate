@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { DeveloperStatus } from "@/generated/prisma";
+import { DeveloperStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function getDevelopers(status?: DeveloperStatus) {

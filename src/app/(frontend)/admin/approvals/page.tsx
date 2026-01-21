@@ -14,7 +14,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Property, User, PropertyType } from "@/generated/prisma";
+import { Property, User, PropertyType } from "@prisma/client";
 import Image from "next/image";
 
 // Extend Property type to include relations we fetch

@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
-import { Role } from "@/generated/prisma/index.js";
+import { Role } from "@prisma/client";
 
 export async function checkQuota() {
   const session = await getServerSession(authOptions);

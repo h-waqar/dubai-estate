@@ -1,5 +1,5 @@
 import { getDevelopers } from "@/modules/admin/actions/developer.actions";
-import { DeveloperStatus } from "@/generated/prisma";
+import { DeveloperStatus } from "@prisma/client";
 import PageHeader from "@/components/dashboard/PageHeader";
 import {
     Table,

@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@prisma/client";
 
 export function serializeDecimals<T>(obj: T): T {
   if (obj === null || obj === undefined) return obj;
