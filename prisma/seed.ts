@@ -16,6 +16,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Seeding database...");
+  console.log("Prisma keys:", Object.keys(prisma));
+  console.log("Prisma PricingPlan:", prisma.pricingPlan);
 
   // --- 1. Pricing Plans ---
   // Fix potential slug conflicts (e.g. "Silver Package" having slug "silver-package" vs "silver")

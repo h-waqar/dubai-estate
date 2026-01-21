@@ -8,6 +8,19 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Admin {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  userId Int     @unique
+  bio    String?
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   SUPER_ADMIN
   ADMIN
@@ -25,6 +38,50 @@ enum MediaType {
   OTHER
 }
 
+// --- Users & Auth ---
+model User {
+  id                 Int      @id @default(autoincrement())
+  name               String?
+  firstName          String?
+  lastName           String?
+  username           String?  @unique
+  phoneNumber        String?
+  email              String   @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String? // For credentials login (optional if only OAuth)
+  roles              Role[]   @default([USER])
+  profile            Profile?
+  admin              Admin?
+  posts              Post[]
+  properties         Property[]
+  pricingPlanId      Int?
+  approvedProperties Property[] @relation("PropertyApprovals")
+  projects           Project[]
+  approvedProjects   Project[] @relation("ProjectApprovals")
+
+  passwordResetToken   String?   @unique
+  passwordResetExpires DateTime?
+
+  pricingPlan     PricingPlan? @relation(fields: [pricingPlanId], references: [id], onDelete: SetNull)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  Media           Media[]
+  createdDevelopers Developer[]
+  leads              CallbackRequest[] @relation("AgentLeads")
+  accounts        Account[]
+  sessions        Session[]
+  
+  // Subscription Info (Deprecated - use subscriptions relation)
+  subscriptionId     String? // PayPal Subscription ID
+  subscriptionStatus String? // e.g. ACTIVE, SUSPENDED, CANCELLED
+  
+  subscriptions      Subscription[]
+  payments           Payment[]
+}
+
+// --- Subscriptions & Payments ---
+
 enum SubscriptionStatus {
   ACTIVE
   SUSPENDED
@@ -40,6 +97,166 @@ enum PaymentStatus {
   REFUNDED
 }
 
+model Subscription {
+  id                   String             @id @default(uuid())
+  
+  userId               Int
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId               Int
+  plan                 PricingPlan        @relation(fields: [planId], references: [id])
+  
+  paypalSubscriptionId String             @unique
+  status               SubscriptionStatus @default(PENDING)
+  
+  startDate            DateTime           @default(now())
+  endDate              DateTime?
+  nextBillingDate      DateTime?
+  
+  priceAtSubscription  Decimal            @db.Decimal(10, 2)
+  currency             String             @default("USD")
+  
+  featuredCreditsUsed  Int                @default(0)
+
+  payments             Payment[]
+  
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Payment {
+  id                    String        @id @default(uuid())
+  
+  userId                Int
+  user                  User          @relation(fields: [userId], references: [id])
+  subscriptionId        String?
+  subscription          Subscription? @relation(fields: [subscriptionId], references: [id])
+  
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("USD")
+  providerTransactionId String        @unique
+  status                PaymentStatus @default(PENDING)
+  
+  type                  String        @default("SUBSCRIPTION_PAYMENT")
+  metadata              Json?
+  
+  createdAt             DateTime      @default(now())
+  
+  @@index([userId])
+  @@index([subscriptionId])
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+
+// --- Categories ---
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  color       String? // Hex color for UI (#FF5733)
+  icon        String? // Icon name or emoji
+  posts       Post[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+}
+
+// --- Posts ---
+model Post {
+  id         Int      @id @default(autoincrement())
+  title      String
+  slug       String   @unique
+  excerpt    String?
+  content    String // markdown/html
+  coverImage String?
+  // coverImageId Int?
+  // coverImage   Media?   @relation(fields: [coverImageId], references: [id], onDelete: SetNull)
+  tags       String[] @default([])
+  published  Boolean  @default(false)
+
+  // Relations
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([published])
+  @@index([createdAt])
+}
+
+// This module is "lead"
+model CallbackRequest {
+  id              Int           @id @default(autoincrement())
+  fullName        String
+  phone           String
+  email           String
+  preferredTime   String?
+  contactMethod   ContactMethod
+  purchasePurpose String?
+  budget          Int?
+  location        String?
+  message         String?
+
+  // Link to Listing
+  propertyId Int?
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  projectId  Int?
+  project    Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  // Link to Agent
+  agentId Int?
+  agent   User? @relation("AgentLeads", fields: [agentId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- Enums ---
 enum ContactMethod {
   Phone
   Email
@@ -72,6 +289,7 @@ enum ListingType {
   OFF_PLAN
 }
 
+// --- Projects Module Enums ---
 enum ProjectType {
   FUTURE
   CURRENT
@@ -100,13 +318,437 @@ enum UnitType {
   TOWNHOUSE
 }
 
+
 enum PlanType {
   SUBSCRIPTION
   ONE_TIME
+}
+
+// --- Pricing Plan & Quotas ---
+model PricingPlan {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  slug         String   @unique
+  description  String?
+  type         PlanType @default(SUBSCRIPTION)
+  maxListings  Int      @default(3) // e.g., 3, 5, 10
+  maxFeaturedListings Int @default(0)
+  priceMonthly Decimal? @db.Decimal(10, 2)
+  priceYearly  Decimal? @db.Decimal(10, 2)
+  priceOneTime Decimal? @db.Decimal(10, 2)
+  isActive     Boolean  @default(true)
+  
+  // PayPal Integration
+  paypalPlanId    String? // ID from PayPal API (e.g., P-...)
+  paypalProductId String? // ID from PayPal API (e.g., PROD-...)
+  
+  users        User[]
+  subscriptions Subscription[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --- Properties ---
+model Property {
+  id             Int          @id @default(autoincrement())
+  title          String
+  slug           String       @unique
+  description    String?
+  price          Decimal      @db.Decimal(12, 2)
+  currency       String       @default("AED")
+  isFeatured     Boolean      @default(false)
+  propertyType   PropertyType @relation(fields: [propertyTypeId], references: [id])
+  propertyTypeId Int
+  listingType    ListingType  @default(SALE)
+
+  developerId           Int?
+  developer             Developer? @relation(fields: [developerId], references: [id], onDelete: SetNull)
+  proposedDeveloperName String?
+
+  // Media
+  mediaUsages MediaUsage[] // direct backref, optional helper for queries3
+
+  bedrooms     Int?
+  bathrooms    Int?
+  builtUpArea  Float?
+  areaUnit     String?              @default("sqft")
+  refNo        String?              @unique
+  location     String
+  address      String?
+  latitude     Float?
+  longitude    Float?
+  furnishing   FurnishingStatus     @default(UNFURNISHED)
+  availability PropertyAvailability @default(AVAILABLE)
+  status       PropertyStatus       @default(DRAFT)
+  views        Int                  @default(0)
+  features     PropertyFeature[]
+  images       PropertyImage[]
+  videos       PropertyVideo[]
+  leads        CallbackRequest[]
+
+  // Owner (Agent / User)
+  createdById Int
+  createdBy   User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  // Moderation & Lifecycle
+  published      Boolean   @default(false)
+  approvedById   Int?
+  approvedBy     User?     @relation("PropertyApprovals", fields: [approvedById], references: [id])
+  publishedAt    DateTime?
+  declinedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([price])
+  @@index([propertyTypeId])
+  @@index([status])
+  @@index([availability])
+  @@index([createdById])
+}
+
+// --- Property Type ---
+model PropertyType {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  properties  Property[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// --- Property Image ---
+model PropertyImage {
+  id         Int      @id @default(autoincrement())
+  url        String
+  alt        String?
+  isPrimary  Boolean  @default(false)
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+// --- Property Video ---
+model PropertyVideo {
+  id         Int      @id @default(autoincrement())
+  url        String
+  provider   String? // e.g. YouTube, Vimeo
+  propertyId Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+// --- Media ---
+model Media {
+  id           Int       @id @default(autoincrement())
+  url          String
+  publicId     String?   // Store Cloudinary Public ID for deletion
+  type         MediaType @default(IMAGE)
+  alt          String?
+  title        String?
+  mimeType     String?
+  size         Int? // in bytes
+  uploadedById Int?
+  uploadedBy   User?     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  usages MediaUsage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // Post      Post[]
+
+  @@index([type])
+  @@index([uploadedById])
+}
+
+// --- Media Usage ---
+model MediaUsage {
+  id      Int   @id @default(autoincrement())
+  mediaId Int
+  media   Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  entityId   Int
+  entityType String // e.g. "POST", "PROPERTY", "CATEGORY", "PROFILE"
+  role       String? // optional: "COVER", "THUMBNAIL", "GALLERY"
+
+  createdAt  DateTime  @default(now())
+  Property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId Int?
+
+  @@index([entityType, entityId])
+}
+
+// --- Features / Anmenities ---
+model Feature {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  icon        String? // optional for UI, e.g. "lucide:home"
+  category    String? // e.g. "Indoor", "Outdoor", "Security"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  properties PropertyFeature[]
+}
+
+// --- Features / Anmenities ---
+model PropertyFeature {
+  propertyId Int
+  featureId  Int
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  feature    Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, featureId])
+}
+
+// ========================================
+// PROJECTS MODULE
+// ========================================
+
+// --- Developer ---
+model Developer {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique // Auto-generated from name
+  logo        String? // URL to logo image
+  description String? // About the developer
+  website     String?
+  email       String?
+  phone       String?
+  
+  status      DeveloperStatus @default(PENDING)
+  createdById Int?
+  createdBy   User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  projects    Project[]
+  properties  Property[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([status])
 }
 
 enum DeveloperStatus {
   PENDING
   APPROVED
   DECLINED
+}
+
+// --- Project ---
+model Project {
+  id          Int           @id @default(autoincrement())
+  name        String
+  slug        String        @unique // Auto-generated from name
+  description String? // About section
+  
+  // New About Section Fields
+  tagline      String? // Subheading/tagline for about section
+  aboutContent String? // Full about section description
+  
+  projectType ProjectType   @default(CURRENT)
+  status      ProjectStatus @default(DRAFT)
+  isFeatured  Boolean       @default(false)
+  views       Int           @default(0)
+
+  // Location
+  community String? // e.g., "Al Furjan"
+  location  String // Full location/address
+  address   String?
+  latitude  Float?
+  longitude Float?
+  
+  // New Location Section Fields
+  locationDescription String? // Rich description of location/community
+
+  // Pricing
+  priceFrom          Decimal? @db.Decimal(12, 2)
+  currency           String   @default("AED")
+  paymentPlanSummary String? // Brief summary like "30/70"
+
+  // Dates & Timeline
+  handoverDate          DateTime?
+  announcementDate      DateTime?
+  bookingOpenedDate     DateTime?
+  constructionStartDate DateTime?
+
+  // Progress Updates
+  progressPercentage    Int?      // 0-100
+  progressStatus        String?   // e.g., "Under Construction", "Foundation Stage"
+  progressImage         String?   // URL to progress update image
+
+  // Media - Using MediaLibrary via MediaUsage
+  // logo, cover, gallery will be linked via MediaUsage with entityType="PROJECT"
+  // No direct image fields needed
+
+  // Developer Relation
+  developerId Int
+  developer   Developer @relation(fields: [developerId], references: [id])
+
+  // Relations
+  floorplans         ProjectFloorplan[]
+  amenities          ProjectAmenity[]
+  features           ProjectFeature[] // NEW
+  paymentPlan        PaymentPlanStage[]
+  nearbyAttractions  NearbyAttraction[]
+  progressTimeline   ProjectProgress[] // NEW
+  faqs               ProjectFAQ[]
+  leads              CallbackRequest[]
+
+  // Moderation & Ownership
+  createdById  Int
+  createdBy    User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  approvedById Int?
+  approvedBy   User?     @relation("ProjectApprovals", fields: [approvedById], references: [id])
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([projectType])
+  @@index([status])
+  @@index([developerId])
+  @@index([createdById])
+}
+
+// --- Project Floorplan ---
+model ProjectFloorplan {
+  id        Int      @id @default(autoincrement())
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  unitType  UnitType
+  unitName  String? // e.g., "1 Bedroom Apartment", "2 Bedroom + Study"
+  
+  bedrooms  Int?
+  bathrooms Int?
+  size      Float? // Square footage/meters
+  sizeUnit  String?  @default("sqft")
+  
+  imageUrl  String? // URL to floorplan image
+  pdfUrl    String? // URL to downloadable PDF
+  
+  featured  Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// --- Project Amenity ---
+model ProjectAmenity {
+  id          Int       @id @default(autoincrement())
+  name        String
+  icon        String? // Icon identifier (lucide icon name, emoji, etc.)
+  category    String? // e.g., "Wellness", "Leisure", "Security"
+  projects    Project[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([name])
+}
+
+// --- Payment Plan Stage ---
+model PaymentPlanStage {
+  id           Int     @id @default(autoincrement())
+  projectId    Int
+  project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  percentage   Int // e.g., 10, 20, 70
+  description  String // e.g., "On Booking", "Within 30 Days", "On Handover"
+  triggerEvent String? // Optional detailed trigger
+  
+  order        Int     @default(0) // Display order
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// --- Nearby Attraction ---
+model NearbyAttraction {
+  id        Int     @id @default(autoincrement())
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  name      String // e.g., "Metro Station", "Sheikh Zayed Road"
+  distance  String // e.g., "5 Minutes", "10 km"
+  
+  order     Int     @default(0) // Display order
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// --- Project FAQ ---
+model ProjectFAQ {
+  id        Int     @id @default(autoincrement())
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  question  String
+  answer    String
+  
+  order     Int     @default(0) // Display order
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+// --- Project Feature ---
+// Used for both "About Features" (Yacht Berth Access, etc.) and "Amenities" (Pool, Gym, etc.)
+model ProjectFeature {
+  id          Int     @id @default(autoincrement())
+  projectId   Int
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  name        String // e.g., "Yacht Berth Access", "Pool Center"
+  description String? // Optional description
+  icon        String? // Icon identifier (lucide icon name, emoji, etc.)
+  imageUrl    String? // Feature/amenity image for display
+  
+  order       Int     @default(0) // Display order
+  category    String  @default("AMENITY") // "ABOUT_FEATURE" or "AMENITY"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([category])
+}
+
+// --- Project Progress Timeline ---
+model ProjectProgress {
+  id        Int     @id @default(autoincrement())
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  milestone String // e.g., "Project Announcement", "Construction Begins"
+  date      String // e.g., "November 2025", "Q4 2029", "Imminent" (flexible string)
+  
+  order     Int     @default(0) // Display order
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([order])
+}
+
+// --- Newsletter ---
+model NewsletterSubscriber {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
