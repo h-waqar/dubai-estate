@@ -1,15 +1,15 @@
 // prisma/seed.ts
-import { 
-  PrismaClient, 
-  Role, 
-  PlanType, 
-  PropertyStatus, 
-  PropertyAvailability, 
+import {
+  PrismaClient,
+  Role,
+  PlanType,
+  PropertyStatus,
+  PropertyAvailability,
   ListingType,
   ProjectType,
   ProjectStatus,
   UnitType,
-  ContactMethod 
+  ContactMethod,
 } from "../src/generated/prisma/index.js";
 
 const prisma = new PrismaClient();
@@ -22,26 +22,30 @@ async function main() {
   const slugMappings = {
     "Silver Package": "silver",
     "Gold Package": "gold",
-    "Project Listing": "project-listing"
+    "Project Listing": "project-listing",
   };
 
   for (const [name, targetSlug] of Object.entries(slugMappings)) {
     const existing = await prisma.pricingPlan.findUnique({ where: { name } });
     if (existing && existing.slug !== targetSlug) {
-      console.log(`⚠️ Renaming slug for "${name}" from "${existing.slug}" to "${targetSlug}"`);
+      console.log(
+        `⚠️ Renaming slug for "${name}" from "${existing.slug}" to "${targetSlug}"`,
+      );
       // Update slug to match target, but check if target slug exists first (unlikely but safe)
-      const targetExists = await prisma.pricingPlan.findUnique({ where: { slug: targetSlug } });
+      const targetExists = await prisma.pricingPlan.findUnique({
+        where: { slug: targetSlug },
+      });
       if (targetExists) {
-         // If target exists but name is different, we have a problem. 
-         // But usually we just want to align this one record.
-         // If target exists and name IS "Silver Package", we wouldn't be here (since slugs would match or name check handles it).
-         // Just delete the target if it's not the one we want? No, risky.
-         // For now, assume single record per name.
-         // If target slug is taken by ANOTHER record, we fail.
+        // If target exists but name is different, we have a problem.
+        // But usually we just want to align this one record.
+        // If target exists and name IS "Silver Package", we wouldn't be here (since slugs would match or name check handles it).
+        // Just delete the target if it's not the one we want? No, risky.
+        // For now, assume single record per name.
+        // If target slug is taken by ANOTHER record, we fail.
       } else {
         await prisma.pricingPlan.update({
           where: { id: existing.id },
-          data: { slug: targetSlug }
+          data: { slug: targetSlug },
         });
       }
     }
@@ -105,10 +109,10 @@ async function main() {
       email: adminEmail,
       name: "Super Admin",
       username: "super_admin",
-      roles: [Role.SUPER_ADMIN],
+      roles: [Role.SUPER_ADMIN, Role.ADMIN],
       // In a real app, use hashed passwords. For seed/dev, we might leave password null if using NextAuth w/o credentials, or set a dummy.
       // We'll set a dummy "password" if your auth system uses it, but usually standard is to rely on providers or a specific dev login flow.
-      password: "password123", 
+      password: "1122",
     },
   });
   console.log(`✅ Admin User: ${admin.email}`);
@@ -125,18 +129,38 @@ async function main() {
       roles: [Role.USER],
       password: "password123",
       pricingPlan: {
-        connect: { slug: "gold" }
-      }
+        connect: { slug: "gold" },
+      },
     },
   });
   console.log(`✅ Agent User: ${agent.email}`);
 
   // --- 3. Categories (Blog) ---
   const categories = [
-    { name: "Market Trends", slug: "market-trends", color: "#3B82F6", icon: "trending-up" },
-    { name: "Investment Guides", slug: "investment-guides", color: "#10B981", icon: "dollar-sign" },
-    { name: "Community Spotlights", slug: "community-spotlights", color: "#F59E0B", icon: "map-pin" },
-    { name: "Legal & Regulations", slug: "legal-regulations", color: "#EF4444", icon: "scale" },
+    {
+      name: "Market Trends",
+      slug: "market-trends",
+      color: "#3B82F6",
+      icon: "trending-up",
+    },
+    {
+      name: "Investment Guides",
+      slug: "investment-guides",
+      color: "#10B981",
+      icon: "dollar-sign",
+    },
+    {
+      name: "Community Spotlights",
+      slug: "community-spotlights",
+      color: "#F59E0B",
+      icon: "map-pin",
+    },
+    {
+      name: "Legal & Regulations",
+      slug: "legal-regulations",
+      color: "#EF4444",
+      icon: "scale",
+    },
     { name: "Lifestyle", slug: "lifestyle", color: "#8B5CF6", icon: "coffee" },
   ];
 
@@ -151,18 +175,30 @@ async function main() {
 
   // --- 4. Developers ---
   const developers = [
-    { name: "Emaar Properties", slug: "emaar", website: "https://www.emaar.com" },
-    { name: "Damac Properties", slug: "damac", website: "https://www.damacproperties.com" },
+    {
+      name: "Emaar Properties",
+      slug: "emaar",
+      website: "https://www.emaar.com",
+    },
+    {
+      name: "Damac Properties",
+      slug: "damac",
+      website: "https://www.damacproperties.com",
+    },
     { name: "Nakheel", slug: "nakheel", website: "https://www.nakheel.com" },
-    { name: "Sobha Realty", slug: "sobha", website: "https://www.sobharealty.com" },
+    {
+      name: "Sobha Realty",
+      slug: "sobha",
+      website: "https://www.sobharealty.com",
+    },
     { name: "Dubai Properties", slug: "dubai-properties" },
   ];
 
   for (const developer of developers) {
     await prisma.developer.upsert({
       where: { slug: developer.slug },
-      update: { ...developer, status: 'APPROVED' },
-      create: { ...developer, status: 'APPROVED' },
+      update: { ...developer, status: "APPROVED" },
+      create: { ...developer, status: "APPROVED" },
     });
     console.log(`✅ Developer: ${developer.name}`);
   }
@@ -188,10 +224,18 @@ async function main() {
 
   // --- 6. Property Types ---
   const propertyTypes = [
-    { name: "Apartment", slug: "apartment", description: "Residential flats and apartments" },
+    {
+      name: "Apartment",
+      slug: "apartment",
+      description: "Residential flats and apartments",
+    },
     { name: "Villa", slug: "villa", description: "Standalone houses" },
     { name: "Townhouse", slug: "townhouse", description: "Terraced housing" },
-    { name: "Penthouse", slug: "penthouse", description: "Luxury top-floor units" },
+    {
+      name: "Penthouse",
+      slug: "penthouse",
+      description: "Luxury top-floor units",
+    },
     { name: "Office", slug: "office", description: "Commercial office space" },
     { name: "Plot", slug: "plot", description: "Land for development" },
   ];
@@ -208,12 +252,42 @@ async function main() {
   // --- 7. Property Features (Amenities) ---
   const propertyFeatures = [
     { name: "Balcony", slug: "balcony", category: "Outdoor", icon: "wind" },
-    { name: "Central A/C", slug: "central-ac", category: "Indoor", icon: "thermometer" },
-    { name: "Private Pool", slug: "private-pool", category: "Outdoor", icon: "droplet" },
-    { name: "Shared Gym", slug: "shared-gym", category: "Wellness", icon: "dumbbell" },
-    { name: "Maid's Room", slug: "maids-room", category: "Indoor", icon: "home" },
-    { name: "View of Water", slug: "view-water", category: "View", icon: "eye" },
-    { name: "Pets Allowed", slug: "pets-allowed", category: "Rules", icon: "dog" },
+    {
+      name: "Central A/C",
+      slug: "central-ac",
+      category: "Indoor",
+      icon: "thermometer",
+    },
+    {
+      name: "Private Pool",
+      slug: "private-pool",
+      category: "Outdoor",
+      icon: "droplet",
+    },
+    {
+      name: "Shared Gym",
+      slug: "shared-gym",
+      category: "Wellness",
+      icon: "dumbbell",
+    },
+    {
+      name: "Maid's Room",
+      slug: "maids-room",
+      category: "Indoor",
+      icon: "home",
+    },
+    {
+      name: "View of Water",
+      slug: "view-water",
+      category: "View",
+      icon: "eye",
+    },
+    {
+      name: "Pets Allowed",
+      slug: "pets-allowed",
+      category: "Rules",
+      icon: "dog",
+    },
   ];
 
   for (const feature of propertyFeatures) {
@@ -228,65 +302,71 @@ async function main() {
   // --- 8. Projects (Dummy Data) ---
   const emaar = await prisma.developer.findUnique({ where: { slug: "emaar" } });
   if (emaar) {
-    const existingProject = await prisma.project.findUnique({ where: { slug: "creek-waters" } });
+    const existingProject = await prisma.project.findUnique({
+      where: { slug: "creek-waters" },
+    });
     if (!existingProject) {
-        await prisma.project.create({
-            data: {
-                name: "Creek Waters",
-                slug: "creek-waters",
-                description: "Luxury living on Creek Island.",
-                developerId: emaar.id,
-                createdById: admin.id,
-                projectType: ProjectType.CURRENT,
-                status: ProjectStatus.APPROVED,
-                isFeatured: true,
-                published: true,
-                publishedAt: new Date(),
-                location: "Dubai Creek Harbour",
-                priceFrom: "1500000",
-                amenities: {
-                    connect: [{ name: "Infinity Pool" }, { name: "Concierge" }]
-                }
-            }
-        });
-        console.log("✅ Project: Creek Waters");
+      await prisma.project.create({
+        data: {
+          name: "Creek Waters",
+          slug: "creek-waters",
+          description: "Luxury living on Creek Island.",
+          developerId: emaar.id,
+          createdById: admin.id,
+          projectType: ProjectType.CURRENT,
+          status: ProjectStatus.APPROVED,
+          isFeatured: true,
+          published: true,
+          publishedAt: new Date(),
+          location: "Dubai Creek Harbour",
+          priceFrom: "1500000",
+          amenities: {
+            connect: [{ name: "Infinity Pool" }, { name: "Concierge" }],
+          },
+        },
+      });
+      console.log("✅ Project: Creek Waters");
     }
   }
 
   // --- 9. Properties (Dummy Data) ---
-  const apartmentType = await prisma.propertyType.findUnique({ where: { slug: "apartment" } });
+  const apartmentType = await prisma.propertyType.findUnique({
+    where: { slug: "apartment" },
+  });
   if (apartmentType) {
-    const existingProperty = await prisma.property.findUnique({ where: { slug: "luxury-marina-apt" } });
+    const existingProperty = await prisma.property.findUnique({
+      where: { slug: "luxury-marina-apt" },
+    });
     if (!existingProperty) {
-        await prisma.property.create({
-            data: {
-                title: "Luxury 2BR Apartment with Marina View",
-                slug: "luxury-marina-apt",
-                description: "Stunning views of the Dubai Marina. Fully furnished.",
-                price: "2500000",
-                currency: "AED",
-                propertyTypeId: apartmentType.id,
-                listingType: ListingType.SALE,
-                status: PropertyStatus.APPROVED,
-                availability: PropertyAvailability.AVAILABLE,
-                published: true,
-                publishedAt: new Date(),
-                createdById: agent.id,
-                approvedById: admin.id,
-                location: "Dubai Marina",
-                bedrooms: 2,
-                bathrooms: 3,
-                builtUpArea: 1200,
-                furnishing: "FURNISHED",
-                features: {
-                    create: [
-                        { feature: { connect: { slug: "balcony" } } },
-                        { feature: { connect: { slug: "view-water" } } }
-                    ]
-                }
-            }
-        });
-        console.log("✅ Property: Luxury Marina Apt");
+      await prisma.property.create({
+        data: {
+          title: "Luxury 2BR Apartment with Marina View",
+          slug: "luxury-marina-apt",
+          description: "Stunning views of the Dubai Marina. Fully furnished.",
+          price: "2500000",
+          currency: "AED",
+          propertyTypeId: apartmentType.id,
+          listingType: ListingType.SALE,
+          status: PropertyStatus.APPROVED,
+          availability: PropertyAvailability.AVAILABLE,
+          published: true,
+          publishedAt: new Date(),
+          createdById: agent.id,
+          approvedById: admin.id,
+          location: "Dubai Marina",
+          bedrooms: 2,
+          bathrooms: 3,
+          builtUpArea: 1200,
+          furnishing: "FURNISHED",
+          features: {
+            create: [
+              { feature: { connect: { slug: "balcony" } } },
+              { feature: { connect: { slug: "view-water" } } },
+            ],
+          },
+        },
+      });
+      console.log("✅ Property: Luxury Marina Apt");
     }
   }
 
