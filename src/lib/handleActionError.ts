@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ZodError } from "zod";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 export function handleActionError(error: unknown): Error {
   // Axios error handling (client or server)
@@ -37,7 +37,7 @@ export function handleActionError(error: unknown): Error {
   }
 
   // Prisma
-  if (error instanceof PrismaClientKnownRequestError) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
     switch (error.code) {
       case "P2025":
         return new Error("Resource not found");

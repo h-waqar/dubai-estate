@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 const subscribeValidator = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -56,7 +56,7 @@ export async function subscribeToNewsletter(formData: FormData) {
         return { success: true, message: "Successfully subscribed!" };
     } catch (error) {
         // Handle unique constraint violation (P2002)
-        if (error instanceof PrismaClientKnownRequestError && error.code === "P2002") {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
             // It's technically successful if they are already subscribed
             return { success: true, message: "You are already subscribed!" };
         }
