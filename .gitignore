@@ -27,6 +27,7 @@ yarn-error.log*
 .idea/
 .vscode/
 .serena/
+.vercel/
 
 # Vercel
 .vercel
@@ -43,3 +44,6 @@ public/uploads/
 gemini/
 docs/
 GEMINI.md
+
+
+// npx prisma migrate deploy && npx ts-node --esm prisma/seed.ts && next build

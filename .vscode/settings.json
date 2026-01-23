@@ -1,5 +1,5 @@
 {
-  "prisma.pinToPrisma6": true,
+  "prisma.pinToPrisma6": false,
   "chat.mcp.serverSampling": {
     "dubai-estate/.vscode/mcp.json: next-devtools": {
       "allowedModels": []

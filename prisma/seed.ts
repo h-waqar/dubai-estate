@@ -1,4 +1,5 @@
 // prisma/seed.ts
+import "dotenv/config"; // LOAD ENV FIRST
 import {
   PrismaClient,
   Role,
@@ -11,8 +12,15 @@ import {
   UnitType,
   ContactMethod,
 } from "@prisma/client";
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({
+  connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL!,
+});
+
+const prisma = new PrismaClient({ adapter });
+
 
 async function main() {
   console.log("🌱 Seeding database...");
