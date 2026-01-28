@@ -16,8 +16,8 @@ export const accountLinks: SidebarItem[] = [
     icon: User,
     subItems: [
       { href: "/account/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/account", label: "Profile", icon: User },
-      { href: "/account?tab=security", label: "Security", icon: Shield },
+      { href: "/account/profile", label: "Profile", icon: User },
+      { href: "/account/security", label: "Security", icon: Shield },
     ],
   },
   {

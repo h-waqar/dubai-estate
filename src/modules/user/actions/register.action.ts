@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import { verifyTurnstile } from "@/lib/verifyTurnstile";
 import { sendVerificationEmail } from "@/modules/user/actions/verify-email.action";
 
+import { passwordSchema } from "@/validators/password.validator";
+
 export async function registerUser(formData: FormData) {
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
@@ -29,6 +31,12 @@ export async function registerUser(formData: FormData) {
   // 2. Validate Inputs
   if (!email || !password || !firstName || !lastName) {
     return { error: "Missing required fields" };
+  }
+
+  // Validate Password Strength
+  const passwordValidation = passwordSchema.safeParse(password);
+  if (!passwordValidation.success) {
+    return { error: passwordValidation.error.issues[0].message };
   }
 
   // 3. Check Existing User

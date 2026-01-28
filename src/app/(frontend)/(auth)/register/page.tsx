@@ -14,9 +14,10 @@ import { registerUser } from "@/modules/user/actions/register.action";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
 import { Checkbox } from "@/components/ui/checkbox";
 
+import { PasswordInput } from "@/components/auth/PasswordInput";
+
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -118,28 +119,13 @@ export default function RegisterPage() {
 
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                required
-                className="pl-10"
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 flex items-center pr-3"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
-              </button>
-            </div>
+            <PasswordInput
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+              showStrength
+            />
           </div>
           
           <div className="flex items-center space-x-2">

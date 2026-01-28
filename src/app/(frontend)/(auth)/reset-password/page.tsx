@@ -7,13 +7,12 @@ import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { resetPasswordAction } from "@/modules/user/actions/reset-password.action";
+import { PasswordInput } from "@/components/auth/PasswordInput";
 
 export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -68,43 +67,23 @@ export default function ResetPasswordPage() {
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="password">New Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                required
-                className="pl-10"
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 flex items-center pr-3"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
-              </button>
-            </div>
+            <PasswordInput
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+              showStrength
+            />
           </div>
           
           <div className="grid gap-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                required
-                className="pl-10"
-              />
-            </div>
+            <PasswordInput
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="••••••••"
+              required
+            />
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>

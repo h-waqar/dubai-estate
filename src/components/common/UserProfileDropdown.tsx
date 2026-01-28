@@ -89,15 +89,16 @@ export function UserProfileDropdown() {
             </Link>
           </DropdownMenuItem>
         ) : (
-          <DropdownMenuItem asChild>
-            <Link
-              href="/account/dashboard"
-              className="cursor-pointer flex items-center"
-            >
-              <User className="mr-2 h-4 w-4" />
-              <span>Agent Dashboard</span>
-            </Link>
-          </DropdownMenuItem>
+          <></>
+          // <DropdownMenuItem asChild>
+          //   <Link
+          //     href="/account/dashboard"
+          //     className="cursor-pointer flex items-center"
+          //   >
+          //     <User className="mr-2 h-4 w-4" />
+          //     <span>Agent Dashboard</span>
+          //   </Link>
+          // </DropdownMenuItem>
         )}
         {/* <DropdownMenuItem asChild>
                     <Link href="/admin/settings" className="cursor-pointer flex items-center">

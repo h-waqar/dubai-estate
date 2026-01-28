@@ -22,8 +22,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    // In a real app, verify captchaToken on server
-    // if (captchaToken) formData.set("cf-turnstile-response", captchaToken);
+    
+    if (captchaToken) {
+        formData.set("cf-turnstile-response", captchaToken);
+    }
 
     try {
       const res = await forgotPasswordAction(formData);

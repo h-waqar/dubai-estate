@@ -109,15 +109,16 @@ services:
       - "5555:5555"
     environment:
       # Needs the same DB connection string to find the data
-      # DATABASE_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
-      # DIRECT_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
-      DATABASE_URL: "postgresql://neondb_owner:npg_mE9TqNUck7aX@ep-bold-cake-ahc2nryp.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-      DIRECT_URL: "postgresql://neondb_owner:npg_mE9TqNUck7aX@ep-bold-cake-ahc2nryp-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+      DATABASE_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+      DIRECT_URL: postgresql://postgres:password@db:5432/dubai_estate?schema=public
+      # DATABASE_URL: "postgresql://neondb_owner:npg_mE9TqNUck7aX@ep-bold-cake-ahc2nryp.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+      # DIRECT_URL: "postgresql://neondb_owner:npg_mE9TqNUck7aX@ep-bold-cake-ahc2nryp-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
     volumes:
       - .:/app
       - /app/node_modules
     # We use 0.0.0.0 so it's accessible from outside the container
-    command: sh -c "npm install && npx prisma studio --hostname 0.0.0.0"
+    # command: sh -c "npm install && npx prisma studio --hostname 0.0.0.0"
+    command: sh -c "npm install && PRISMA_STUDIO_HOST=0.0.0.0 npx prisma studio --port 5555 --browser none"
     depends_on:
       db:
         condition: service_healthy

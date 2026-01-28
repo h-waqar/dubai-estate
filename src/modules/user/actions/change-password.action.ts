@@ -5,10 +5,11 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { authOptions } from "@/modules/user/routes/auth";
 import { z } from "zod";
+import { passwordSchema } from "@/validators/password.validator";
 
 const ChangePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+  newPassword: passwordSchema,
   confirmPassword: z.string().min(1, "Confirm password is required"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords do not match",

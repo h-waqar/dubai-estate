@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { passwordSchema } from "@/validators/password.validator";
 
 export async function resetPasswordAction(token: string, formData: FormData) {
   const password = formData.get("password") as string;
@@ -15,8 +16,9 @@ export async function resetPasswordAction(token: string, formData: FormData) {
     return { error: "Passwords do not match" };
   }
 
-  if (password.length < 8) {
-    return { error: "Password must be at least 8 characters" };
+  const passwordValidation = passwordSchema.safeParse(password);
+  if (!passwordValidation.success) {
+    return { error: passwordValidation.error.issues[0].message };
   }
 
   try {
