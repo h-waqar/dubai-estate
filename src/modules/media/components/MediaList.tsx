@@ -8,26 +8,27 @@ import MediaListItem from "./MediaListItem";
 
 interface MediaListProps {
   media: Media[];
-  selectedMedia: Media | null;
+  selectedItems: Media[];
   onMediaSelect: (media: Media) => void;
   mode: "select" | "manage";
   allowDelete: boolean;
+  selectionMode: "single" | "multiple";
 }
 
 export default function MediaList({
   media,
-  selectedMedia,
+  selectedItems,
   onMediaSelect,
   mode,
   allowDelete,
 }: MediaListProps) {
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       {media.map((item) => (
         <MediaListItem
           key={item.id}
           media={item}
-          isSelected={selectedMedia?.id === item.id}
+          isSelected={selectedItems.some((i) => i.id === item.id)}
           onSelect={onMediaSelect}
           mode={mode}
           allowDelete={allowDelete}

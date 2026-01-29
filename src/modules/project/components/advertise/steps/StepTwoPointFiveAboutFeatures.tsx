@@ -134,10 +134,7 @@ export default function StepTwoPointFiveAboutFeatures() {
                             </DropdownMenu>
 
                             <MediaLibraryButton
-                                onSelect={(media) => {
-                                    setCustomIcon(media);
-                                    setSelectedIcon(""); // Clear default icon if custom selected
-                                }}
+                                onSelect={(media) => !Array.isArray(media) && setCustomIcon(media)}
                                 buttonText="Upload"
                                 mode="select"
                             />

@@ -126,11 +126,11 @@ export default function StepFiveFloorplans() {
                     <div className="col-span-2">
                         <Label>Floorplan Image</Label>
                         <div className="flex gap-4 items-start mt-2">
-                            <MediaLibraryButton
-                                onSelect={(media) => setFloorplan({ ...floorplan, image: media })}
-                                buttonText={floorplan.image ? "Change Image" : "Select Image"}
-                                mode="select"
-                            />
+                                <MediaLibraryButton
+                                    onSelect={(media) => !Array.isArray(media) && setFloorplan({ ...floorplan, image: media })}
+                                    buttonText={floorplan.image ? "Change Plan" : "Select Plan"}
+                                    mode="select"
+                                />
                             {floorplan.image && (
                                 <div className="relative w-32 h-24 rounded-lg overflow-hidden border border-gray-200">
                                     <Image

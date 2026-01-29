@@ -9,12 +9,13 @@ import { Media } from "../types/media.types";
 import MediaLibraryModal from "./MediaLibraryModal";
 
 interface MediaLibraryButtonProps {
-  onSelect: (media: Media) => void;
+  onSelect: (media: Media | Media[]) => void;
   buttonText?: string;
   buttonClassName?: string;
   mode?: "select" | "manage";
   allowDelete?: boolean;
   scope?: "USER" | "GLOBAL";
+  selectionMode?: "single" | "multiple";
 }
 
 export default function MediaLibraryButton({
@@ -24,6 +25,7 @@ export default function MediaLibraryButton({
   mode = "select",
   allowDelete = false,
   scope,
+  selectionMode = "single",
 }: MediaLibraryButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,6 +53,7 @@ export default function MediaLibraryButton({
         mode={mode}
         allowDelete={allowDelete}
         scope={scope}
+        selectionMode={selectionMode}
       />
     </>
   );

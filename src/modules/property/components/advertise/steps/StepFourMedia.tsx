@@ -158,10 +158,12 @@ export default function StepFourMedia({ isEditMode, propertyId, serverData }: St
   };
 
   // --- Gallery Handlers ---
-  const handleGallerySelect = (media: Media) => {
+  const handleGallerySelect = (media: Media | Media[]) => {
     const current = currentGallery || [];
-    if (!current.find((img) => img.id === media.id)) {
-      setValue("gallery", [...current, media], { shouldValidate: true });
+    const newItems = Array.isArray(media) ? media : [media];
+    const uniqueItems = newItems.filter(item => !current.find((img) => img.id === item.id));
+    if (uniqueItems.length > 0) {
+      setValue("gallery", [...current, ...uniqueItems], { shouldValidate: true });
     }
   };
 
@@ -235,7 +237,7 @@ export default function StepFourMedia({ isEditMode, propertyId, serverData }: St
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Cover Image</h3>
             <MediaLibraryButton
-              onSelect={handleCoverSelect}
+              onSelect={(m) => !Array.isArray(m) && handleCoverSelect(m)}
               buttonText={currentCoverImage ? "Change Cover" : "Select Cover"}
               mode="select"
             />
@@ -298,6 +300,7 @@ export default function StepFourMedia({ isEditMode, propertyId, serverData }: St
               onSelect={handleGallerySelect}
               buttonText="Add to Gallery"
               mode="select"
+              selectionMode="multiple"
             />
           </div>
           <div

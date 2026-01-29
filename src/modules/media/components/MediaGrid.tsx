@@ -8,15 +8,16 @@ import MediaCard from "./MediaCard";
 
 interface MediaGridProps {
   media: Media[];
-  selectedMedia: Media | null;
+  selectedItems: Media[];
   onMediaSelect: (media: Media) => void;
   mode: "select" | "manage";
   allowDelete: boolean;
+  selectionMode: "single" | "multiple";
 }
 
 export default function MediaGrid({
   media,
-  selectedMedia,
+  selectedItems,
   onMediaSelect,
   mode,
   allowDelete,
@@ -27,7 +28,7 @@ export default function MediaGrid({
         <MediaCard
           key={item.id}
           media={item}
-          isSelected={selectedMedia?.id === item.id}
+          isSelected={selectedItems.some((i) => i.id === item.id)}
           onSelect={onMediaSelect}
           mode={mode}
           allowDelete={allowDelete}

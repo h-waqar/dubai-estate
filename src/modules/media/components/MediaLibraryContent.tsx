@@ -10,28 +10,31 @@ import MediaUploadView from "./MediaUploadView";
 interface MediaLibraryContentProps {
   activeTab: "library" | "upload";
   onTabChange: (tab: "library" | "upload") => void;
-  selectedMedia: Media | null;
+  selectedItems: Media[];
   onMediaSelect: (media: Media) => void;
   mode: "select" | "manage";
   allowDelete: boolean;
+  selectionMode: "single" | "multiple";
 }
 
 export default function MediaLibraryContent({
   activeTab,
   onTabChange,
-  selectedMedia,
+  selectedItems,
   onMediaSelect,
   mode,
   allowDelete,
+  selectionMode,
 }: MediaLibraryContentProps) {
   return (
     <div className="flex-1 overflow-auto">
       {activeTab === "library" ? (
         <MediaLibraryView
-          selectedMedia={selectedMedia}
+          selectedItems={selectedItems}
           onMediaSelect={onMediaSelect}
           mode={mode}
           allowDelete={allowDelete}
+          selectionMode={selectionMode}
         />
       ) : (
         <MediaUploadView onUploadSuccess={() => onTabChange("library")} />

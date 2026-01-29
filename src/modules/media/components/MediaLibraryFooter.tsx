@@ -9,31 +9,35 @@ import { useMediaStore } from "../stores/store";
 
 interface MediaLibraryFooterProps {
   activeTab: "library" | "upload";
-  selectedMedia: Media | null;
+  selectedItems: Media[];
   onClose: () => void;
   onInsert: () => void;
   mode: "select" | "manage";
+  selectionMode: "single" | "multiple";
 }
 
 export default function MediaLibraryFooter({
   activeTab,
-  selectedMedia,
+  selectedItems,
   onClose,
   onInsert,
   mode,
+  selectionMode,
 }: MediaLibraryFooterProps) {
   const { mediaList } = useMediaStore();
 
   return (
     <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
       <div className="text-sm text-gray-500 dark:text-gray-400">
-        {activeTab === "library" && selectedMedia && (
+        {activeTab === "library" && selectedItems.length > 0 && (
           <span className="flex items-center gap-2">
             <Check className="w-4 h-4 text-green-500" />
-            Selected: {selectedMedia.title}
+            {selectionMode === "single"
+              ? `Selected: ${selectedItems[0].title}`
+              : `Selected: ${selectedItems.length} items`}
           </span>
         )}
-        {activeTab === "library" && !selectedMedia && (
+        {activeTab === "library" && selectedItems.length === 0 && (
           <span>{mediaList.length} items</span>
         )}
       </div>
@@ -47,7 +51,7 @@ export default function MediaLibraryFooter({
         {activeTab === "library" && mode === "select" && (
           <button
             onClick={onInsert}
-            disabled={!selectedMedia}
+            disabled={selectedItems.length === 0}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             Insert Media

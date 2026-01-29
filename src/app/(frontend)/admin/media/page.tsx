@@ -23,10 +23,11 @@ export default function AdminMediaPage() {
 
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border h-full overflow-hidden">
                 <MediaLibraryView
-                    selectedMedia={null}
+                    selectedItems={[]}
                     onMediaSelect={() => { }}
                     mode="manage"
                     allowDelete={true}
+                    selectionMode="single"
                 />
             </div>
         </div>

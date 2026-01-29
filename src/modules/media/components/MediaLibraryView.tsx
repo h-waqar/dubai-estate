@@ -14,17 +14,19 @@ import MediaLoadingState from "./MediaLoadingState";
 import MediaErrorState from "./MediaErrorState";
 
 interface MediaLibraryViewProps {
-  selectedMedia: Media | null;
+  selectedItems: Media[];
   onMediaSelect: (media: Media) => void;
   mode: "select" | "manage";
   allowDelete: boolean;
+  selectionMode: "single" | "multiple";
 }
 
 export default function MediaLibraryView({
-  selectedMedia,
+  selectedItems,
   onMediaSelect,
   mode,
   allowDelete,
+  selectionMode,
 }: MediaLibraryViewProps) {
   const { mediaList, loading, error } = useMediaStore();
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,18 +64,20 @@ export default function MediaLibraryView({
         ) : viewMode === "grid" ? (
           <MediaGrid
             media={filteredMedia}
-            selectedMedia={selectedMedia}
+            selectedItems={selectedItems}
             onMediaSelect={onMediaSelect}
             mode={mode}
             allowDelete={allowDelete}
+            selectionMode={selectionMode}
           />
         ) : (
           <MediaList
             media={filteredMedia}
-            selectedMedia={selectedMedia}
+            selectedItems={selectedItems}
             onMediaSelect={onMediaSelect}
             mode={mode}
             allowDelete={allowDelete}
+            selectionMode={selectionMode}
           />
         )}
       </div>

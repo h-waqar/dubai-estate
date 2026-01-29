@@ -305,7 +305,7 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
             Cover Image
           </label>
           <MediaLibraryButton
-            onSelect={(media) => setCoverImage(media)}
+            onSelect={(media) => !Array.isArray(media) && setCoverImage(media)}
             buttonText={coverImage ? "Change Cover" : "Select Cover"}
             mode="select"
           />
@@ -340,12 +340,14 @@ export function PropertyForm({ propertyTypes }: PropertyFormProps) {
           </label>
           <MediaLibraryButton
             onSelect={(media) => {
-              if (!galleryImages.find((img) => img.id === media.id)) {
-                setGalleryImages([...galleryImages, media]);
+              const newItems = Array.isArray(media) ? media : [media];
+              const uniqueItems = newItems.filter(item => !galleryImages.find(g => g.id === item.id));
+              if (uniqueItems.length > 0) {
+                 setGalleryImages([...galleryImages, ...uniqueItems]);
               }
             }}
-            buttonText="Add to Gallery"
-            mode="select"
+            buttonText="Add Images"
+            selectionMode="multiple"
           />
 
           {galleryImages.length > 0 && (

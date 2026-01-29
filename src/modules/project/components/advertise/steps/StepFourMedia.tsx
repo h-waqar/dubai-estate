@@ -126,9 +126,11 @@ export default function StepFourMedia() {
     };
 
     // Handle gallery selection
-    const handleGallerySelect = (media: Media) => {
-        if (!store.gallery.find((img) => img.id === media.id)) {
-            store.update({ gallery: [...store.gallery, media] });
+    const handleGallerySelect = (media: Media | Media[]) => {
+        const newItems = Array.isArray(media) ? media : [media];
+        const uniqueItems = newItems.filter(item => !store.gallery.find((img) => img.id === item.id));
+        if (uniqueItems.length > 0) {
+             store.update({ gallery: [...store.gallery, ...uniqueItems] });
         }
     };
 
@@ -153,7 +155,7 @@ export default function StepFourMedia() {
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-medium">Developer Logo</h3>
                         <MediaLibraryButton
-                            onSelect={handleLogoSelect}
+                            onSelect={(m) => !Array.isArray(m) && handleLogoSelect(m)}
                             buttonText={store.logo ? "Change Logo" : "Select Logo"}
                             mode="select"
                         />
@@ -203,7 +205,7 @@ export default function StepFourMedia() {
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-medium">Cover Image *</h3>
                         <MediaLibraryButton
-                            onSelect={handleCoverSelect}
+                            onSelect={(m) => !Array.isArray(m) && handleCoverSelect(m)}
                             buttonText={store.coverImage ? "Change Cover" : "Select Cover"}
                             mode="select"
                         />
@@ -253,7 +255,7 @@ export default function StepFourMedia() {
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-medium">Progress Update Image</h3>
                         <MediaLibraryButton
-                            onSelect={(media) => store.update({ progressImage: media })}
+                            onSelect={(media) => !Array.isArray(media) && store.update({ progressImage: media })}
                             buttonText={store.progressImage ? "Change Image" : "Select Image"}
                             mode="select"
                         />
@@ -308,6 +310,7 @@ export default function StepFourMedia() {
                             onSelect={handleGallerySelect}
                             buttonText="Add to Gallery"
                             mode="select"
+                            selectionMode="multiple"
                         />
                     </div>
                     <div

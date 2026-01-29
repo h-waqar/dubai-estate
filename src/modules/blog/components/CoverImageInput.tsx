@@ -5,6 +5,7 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { Control, useController } from "react-hook-form";
 import { PostFormData } from "../types/post.types";
+import { toast } from "sonner";
 
 interface CoverImageInputProps {
   control: Control<PostFormData>;
@@ -25,8 +26,13 @@ export function CoverImageInput({
     control,
   });
 
-  const handleSelect = (media: Media) => {
-    onChange(media.url);
+  const handleSelect = (media: Media | Media[]) => {
+    if (Array.isArray(media)) return; // Only accept single
+    if (media.type !== "IMAGE") {
+      toast.error("Please select an image file");
+      return;
+    }
+    onChange(media);
   };
 
   const handleRemove = () => {

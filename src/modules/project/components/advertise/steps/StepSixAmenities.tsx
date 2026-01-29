@@ -65,9 +65,10 @@ export default function StepSixAmenities({ amenities }: { amenities: any[] }) {
                                                     </div>
                                                 ) : (
                                                     <MediaLibraryButton
-                                                        onSelect={(media) => store.updateAmenityImage(amenity.id, media)}
+                                                        onSelect={(media) => !Array.isArray(media) && store.updateAmenityImage(amenity.id, media)}
                                                         buttonText="Add Image"
                                                         mode="select"
+                                                        buttonClassName="text-xs px-2 py-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded flex items-center gap-1"
                                                     />
                                                 )}
                                                 {selected.image && (
