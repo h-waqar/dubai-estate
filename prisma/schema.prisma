@@ -59,6 +59,7 @@ model Subscription {
   id                   String             @id @default(uuid())
   userId               Int
   planId               Int
+  couponId             String?
   paypalSubscriptionId String             @unique
   status               SubscriptionStatus @default(PENDING)
   startDate            DateTime           @default(now())
@@ -72,9 +73,28 @@ model Subscription {
   payments             Payment[]
   plan                 PricingPlan        @relation(fields: [planId], references: [id])
   user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon               Coupon?            @relation(fields: [couponId], references: [id])
 
   @@index([userId])
   @@index([status])
+}
+
+model Coupon {
+  id                String         @id @default(cuid())
+  code              String         @unique
+  type              CouponType
+  value             Decimal        @db.Decimal(10, 2)
+  maxUsage          Int?
+  perUserLimit      Int?
+  usedCount         Int            @default(0)
+  validFrom         DateTime?
+  validTo           DateTime?
+  isActive          Boolean        @default(true)
+  appliesToAllPlans Boolean        @default(true)
+  planIds           Int[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  subscriptions     Subscription[]
 }
 
 model Payment {
@@ -622,4 +642,10 @@ enum DeveloperStatus {
   PENDING
   APPROVED
   DECLINED
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+  TRIAL
 }

@@ -69,7 +69,8 @@ export default function PricingList({ plans, userId }: PricingListProps) {
         <PayPalSubscriptionModal 
           plan={selectedPlan} 
           isOpen={isModalOpen} 
-          onClose={handleCloseModal} 
+          onClose={handleCloseModal}
+          userId={userId}
         />
       </>
     </PayPalScriptProvider>

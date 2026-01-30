@@ -5,7 +5,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { getSubscriptionDetails } from "@/lib/paypal-api";
 import { revalidatePath } from "next/cache";
-import { SubscriptionStatus } from "@prisma/client";
+import { SubscriptionStatus, Prisma } from "@prisma/client";
+import { couponService } from "@/modules/coupon/coupon.service";
 
 export async function activateSubscription(paypalSubscriptionId: string) {
   const session = await getServerSession(authOptions);
@@ -39,6 +40,38 @@ export async function activateSubscription(paypalSubscriptionId: string) {
       return { success: false, error: `Unknown PayPal Plan ID: ${paypalPlanId}` };
     }
 
+    // 3. Check for Coupon in custom_id
+    let couponId: string | undefined;
+    let priceAtSubscription = dbPlan.priceMonthly ? new Prisma.Decimal(dbPlan.priceMonthly) : new Prisma.Decimal(0);
+
+    if (subDetails.custom_id) {
+        try {
+            const customData = JSON.parse(subDetails.custom_id);
+            if (customData.couponCode) {
+                const coupon = await couponService.getCouponByCode(customData.couponCode);
+                if (coupon) {
+                    couponId = coupon.id;
+                    // Increment usage
+                    await prisma.coupon.update({
+                        where: { id: coupon.id },
+                        data: { usedCount: { increment: 1 } }
+                    });
+
+                    // Calculate discounted price
+                    if (coupon.type === 'FIXED') {
+                        priceAtSubscription = priceAtSubscription.minus(coupon.value);
+                    } else if (coupon.type === 'PERCENTAGE') {
+                        const discount = priceAtSubscription.mul(coupon.value).div(100);
+                        priceAtSubscription = priceAtSubscription.minus(discount);
+                    }
+                    if (priceAtSubscription.lessThan(0)) priceAtSubscription = new Prisma.Decimal(0);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to parse custom_id", e);
+        }
+    }
+
     // 4. Upsert Subscription
     // Status mapping
     const paypalStatus = subDetails.status; // ACTIVE, APPROVAL_PENDING, etc.
@@ -53,15 +86,18 @@ export async function activateSubscription(paypalSubscriptionId: string) {
       update: {
         status,
         planId: dbPlan.id,
+        couponId: couponId, // Update coupon if changed (e.g. from pending to active with coupon)
+        priceAtSubscription, // Update price if it was calculated differently
         // Update dates if available
         nextBillingDate: subDetails.billing_info?.next_billing_time ? new Date(subDetails.billing_info.next_billing_time) : undefined,
       },
       create: {
         userId: session.user.id,
         planId: dbPlan.id,
+        couponId: couponId,
         paypalSubscriptionId,
         status,
-        priceAtSubscription: dbPlan.priceMonthly || 0,
+        priceAtSubscription,
         startDate: new Date(),
         nextBillingDate: subDetails.billing_info?.next_billing_time ? new Date(subDetails.billing_info.next_billing_time) : undefined,
       }
