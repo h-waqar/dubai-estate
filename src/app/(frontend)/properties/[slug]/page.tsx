@@ -1,7 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import "leaflet/dist/leaflet.css";
-import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getMediaUrl } from "@/lib/utils";
@@ -13,18 +12,14 @@ import {
   Bath,
   Maximize,
   Check,
-  User,
-  Phone,
-  Mail,
   Home,
-  Calendar,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { ImageGallery } from "@/components/properties/ImageGallery";
 import { PropertyLocationSection } from "@/components/property/PropertyLocationSection";
+import { AgentCard } from "@/components/property/AgentCard";
 import { ViewCounter } from "@/modules/property/components/ViewCounter";
 
 // Helper to format currency
@@ -294,45 +289,14 @@ export default async function PropertyPage({ params }: PageProps) {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Agent Card */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-muted overflow-hidden relative">
-                    {property.createdBy.image ? (
-                      <Image
-                        src={property.createdBy.image}
-                        alt={property.createdBy.name || "Agent"}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
-                        <User className="w-8 h-8" />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">
-                      {property.createdBy.name || "Estate Agent"}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Listing Agent
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <Button className="w-full" size="lg">
-                    <Phone className="w-4 h-4 mr-2" />
-                    Call Agent
-                  </Button>
-                  <Button variant="outline" className="w-full" size="lg">
-                    <Mail className="w-4 h-4 mr-2" />
-                    Email Agent
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <AgentCard
+              name={property.createdBy.name}
+              image={property.createdBy.image}
+              email={property.createdBy.email}
+              phone={property.createdBy.phoneNumber}
+              propertyRef={property.refNo}
+              propertySlug={property.slug}
+            />
 
             {/* Quick Summary */}
             <Card>
