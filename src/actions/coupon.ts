@@ -47,7 +47,7 @@ export async function createCouponAction(formData: FormData) {
 
   try {
       await couponService.createCoupon(validation.data);
-      revalidatePath("/admin/finance/coupons");
+      revalidatePath("/admin/coupons");
       return { success: true };
   } catch (e: any) {
       console.error("Create Coupon Error:", e);
@@ -74,7 +74,7 @@ export async function updateCouponAction(id: string, formData: FormData) {
 
   try {
       await couponService.updateCoupon(id, validation.data);
-      revalidatePath("/admin/finance/coupons");
+      revalidatePath("/admin/coupons");
       return { success: true };
   } catch (e: any) {
       console.error("Update Coupon Error:", e);
@@ -91,7 +91,7 @@ export async function deleteCouponAction(id: string) {
 
   try {
       await couponService.deleteCoupon(id);
-      revalidatePath("/admin/finance/coupons");
+      revalidatePath("/admin/coupons");
       return { success: true };
   } catch (e: any) {
        console.error("Delete Coupon Error:", e);

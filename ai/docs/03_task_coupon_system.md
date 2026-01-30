@@ -7,7 +7,7 @@
 - **Server Actions**: Created `src/actions/coupon.ts` for CRUD and validation.
 - **Store**: Created `src/stores/useCouponStore.ts` (Zustand).
 - **Admin UI**: 
-    - Created `src/app/(frontend)/admin/finance/coupons/page.tsx` for management.
+    - Created `src/app/(frontend)/admin/coupons/page.tsx` for management.
     - Created `CouponTable.tsx` and `CouponFormModal.tsx`.
 - **User UI**: 
     - Updated `PayPalSubscriptionModal.tsx` to include coupon input and display logic.
@@ -22,7 +22,7 @@
 - `src/validators/coupon.ts` (Created)
 - `src/actions/coupon.ts` (Created)
 - `src/stores/useCouponStore.ts` (Created)
-- `src/app/(frontend)/admin/finance/coupons/page.tsx` (Created)
+- `src/app/(frontend)/admin/coupons/page.tsx` (Created)
 - `src/components/admin/finance/CouponTable.tsx` (Created)
 - `src/components/admin/finance/CouponFormModal.tsx` (Created)
 - `src/modules/pricing/components/PayPalSubscriptionModal.tsx` (Modified)
