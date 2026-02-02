@@ -8,9 +8,9 @@ export const createCouponSchema = z.object({
   perUserLimit: z.number().int().positive().optional().nullable(),
   validFrom: z.date().optional().nullable(),
   validTo: z.date().optional().nullable(),
-  isActive: z.boolean().default(true),
-  appliesToAllPlans: z.boolean().default(true),
-  planIds: z.array(z.number()).default([]),
+  isActive: z.boolean(),
+  appliesToAllPlans: z.boolean(),
+  planIds: z.array(z.number()),
 });
 
 export const updateCouponSchema = createCouponSchema.partial();
