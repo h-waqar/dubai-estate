@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { SubscriptionStatus, Prisma, TransactionType, TransactionStatus } from "@prisma/client";
 import { couponService } from "@/modules/coupon/coupon.service";
 import { ledgerService } from "@/modules/finance/ledger.service";
+import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 
 export async function activateSubscription(paypalSubscriptionId: string) {
   const session = await getServerSession(authOptions);
@@ -165,6 +166,16 @@ export async function activateSubscription(paypalSubscriptionId: string) {
                     subscriptionId: subscription.id 
                 }
             });
+
+            // E. Grant Entitlements
+            await EntitlementService.grant(
+                session.user.id, 
+                'PROPERTY_SLOT', 
+                dbPlan.maxListings, 
+                subscription.id,
+                "SUBSCRIPTION",
+                tx
+            );
         }
 
         return { planName: dbPlan.name };

@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSubscriptionDetails, cancelSubscription, getSubscriptionTransactions, refundPayment } from "@/lib/paypal-api";
+import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -13,10 +14,14 @@ export async function syncSubscriptionStatus(userId: number, subscriptionId: str
     const status = details.status; // ACTIVE, SUSPENDED, CANCELLED, EXPIRED
 
     // Update Subscription Record
-    await prisma.subscription.update({
+    const updatedSub = await prisma.subscription.update({
       where: { paypalSubscriptionId: subscriptionId },
-      data: { status: status },
+      data: { status: status as any },
     });
+
+    if (status === "CANCELLED" || status === "EXPIRED" || status === "SUSPENDED") {
+      await EntitlementService.revoke(updatedSub.id);
+    }
 
     revalidatePath("/admin/subscribers");
     return { success: true, status };
@@ -33,13 +38,16 @@ export async function cancelUserSubscription(userId: number, subscriptionId: str
     await cancelSubscription(subscriptionId, "Admin cancelled via Dashboard");
     
     // Update Subscription Record
-    await prisma.subscription.update({
+    const updatedSub = await prisma.subscription.update({
       where: { paypalSubscriptionId: subscriptionId },
       data: { 
         status: "CANCELLED",
         endDate: new Date() // Set end date to now
       },
     });
+
+    // Revoke entitlements
+    await EntitlementService.revoke(updatedSub.id);
 
     revalidatePath("/admin/subscribers");
     return { success: true };

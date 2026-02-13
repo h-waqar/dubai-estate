@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { GovernanceService } from "@/modules/governance/governance.service";
 import FeaturedProperties from "./FeaturedProperties";
 import { Property } from "@/types/featured-properties";
 
@@ -6,9 +7,8 @@ export async function FeaturedPropertiesSection() {
     // 1. Fetch Featured Properties
     const properties = await prisma.property.findMany({
         where: {
-            published: true,
+            ...GovernanceService.getPublicFilter(),
             isFeatured: true,
-            status: "APPROVED",
         },
         take: 10,
         orderBy: {

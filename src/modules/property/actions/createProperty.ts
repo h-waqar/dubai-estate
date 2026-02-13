@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 import { createPropertyServerValidator } from "../validators/createProperty.validator";
 import * as propertyService from "../services/createProperty";
 import { authOptions } from "@/modules/user/routes/auth";
@@ -49,18 +50,22 @@ export async function createPropertyAction(formData: FormData) {
   }
 
   try {
-    let property = await propertyService.createProperty(
-      {
-        ...validation.data,
-        status: initialStatus,
-        published: false, 
-      },
-      session.user.id
-    );
-    property = JSON.parse(JSON.stringify(property));
+    const result = await prisma.$transaction(async (tx) => {
+      let property = await propertyService.createProperty(
+        {
+          ...validation.data,
+          status: initialStatus,
+          published: false, 
+        },
+        session.user.id,
+        tx
+      );
+      return JSON.parse(JSON.stringify(property));
+    });
+
     revalidatePath("/properties");
     revalidatePath("/account"); // Update quota in dashboard
-    return { success: true, property };
+    return { success: true, property: result };
   } catch (error) {
     console.error("Failed to create property:", error);
     return { success: false, error: String(error) };

@@ -1,12 +1,17 @@
 // src\modules\property\services\listProperties.ts
 "use server";
 import { prisma } from "@/lib/prisma";
+import { GovernanceService } from "@/modules/governance/governance.service";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export type PropertyFilters = {
   searchQuery?: string;
   propertyStatus?: string; // This actually maps to listingType (Sale/Rent)
   approvalStatus?: string; // This maps to DB status (APPROVED, PENDING_REVIEW)
+  editorialStatus?: string;
+  moderationStatus?: string;
+  systemStatus?: string;
+  published?: boolean;
   propertyType?: string;
   bedrooms?: string;
   priceRange?: string;
@@ -22,6 +27,10 @@ export async function listProperties(filters: PropertyFilters = {}) {
     searchQuery,
     propertyStatus,
     approvalStatus,
+    editorialStatus,
+    moderationStatus,
+    systemStatus,
+    published,
     propertyType,
     bedrooms,
     priceRange,
@@ -39,17 +48,21 @@ export async function listProperties(filters: PropertyFilters = {}) {
     where.createdById = userId;
   }
 
-  // Default to APPROVED if no specific status requested
+  // Governance Filter Logic
+  if (editorialStatus) where.editorialStatus = editorialStatus;
+  if (moderationStatus) where.moderationStatus = moderationStatus;
+  if (systemStatus) where.systemStatus = systemStatus;
+  if (published !== undefined) where.published = published;
+
+  // Backward compatibility with approvalStatus
   if (approvalStatus) {
     if (approvalStatus !== "ALL") {
       where.status = approvalStatus;
     }
-    // If "ALL", don't add status filter (for admin or agent dashboard)
-  } else {
-    // Only default to APPROVED if NOT filtering by userId (public view)
-    // If filtering by userId, we likely want to see all their properties unless specified otherwise
+  } else if (!editorialStatus && !moderationStatus && !systemStatus && published === undefined) {
+    // Only default to public filter if NOT filtering by userId and no specific governance filter provided
     if (!userId) {
-      where.status = "APPROVED";
+      Object.assign(where, GovernanceService.getPublicFilter());
     }
   }
 

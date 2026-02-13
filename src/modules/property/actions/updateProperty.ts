@@ -104,6 +104,11 @@ export async function updatePropertyAction(
 
         // Manage Transactions for atomicity
         const property = await prisma.$transaction(async (tx) => {
+            const editorialStatus = "SUBMITTED";
+            const moderationStatus = isAdmin ? "APPROVED" : "PENDING_REVIEW";
+            const publishedStatus = isAdmin ? true : false;
+            const legacyStatus = isAdmin ? "APPROVED" : "PENDING_REVIEW";
+
             // Update Core Fields
             const p = await tx.property.update({
                 where: { id: propertyId },
@@ -119,15 +124,13 @@ export async function updatePropertyAction(
                     furnishing: furnishing as any,
                     listingType: listingType as any,
                     description,
-                    status: updatedStatus as any,
-                    published: isAdmin ? undefined : false, // Reset published for non-admins
+                    status: legacyStatus as any,
+                    editorialStatus: editorialStatus as any,
+                    moderationStatus: moderationStatus as any,
+                    systemStatus: "ACTIVE", // Ensure it's active or keep current
+                    published: publishedStatus,
                     declinedReason: null, // Clear previous decline reasons
-                    developerId: finalDeveloperId ?? null, // Allow clearing if explicitly null? Or undefined to keep current? 
-                    // Validator returns undefined if not present. If user wants to clear, we need to handle that.
-                    // For now assuming replace.
-                    // Actually, if finalDeveloperId is undefined, it skips update.
-                    // If we want to support unlinking, we need more logic.
-                    // Assuming for now if passed, update it.
+                    developerId: finalDeveloperId ?? null,
                     ...(finalDeveloperId !== undefined && { developerId: finalDeveloperId }),
                     ...(finalProposedName !== undefined && { proposedDeveloperName: finalProposedName }),
                 }

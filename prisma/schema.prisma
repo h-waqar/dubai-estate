@@ -45,6 +45,7 @@ model User {
   Media                Media[]
   payments             Payment[]
   ledgerTransactions   LedgerTransaction[]
+  entitlementGrants    EntitlementGrant[]
   posts                Post[]
   profile              Profile?
   approvedProjects     Project[]         @relation("ProjectApprovals")
@@ -253,8 +254,12 @@ model Property {
   furnishing            FurnishingStatus     @default(UNFURNISHED)
   availability          PropertyAvailability @default(AVAILABLE)
   status                PropertyStatus       @default(DRAFT)
+  editorialStatus       EditorialStatus      @default(DRAFT)
+  moderationStatus      ModerationStatus     @default(PENDING_REVIEW)
+  systemStatus          SystemStatus         @default(ACTIVE)
   views                 Int                  @default(0)
   createdById           Int
+  /// @deprecated Use editorialStatus, moderationStatus, and systemStatus instead
   published             Boolean              @default(false)
   approvedById          Int?
   publishedAt           DateTime?
@@ -275,6 +280,9 @@ model Property {
   @@index([price])
   @@index([propertyTypeId])
   @@index([status])
+  @@index([editorialStatus])
+  @@index([moderationStatus])
+  @@index([systemStatus])
   @@index([availability])
   @@index([createdById])
 }
@@ -390,6 +398,9 @@ model Project {
   aboutContent          String?
   projectType           ProjectType        @default(CURRENT)
   status                ProjectStatus      @default(DRAFT)
+  editorialStatus       EditorialStatus    @default(DRAFT)
+  moderationStatus      ModerationStatus   @default(PENDING_REVIEW)
+  systemStatus          SystemStatus       @default(ACTIVE)
   isFeatured            Boolean            @default(false)
   views                 Int                @default(0)
   community             String?
@@ -411,6 +422,7 @@ model Project {
   developerId           Int
   createdById           Int
   approvedById          Int?
+  /// @deprecated Use editorialStatus, moderationStatus, and systemStatus instead
   published             Boolean            @default(false)
   publishedAt           DateTime?
   createdAt             DateTime           @default(now())
@@ -430,6 +442,9 @@ model Project {
   @@index([slug])
   @@index([projectType])
   @@index([status])
+  @@index([editorialStatus])
+  @@index([moderationStatus])
+  @@index([systemStatus])
   @@index([developerId])
   @@index([createdById])
 }
@@ -550,6 +565,25 @@ enum Role {
   MANAGER
   SUPPORT
   USER
+}
+
+enum EditorialStatus {
+  DRAFT
+  SUBMITTED
+  ARCHIVED
+}
+
+enum ModerationStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum SystemStatus {
+  ACTIVE
+  INACTIVE_BILLING
+  INACTIVE_QUOTA
 }
 
 enum MediaType {
@@ -678,4 +712,34 @@ enum TransactionStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum GrantStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+model EntitlementDefinition {
+  id          String             @id @default(cuid())
+  code        String             @unique // e.g., 'PROPERTY_SLOT'
+  description String?
+  grants      EntitlementGrant[]
+}
+
+model EntitlementGrant {
+  id           String                @id @default(cuid())
+  userId       Int
+  definitionId String
+  amount       Int // Capacity (e.g., 5 slots)
+  used         Int                   @default(0)
+  sourceType   String // "SUBSCRIPTION", "BONUS"
+  sourceId     String // Subscription.id
+  validFrom    DateTime              @default(now())
+  validTo      DateTime?
+  status       GrantStatus           @default(ACTIVE)
+  user         User                  @relation(fields: [userId], references: [id])
+  definition   EntitlementDefinition @relation(fields: [definitionId], references: [id])
+
+  @@index([userId, status])
 }

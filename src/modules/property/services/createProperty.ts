@@ -3,12 +3,14 @@
 import { prisma } from "@/lib/prisma";
 import { CreatePropertyInput } from "../types/property.types";
 import { generateUniqueSlug } from "@/utils/slug";
-import { PropertyStatus, ListingType } from "@prisma/client";
+import { PropertyStatus, ListingType, EditorialStatus, ModerationStatus, SystemStatus } from "@prisma/client";
 import { serializeDecimals } from "@/lib/serializeDecimal";
+import { EntitlementService, PrismaClientType } from "@/modules/entitlement/entitlement.service";
 
 export async function createProperty(
   input: CreatePropertyInput & { status?: string; published?: boolean },
-  createdById: number
+  createdById: number,
+  tx: PrismaClientType = prisma
 ) {
   const { coverImage, gallery, features, status, published, ...propertyData } = input;
   const slug = await generateUniqueSlug(propertyData.title);
@@ -27,7 +29,7 @@ export async function createProperty(
 
   if (finalProposedName && !finalDeveloperId) {
     // Check if developer exists to dedupe
-    const existingDev = await prisma.developer.findUnique({
+    const existingDev = await tx.developer.findUnique({
       where: { name: finalProposedName },
     });
 
@@ -35,13 +37,10 @@ export async function createProperty(
       if (existingDev.status === "APPROVED") {
         finalDeveloperId = existingDev.id;
         finalProposedName = undefined; // Linked directly
-      } else {
-        // Pending or Declined - keep as proposed name so it links later (or stays proposed)
-        // We don't need to re-create it.
       }
     } else {
       // Create new PENDING developer
-      await prisma.developer.create({
+      await tx.developer.create({
         data: {
           name: finalProposedName,
           slug: await generateUniqueSlug(finalProposedName), // Reusing slug util
@@ -53,7 +52,7 @@ export async function createProperty(
   }
 
   // Step 1: Create the property
-  const property = await prisma.property.create({
+  const property = await tx.property.create({
     data: {
       ...propertyData,
       slug,
@@ -62,18 +61,20 @@ export async function createProperty(
       developerId: finalDeveloperId,
       proposedDeveloperName: finalProposedName,
       status: (status as PropertyStatus) || PropertyStatus.PENDING_REVIEW,
-      published: published ?? false,
+      editorialStatus: EditorialStatus.SUBMITTED,
+      moderationStatus: status === "APPROVED" ? ModerationStatus.APPROVED : ModerationStatus.PENDING_REVIEW,
+      systemStatus: SystemStatus.ACTIVE,
+      published: published ?? (status === "APPROVED"),
       availability: propertyData.listingType === "OFF_PLAN" ? "OFFPLAN" : "AVAILABLE",
       listingType: propertyData.listingType as ListingType,
-      approvedById: status === "APPROVED" ? createdById : null, // Auto-approve if status is APPROVED? Maybe separate logic. 
-      // Actually checking schema... approvedById is optional. 
+      approvedById: status === "APPROVED" ? createdById : null,
       declinedReason: null,
     },
   });
 
-  // Step 2: Link media (depending on your schema usage)
+  // Step 2: Link media
   if (coverImage) {
-    await prisma.mediaUsage.create({
+    await tx.mediaUsage.create({
       data: {
         mediaId: coverImage,
         entityId: property.id,
@@ -84,7 +85,7 @@ export async function createProperty(
   }
 
   if (gallery?.length) {
-    await prisma.mediaUsage.createMany({
+    await tx.mediaUsage.createMany({
       data: gallery.map((id) => ({
         mediaId: id,
         entityId: property.id,
@@ -96,12 +97,20 @@ export async function createProperty(
 
   // Step 3: Link features
   if (features?.length) {
-    await prisma.propertyFeature.createMany({
+    await tx.propertyFeature.createMany({
       data: features.map((fid) => ({
         propertyId: property.id,
         featureId: fid,
       })),
     });
+  }
+
+  // Step 4: Consume Entitlement (if not admin)
+  const user = await tx.user.findUnique({ where: { id: createdById } });
+  const isAdmin = user?.roles.includes("ADMIN") || user?.roles.includes("SUPER_ADMIN");
+
+  if (!isAdmin) {
+      await EntitlementService.consume(createdById, "PROPERTY_SLOT", tx);
   }
 
   return serializeDecimals(property);

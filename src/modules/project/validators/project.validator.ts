@@ -122,6 +122,10 @@ export const projectFilterValidator = z.object({
     search: z.string().optional(),
     published: z.boolean().optional(),
     createdById: z.number().int().positive().optional(),
+    // New Governance Fields
+    editorialStatus: z.enum(["DRAFT", "SUBMITTED", "ARCHIVED"]).optional(),
+    moderationStatus: z.enum(["PENDING_REVIEW", "APPROVED", "REJECTED", "SUSPENDED"]).optional(),
+    systemStatus: z.enum(["ACTIVE", "INACTIVE_BILLING", "INACTIVE_QUOTA"]).optional(),
 });
 
 // Export types

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { GovernanceService } from "@/modules/governance/governance.service";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 import { FeaturedProjectGrid } from "./FeaturedProjectGrid";
 
@@ -6,8 +7,7 @@ export async function FeaturedProjectsSection() {
     // 1. Fetch Projects
     const projects = await prisma.project.findMany({
         where: {
-            status: "APPROVED",
-            published: true,
+            ...GovernanceService.getPublicFilter(),
         },
         take: 15,
         orderBy: {

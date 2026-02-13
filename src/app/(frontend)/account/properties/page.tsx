@@ -18,12 +18,37 @@ export default async function MyPropertiesPage() {
         limit: 1000,
     });
 
-    const getStatusColor = (status: string) => {
+    const getStatusInfo = (property: any) => {
+        const { editorialStatus, moderationStatus, systemStatus, status } = property;
+        
+        if (editorialStatus === "ARCHIVED") {
+            return { label: "Archived", color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" };
+        }
+        if (systemStatus === "INACTIVE_BILLING") {
+            return { label: "Hidden: Billing", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+        }
+        if (systemStatus === "INACTIVE_QUOTA") {
+            return { label: "Hidden: Quota", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+        }
+        if (moderationStatus === "PENDING_REVIEW") {
+            return { label: "Pending Review", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" };
+        }
+        if (moderationStatus === "REJECTED") {
+            return { label: "Rejected", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+        }
+        if (moderationStatus === "APPROVED" && editorialStatus === "SUBMITTED" && systemStatus === "ACTIVE") {
+            return { label: "Published", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" };
+        }
+        if (editorialStatus === "DRAFT") {
+            return { label: "Draft", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
+        }
+        
+        // Fallback to legacy status
         switch (status) {
-            case "APPROVED": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
-            case "PENDING_REVIEW": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
-            case "DECLINED": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
-            default: return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400";
+            case "APPROVED": return { label: "Approved", color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" };
+            case "PENDING_REVIEW": return { label: "Pending Review", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" };
+            case "DECLINED": return { label: "Declined", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+            default: return { label: status?.replace("_", " ") || "Unknown", color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400" };
         }
     };
 
@@ -57,50 +82,52 @@ export default async function MyPropertiesPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {properties.map((property: any) => (
-                                    <tr key={property.id} className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="relative w-24 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                                                    {(() => {
-                                                        const coverImage = property.mediaUsages?.find((mu: any) => mu.role === "COVER")?.media || property.mediaUsages?.[0]?.media || property.images?.[0];
-                                                        return coverImage?.url ? (
-                                                            <Image
-                                                                src={coverImage.url}
-                                                                alt={property.title}
-                                                                fill
-                                                                sizes="96px"
-                                                                className="object-fill"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                                <Eye className="w-6 h-6" />
-                                                            </div>
-                                                        );
-                                                    })()}
-                                                </div>
-                                                <div>
-                                                    <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{property.title}</div>
-                                                    <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
-                                                        <MapPin className="w-3 h-3" />
-                                                        {property.location}
+                                {properties.map((property: any) => {
+                                    const statusInfo = getStatusInfo(property);
+                                    return (
+                                        <tr key={property.id} className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="relative w-24 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                                                        {(() => {
+                                                            const coverImage = property.mediaUsages?.find((mu: any) => mu.role === "COVER")?.media || property.mediaUsages?.[0]?.media || property.images?.[0];
+                                                            return coverImage?.url ? (
+                                                                <Image
+                                                                    src={coverImage.url}
+                                                                    alt={property.title}
+                                                                    fill
+                                                                    sizes="96px"
+                                                                    className="object-fill"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                                    <Eye className="w-6 h-6" />
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{property.title}</div>
+                                                        <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
+                                                            <MapPin className="w-3 h-3" />
+                                                            {property.location}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 font-medium">
-                                            {formatPrice(property.price)}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <Badge variant="secondary" className={`font-normal ${getStatusColor(property.status)}`}>
-                                                {property.status.replace("_", " ")}
-                                            </Badge>
-                                            {property.status === "DECLINED" && property.declinedReason && (
-                                                <div className="text-xs text-red-500 mt-1 max-w-[200px] truncate" title={property.declinedReason}>
-                                                    Reason: {property.declinedReason}
-                                                </div>
-                                            )}
-                                        </td>
+                                            </td>
+                                            <td className="px-6 py-4 font-medium">
+                                                {formatPrice(property.price)}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant="secondary" className={`font-normal ${statusInfo.color}`}>
+                                                    {statusInfo.label}
+                                                </Badge>
+                                                {(property.moderationStatus === "REJECTED" || property.status === "DECLINED") && property.declinedReason && (
+                                                    <div className="text-xs text-red-500 mt-1 max-w-[200px] truncate" title={property.declinedReason}>
+                                                        Reason: {property.declinedReason}
+                                                    </div>
+                                                )}
+                                            </td>
                                         <td className="px-6 py-4 text-muted-foreground">
                                             {new Date(property.createdAt).toLocaleDateString()}
                                         </td>
@@ -120,7 +147,8 @@ export default async function MyPropertiesPage() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

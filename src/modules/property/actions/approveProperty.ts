@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { PropertyStatus } from "@prisma/client";
+import { EntitlementService } from "@/modules/entitlement/entitlement.service";
+import { GovernanceService } from "@/modules/governance/governance.service";
 
 export async function approvePropertyAction(
     propertyId: number,
@@ -21,26 +23,31 @@ export async function approvePropertyAction(
     }
 
     try {
-        const updateData: any = { status };
-
-        if (status === "APPROVED") {
-            updateData.approvedById = session.user.id;
-            // Also publish it so it's visible
-            updateData.published = true;
-            updateData.publishedAt = new Date();
-        } else if (status === "DECLINED") {
-            updateData.approvedById = session.user.id; // Track who declined it
-            updateData.declinedReason = declinedReason;
-            updateData.published = false;
-        }
-
-        await prisma.property.update({
+        const property = await prisma.property.findUnique({
             where: { id: propertyId },
-            data: updateData,
+            select: { createdById: true, status: true }
+        });
+
+        if (!property) return { success: false, error: "Property not found" };
+
+        await prisma.$transaction(async (tx) => {
+            if (status === "APPROVED") {
+                await GovernanceService.approveProperty(propertyId, session.user.id, tx);
+            } else if (status === "DECLINED") {
+                await GovernanceService.rejectProperty(propertyId, session.user.id, declinedReason, tx);
+                
+                // If it was moved TO Declined, release slot.
+                const user = await tx.user.findUnique({ where: { id: property.createdById } });
+                const ownerIsAdmin = user?.roles.includes("ADMIN") || user?.roles.includes("SUPER_ADMIN");
+                if (!ownerIsAdmin) {
+                    await EntitlementService.release(property.createdById, "PROPERTY_SLOT", tx);
+                }
+            }
         });
 
         revalidatePath("/admin/approvals");
         revalidatePath("/properties");
+        revalidatePath("/account");
         return { success: true };
     } catch (error) {
         console.error("Failed to approve property:", error);

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { cancelSubscription, getSubscriptionTransactions } from "@/lib/paypal-api";
+import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 import { sendEmail } from "@/lib/email";
 import { revalidatePath } from "next/cache";
 
@@ -55,6 +56,9 @@ export async function cancelMySubscription(subscriptionId?: string) {
         endDate: new Date()
       }
     });
+
+    // Revoke entitlements
+    await EntitlementService.revoke(sub.id);
 
     revalidatePath("/account/subscriptions");
     return { success: true };

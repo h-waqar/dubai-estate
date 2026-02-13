@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { GovernanceService } from "@/modules/governance/governance.service";
 import slugify from "slugify";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 import {
@@ -54,6 +55,8 @@ export class ProjectService {
                 developerId: data.developerId,
                 createdById: userId,
                 status: "PENDING_REVIEW",
+                editorialStatus: "SUBMITTED",
+                moderationStatus: "PENDING_REVIEW",
 
                 // Create floorplans
                 floorplans: {
@@ -248,6 +251,18 @@ export class ProjectService {
             where.createdById = filters.createdById;
         }
 
+        if (filters.editorialStatus) {
+            where.editorialStatus = filters.editorialStatus;
+        }
+
+        if (filters.moderationStatus) {
+            where.moderationStatus = filters.moderationStatus;
+        }
+
+        if (filters.systemStatus) {
+            where.systemStatus = filters.systemStatus;
+        }
+
         const projects = await prisma.project.findMany({
             where,
             include: {
@@ -301,29 +316,14 @@ export class ProjectService {
      * Approve project
      */
     static async approveProject(projectId: number, adminId: number) {
-        return prisma.project.update({
-            where: { id: projectId },
-            data: {
-                status: "APPROVED",
-                published: true,
-                publishedAt: new Date(),
-                approvedById: adminId,
-            },
-        });
+        return GovernanceService.approveProject(projectId, adminId);
     }
 
     /**
      * Decline project
      */
     static async declineProject(projectId: number, adminId: number, reason?: string) {
-        return prisma.project.update({
-            where: { id: projectId },
-            data: {
-                status: "DECLINED",
-                approvedById: adminId,
-                // Note: Add declinedReason field to schema if needed
-            },
-        });
+        return GovernanceService.rejectProject(projectId, adminId);
     }
 
     /**
@@ -346,6 +346,8 @@ export class ProjectService {
 
         // Reset status to PENDING_REVIEW on edit
         updateData.status = "PENDING_REVIEW";
+        updateData.editorialStatus = "SUBMITTED";
+        updateData.moderationStatus = "PENDING_REVIEW";
         updateData.published = false;
         updateData.approvedById = null;
         updateData.publishedAt = null;
