@@ -44,6 +44,7 @@ model User {
   createdDevelopers    Developer[]
   Media                Media[]
   payments             Payment[]
+  ledgerTransactions   LedgerTransaction[]
   posts                Post[]
   profile              Profile?
   approvedProjects     Project[]         @relation("ProjectApprovals")
@@ -648,4 +649,33 @@ enum CouponType {
   PERCENTAGE
   FIXED
   TRIAL
+}
+
+model LedgerTransaction {
+  id           String            @id @default(uuid())
+  userId       Int
+  type         TransactionType
+  status       TransactionStatus
+  amount       Decimal           @db.Decimal(10, 2)
+  currency     String            @default("USD")
+  provider     String
+  providerTxId String            @unique
+  metadata     Json?
+  occurredAt   DateTime
+  createdAt    DateTime          @default(now())
+
+  user         User              @relation(fields: [userId], references: [id])
+}
+
+enum TransactionType {
+  PAYMENT
+  REFUND
+  DISPUTE
+  CREDIT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
 }
