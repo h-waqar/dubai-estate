@@ -38,10 +38,10 @@ export default async function AdminProjectsPage() {
                             <TableHead>Name</TableHead>
                             <TableHead>Type</TableHead>
                             <TableHead>Developer</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Editorial</TableHead>
+                            <TableHead>Moderation</TableHead>
+                            <TableHead>System</TableHead>
                             <TableHead>Added By</TableHead>
-                            <TableHead>Approved By</TableHead>
-                            <TableHead>Published</TableHead>
                             <TableHead>Featured</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
@@ -50,28 +50,36 @@ export default async function AdminProjectsPage() {
                         {projects.map((project) => (
                             <TableRow key={project.id}>
                                 <TableCell className="font-medium">{project.name}</TableCell>
-                                <TableCell>{project.projectType}</TableCell>
-                                <TableCell>{project.developer.name}</TableCell>
+                                <TableCell className="text-xs">{project.projectType}</TableCell>
+                                <TableCell className="text-xs">{project.developer.name}</TableCell>
                                 <TableCell>
-                                    <span
-                                        className={`px-2 py-1 rounded text-xs ${project.status === "APPROVED"
-                                            ? "bg-green-100 text-green-800"
-                                            : project.status === "PENDING_REVIEW"
-                                                ? "bg-yellow-100 text-yellow-800"
-                                                : "bg-gray-100 text-gray-800"
-                                            }`}
-                                    >
-                                        {project.status}
+                                    <span className={`px-2 py-1 rounded text-[10px] font-medium ${
+                                        project.editorialStatus === "SUBMITTED" ? "bg-blue-100 text-blue-800" :
+                                        project.editorialStatus === "ARCHIVED" ? "bg-gray-100 text-gray-800" : "bg-slate-100 text-slate-800"
+                                    }`}>
+                                        {project.editorialStatus}
                                     </span>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="text-sm">{(project as any).createdBy?.name || "Unknown"}</div>
-                                    <div className="text-xs text-muted-foreground">{(project as any).createdBy?.email}</div>
+                                    <span className={`px-2 py-1 rounded text-[10px] font-medium ${
+                                        project.moderationStatus === "APPROVED" ? "bg-green-100 text-green-800" :
+                                        project.moderationStatus === "REJECTED" ? "bg-red-100 text-red-800" :
+                                        project.moderationStatus === "PENDING_REVIEW" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
+                                    }`}>
+                                        {project.moderationStatus}
+                                    </span>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="text-sm">{(project as any).approvedBy?.name || "-"}</div>
+                                    <span className={`px-2 py-1 rounded text-[10px] font-medium ${
+                                        project.systemStatus === "ACTIVE" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                    }`}>
+                                        {project.systemStatus}
+                                    </span>
                                 </TableCell>
-                                <TableCell>{project.published ? "Yes" : "No"}</TableCell>
+                                <TableCell>
+                                    <div className="text-xs">{(project as any).createdBy?.name || "Unknown"}</div>
+                                    <div className="text-[10px] text-muted-foreground">{(project as any).createdBy?.email}</div>
+                                </TableCell>
                                 <TableCell>
                                     <FeaturedToggle
                                         id={project.id}

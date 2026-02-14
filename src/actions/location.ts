@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { GovernanceService } from "@/modules/governance/governance.service";
 
 export async function searchLocations(query: string, listingType?: string) {
     // Map UI purpose to DB ListingType
@@ -14,8 +15,7 @@ export async function searchLocations(query: string, listingType?: string) {
     }
 
     const whereClause: any = {
-        status: "APPROVED",
-        published: true,
+        ...GovernanceService.getPublicFilter(),
     };
 
     if (typeFilter) {

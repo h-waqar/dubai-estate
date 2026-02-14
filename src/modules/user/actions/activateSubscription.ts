@@ -129,11 +129,11 @@ export async function activateSubscription(paypalSubscriptionId: string) {
 
         // C. Upsert Subscription
         const paypalStatus = subDetails.status; 
-        let status: SubscriptionStatus = "PENDING";
-        if (paypalStatus === "ACTIVE") status = "ACTIVE";
-        else if (paypalStatus === "SUSPENDED") status = "SUSPENDED";
-        else if (paypalStatus === "CANCELLED") status = "CANCELLED";
-        else if (paypalStatus === "EXPIRED") status = "EXPIRED";
+        if (paypalStatus !== "ACTIVE") {
+             throw new Error(`Subscription status is ${paypalStatus}, not ACTIVE.`);
+        }
+
+        const status: SubscriptionStatus = "ACTIVE";
 
         const subscription = await tx.subscription.upsert({
             where: { paypalSubscriptionId },
@@ -156,7 +156,7 @@ export async function activateSubscription(paypalSubscriptionId: string) {
             }
         });
 
-        // D. Update User (if Active)
+        // D. Update User (Confirmed Active)
         if (status === "ACTIVE") {
             await tx.user.update({
                 where: { id: session.user.id },

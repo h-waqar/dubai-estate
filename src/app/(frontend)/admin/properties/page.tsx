@@ -87,11 +87,11 @@ export default function AdminPropertiesPage() {
                             <TableRow>
                                 <TableHead>Property</TableHead>
                                 <TableHead>Type</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead>Editorial</TableHead>
+                                <TableHead>Moderation</TableHead>
+                                <TableHead>System</TableHead>
                                 <TableHead>Views</TableHead>
                                 <TableHead>Added By</TableHead>
-                                <TableHead>Approved By</TableHead>
                                 <TableHead>Featured</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -100,39 +100,42 @@ export default function AdminPropertiesPage() {
                             {properties.map((property) => (
                                 <TableRow key={property.id}>
                                     <TableCell>
-                                        <div className="font-medium">{property.title}</div>
-                                        <div className="text-sm text-muted-foreground">
+                                        <div className="font-medium text-xs md:text-sm">{property.title}</div>
+                                        <div className="text-[10px] md:text-xs text-muted-foreground">
                                             {property.location}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{property.propertyType?.name}</TableCell>
+                                    <TableCell className="text-xs">{property.propertyType?.name}</TableCell>
                                     <TableCell>
-                                        {new Intl.NumberFormat("en-AE", {
-                                            style: "currency",
-                                            currency: property.currency || "AED",
-                                        }).format(Number(property.price))}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span
-                                            className={`px-2 py-1 rounded text-xs ${property.status === "APPROVED"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : property.status === "PENDING_REVIEW"
-                                                        ? "bg-yellow-100 text-yellow-800"
-                                                        : "bg-gray-100 text-gray-800"
-                                                }`}
-                                        >
-                                            {property.status}
+                                        <span className={`px-2 py-1 rounded text-[10px] font-medium ${
+                                            property.editorialStatus === "SUBMITTED" ? "bg-blue-100 text-blue-800" :
+                                            property.editorialStatus === "ARCHIVED" ? "bg-gray-100 text-gray-800" : "bg-slate-100 text-slate-800"
+                                        }`}>
+                                            {property.editorialStatus}
                                         </span>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="text-sm font-medium">{property.views || 0}</div>
+                                        <span className={`px-2 py-1 rounded text-[10px] font-medium ${
+                                            property.moderationStatus === "APPROVED" ? "bg-green-100 text-green-800" :
+                                            property.moderationStatus === "REJECTED" ? "bg-red-100 text-red-800" :
+                                            property.moderationStatus === "PENDING_REVIEW" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
+                                        }`}>
+                                            {property.moderationStatus}
+                                        </span>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="text-sm">{property.createdBy?.name || "Unknown"}</div>
-                                        <div className="text-xs text-muted-foreground">{property.createdBy?.email}</div>
+                                        <span className={`px-2 py-1 rounded text-[10px] font-medium ${
+                                            property.systemStatus === "ACTIVE" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                                        }`}>
+                                            {property.systemStatus}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-xs">
+                                        {property.views || 0}
                                     </TableCell>
                                     <TableCell>
-                                        <div className="text-sm">{property.approvedBy?.name || "-"}</div>
+                                        <div className="text-xs">{property.createdBy?.name || "Unknown"}</div>
+                                        <div className="text-[10px] text-muted-foreground">{property.createdBy?.email}</div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center space-x-2">

@@ -217,6 +217,43 @@ export async function createPayPalPlan(productId: string, name: string, descript
 }
 
 /**
+ * Verify PayPal Webhook Signature
+ */
+export async function verifyWebhookSignature(
+  webhookId: string,
+  headers: Record<string, string | string[] | undefined>,
+  body: any
+) {
+  const token = await getAccessToken();
+
+  try {
+    const response = await axios.post(
+      `${PAYPAL_API}/v1/notifications/verify-webhook-signature`,
+      {
+        auth_algo: headers["paypal-auth-algo"],
+        cert_url: headers["paypal-cert-url"],
+        transmission_id: headers["paypal-transmission-id"],
+        transmission_sig: headers["paypal-transmission-sig"],
+        transmission_time: headers["paypal-transmission-time"],
+        webhook_id: webhookId,
+        webhook_event: body,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data.verification_status === "SUCCESS";
+  } catch (error: any) {
+    console.error("Webhook Verification Error:", error.response?.data || error.message);
+    return false;
+  }
+}
+
+/**
  * Deactivate a Billing Plan
  */
 export async function deactivatePayPalPlan(planId: string) {

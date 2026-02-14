@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getMediaUrl } from "@/lib/utils";
+import { GovernanceService } from "@/modules/governance/governance.service";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import {
@@ -91,10 +92,10 @@ export default async function PropertyPage({ params }: PageProps) {
     notFound();
   }
 
-  // Security Check: If not published, only allow Admin/Manager or Owner
-  const isPublished = property.status === "APPROVED" && property.published;
+  // Security Check: Using Tri-State Governance
+  const isVisible = GovernanceService.isVisible(property);
 
-  if (!isPublished) {
+  if (!isVisible) {
     const session = await getServerSession(authOptions);
     const user = session?.user;
 

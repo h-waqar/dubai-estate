@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import slugify from "slugify";
+import { GovernanceService } from "@/modules/governance/governance.service";
 
 export class DeveloperService {
     /**
@@ -45,7 +46,7 @@ export class DeveloperService {
             where: { id },
             include: {
                 projects: {
-                    where: { published: true },
+                    where: GovernanceService.getPublicFilter(),
                     orderBy: { createdAt: "desc" },
                 },
             },
@@ -60,7 +61,7 @@ export class DeveloperService {
             where: { slug },
             include: {
                 projects: {
-                    where: { published: true },
+                    where: GovernanceService.getPublicFilter(),
                     orderBy: { createdAt: "desc" },
                 },
             },

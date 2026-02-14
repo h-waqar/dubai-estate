@@ -1,6 +1,9 @@
 "use server";
 
 import { ProjectService } from "@/modules/project/services/project.service";
+import { GovernanceService } from "@/modules/governance/governance.service";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/modules/user/routes/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -79,6 +82,21 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
     if (!project) {
         notFound();
+    }
+
+    // Security Check: Using Tri-State Governance
+    const isVisible = GovernanceService.isVisible(project);
+
+    if (!isVisible) {
+        const session = await getServerSession(authOptions);
+        const user = session?.user;
+
+        const isAdmin = user?.roles?.includes("ADMIN") || user?.roles?.includes("MANAGER");
+        const isOwner = user?.id === project.createdById;
+
+        if (!isAdmin && !isOwner) {
+            notFound(); // Hide existence from unauthorized users
+        }
     }
 
     // Fetch media for this project

@@ -43,7 +43,6 @@ model User {
   leads                CallbackRequest[] @relation("AgentLeads")
   createdDevelopers    Developer[]
   Media                Media[]
-  payments             Payment[]
   ledgerTransactions   LedgerTransaction[]
   entitlementGrants    EntitlementGrant[]
   posts                Post[]
@@ -72,7 +71,6 @@ model Subscription {
   featuredCreditsUsed  Int                @default(0)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
-  payments             Payment[]
   plan                 PricingPlan        @relation(fields: [planId], references: [id])
   user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   coupon               Coupon?            @relation(fields: [couponId], references: [id])
@@ -99,23 +97,7 @@ model Coupon {
   subscriptions     Subscription[]
 }
 
-model Payment {
-  id                    String        @id @default(uuid())
-  userId                Int
-  subscriptionId        String?
-  amount                Decimal       @db.Decimal(10, 2)
-  currency              String        @default("USD")
-  providerTransactionId String        @unique
-  status                PaymentStatus @default(PENDING)
-  type                  String        @default("SUBSCRIPTION_PAYMENT")
-  metadata              Json?
-  createdAt             DateTime      @default(now())
-  subscription          Subscription? @relation(fields: [subscriptionId], references: [id])
-  user                  User          @relation(fields: [userId], references: [id])
 
-  @@index([userId])
-  @@index([subscriptionId])
-}
 
 model Account {
   id                Int     @id @default(autoincrement())
@@ -601,12 +583,7 @@ enum SubscriptionStatus {
   PENDING
 }
 
-enum PaymentStatus {
-  COMPLETED
-  PENDING
-  FAILED
-  REFUNDED
-}
+
 
 enum ContactMethod {
   Phone
@@ -706,6 +683,7 @@ enum TransactionType {
   REFUND
   DISPUTE
   CREDIT
+  INFO
 }
 
 enum TransactionStatus {

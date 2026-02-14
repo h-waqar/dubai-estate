@@ -230,12 +230,23 @@ export class ProjectService {
             where.developerId = filters.developerId;
         }
 
+        // Governance Filter Logic
+        if (filters.editorialStatus) where.editorialStatus = filters.editorialStatus;
+        if (filters.moderationStatus) where.moderationStatus = filters.moderationStatus;
+        if (filters.systemStatus) where.systemStatus = filters.systemStatus;
+        if (filters.published !== undefined) where.published = filters.published;
+
+        // Backward compatibility with status
         if (filters.status) {
             where.status = filters.status;
-        }
-
-        if (filters.published !== undefined) {
-            where.published = filters.published;
+        } else if (
+            !filters.editorialStatus &&
+            !filters.moderationStatus &&
+            !filters.systemStatus &&
+            filters.published === undefined &&
+            !filters.createdById // Don't apply public filter for user's own projects
+        ) {
+            Object.assign(where, GovernanceService.getPublicFilter());
         }
 
         if (filters.search) {
@@ -243,24 +254,11 @@ export class ProjectService {
                 { name: { contains: filters.search, mode: "insensitive" } },
                 { description: { contains: filters.search, mode: "insensitive" } },
                 { location: { contains: filters.search, mode: "insensitive" } },
-                { location: { contains: filters.search, mode: "insensitive" } },
             ];
         }
 
         if (filters.createdById) {
             where.createdById = filters.createdById;
-        }
-
-        if (filters.editorialStatus) {
-            where.editorialStatus = filters.editorialStatus;
-        }
-
-        if (filters.moderationStatus) {
-            where.moderationStatus = filters.moderationStatus;
-        }
-
-        if (filters.systemStatus) {
-            where.systemStatus = filters.systemStatus;
         }
 
         const projects = await prisma.project.findMany({

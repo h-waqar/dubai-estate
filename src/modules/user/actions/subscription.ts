@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { cancelSubscription, getSubscriptionTransactions } from "@/lib/paypal-api";
 import { EntitlementService } from "@/modules/entitlement/entitlement.service";
+import { SubscriptionService } from "@/modules/user/services/subscription.service";
 import { sendEmail } from "@/lib/email";
 import { revalidatePath } from "next/cache";
 
@@ -49,16 +50,8 @@ export async function cancelMySubscription(subscriptionId?: string) {
   try {
     await cancelSubscription(sub.paypalSubscriptionId, "User requested cancellation via Dashboard");
     
-    await prisma.subscription.update({
-      where: { id: sub.id },
-      data: { 
-        status: "CANCELLED",
-        endDate: new Date()
-      }
-    });
-
-    // Revoke entitlements
-    await EntitlementService.revoke(sub.id);
+    // Use SubscriptionService for consistent automation (Entitlements, Governance)
+    await SubscriptionService.cancel(sub.paypalSubscriptionId);
 
     revalidatePath("/account/subscriptions");
     return { success: true };
@@ -100,16 +93,11 @@ export async function getMyTransactions() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
-  // Fetch local payment history
-  // For now, if we don't have webhooks yet, we might want to sync first?
-  // Or just return what we have (initial payments).
-  // Strategy: Fetch payments linked to user.
-  
-  const payments = await prisma.payment.findMany({
+  // Fetch local payment history from the Ledger
+  const transactions = await prisma.ledgerTransaction.findMany({
     where: { userId: session.user.id },
-    orderBy: { createdAt: 'desc' },
-    include: { subscription: { include: { plan: true } } }
+    orderBy: { occurredAt: 'desc' },
   });
 
-  return { success: true, transactions: payments };
+  return { success: true, transactions };
 }

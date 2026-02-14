@@ -8,7 +8,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export default async function ProjectsPage() {
-    const projectsRaw = await ProjectService.listProjects({ published: true });
+    const projectsRaw = await ProjectService.listProjects({});
 
     // Map projects to include image URL
     const projects = projectsRaw.map((project: any) => {
