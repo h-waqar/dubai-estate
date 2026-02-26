@@ -8,6 +8,7 @@ import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 import { SubscriptionService } from "@/modules/user/services/subscription.service";
 import { sendEmail } from "@/lib/email";
 import { revalidatePath } from "next/cache";
+import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export async function getUserSubscriptionDetails() {
   const session = await getServerSession(authOptions);
@@ -99,5 +100,5 @@ export async function getMyTransactions() {
     orderBy: { occurredAt: 'desc' },
   });
 
-  return { success: true, transactions };
+  return { success: true, transactions: serializeDecimals(transactions) };
 }

@@ -53,17 +53,19 @@ export default async function PaymentHistoryPage() {
                 ) : (
                   transactions.map((tx: any) => (
                     <TableRow key={tx.id}>
-                      <TableCell>{format(new Date(tx.time), "MMM d, yyyy")}</TableCell>
+                      <TableCell>{format(new Date(tx.occurredAt), "MMM d, yyyy")}</TableCell>
                       <TableCell className="font-mono text-xs">{tx.id}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          tx.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                          tx.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 
+                          tx.status === 'FAILED' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
                         }`}>
                           {tx.status}
                         </span>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {tx.amount_with_breakdown?.gross_amount?.currency_code} {tx.amount_with_breakdown?.gross_amount?.value}
+                        {tx.currency} {Number(tx.amount).toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))

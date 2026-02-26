@@ -94,7 +94,7 @@ export default function SubscriptionActions({ userId, subscriptionId, status }: 
               Recent payments for subscription {subscriptionId}
             </DialogDescription>
           </DialogHeader>
-          <TransactionList subscriptionId={subscriptionId} />
+          <TransactionList userId={userId} />
         </DialogContent>
       </Dialog>
     </>
