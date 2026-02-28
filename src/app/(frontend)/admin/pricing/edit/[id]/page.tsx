@@ -22,14 +22,17 @@ export default async function EditPlanPage({ params }: EditPlanPageProps) {
     slug: plan.slug,
     description: plan.description || undefined,
     type: plan.type as "SUBSCRIPTION" | "ONE_TIME",
-    maxListings: plan.maxListings || undefined,
     priceMonthly: plan.priceMonthly ? Number(plan.priceMonthly) : 0,
     priceYearly: plan.priceYearly ? Number(plan.priceYearly) : 0,
     priceOneTime: plan.priceOneTime ? Number(plan.priceOneTime) : 0,
     isActive: plan.isActive,
     paypalPlanId: plan.paypalPlanId || undefined,
     paypalProductId: plan.paypalProductId || undefined,
+    entitlements: plan.entitlements.map((e: any) => ({ definitionId: e.definitionId, amount: e.amount }))
   };
+
+  const { getEntitlementDefinitionsAction } = await import("@/modules/pricing/actions/managePlan");
+  const definitions = await getEntitlementDefinitionsAction();
 
   return (
     <div className="space-y-6">
@@ -45,7 +48,7 @@ export default async function EditPlanPage({ params }: EditPlanPageProps) {
           <CardTitle>Edit {plan.name}</CardTitle>
         </CardHeader>
         <CardContent>
-          <PlanForm initialData={formattedPlan} isEditing={true} />
+          <PlanForm initialData={formattedPlan} definitions={definitions} isEditing={true} />
         </CardContent>
       </Card>
     </div>

@@ -24,10 +24,25 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 Seeding database...");
-  console.log("Prisma keys:", Object.keys(prisma));
-  console.log("Prisma PricingPlan:", prisma.pricingPlan);
 
-  // --- 1. Pricing Plans ---
+  // --- 0. Entitlement Definitions ---
+  const entitlementDefs = [
+    { code: "PROPERTY_SLOT", description: "Allows creating one property listing" },
+    { code: "PROJECT_SLOT", description: "Allows creating one project listing" },
+    { code: "PROPERTY_FEATURE_SLOT", description: "Allows featuring a property listing" },
+    { code: "PROJECT_FEATURE_SLOT", description: "Allows featuring a project listing" }
+  ];
+
+  for (const def of entitlementDefs) {
+    await prisma.entitlementDefinition.upsert({
+      where: { code: def.code },
+      update: def,
+      create: def,
+    });
+    console.log(`✅ Entitlement Definition: ${def.code}`);
+  }
+
+  console.log("Prisma keys:", Object.keys(prisma));
   // Fix potential slug conflicts (e.g. "Silver Package" having slug "silver-package" vs "silver")
   const slugMappings = {
     "Silver Package": "silver",

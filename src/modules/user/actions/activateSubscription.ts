@@ -35,6 +35,13 @@ export async function activateSubscription(paypalSubscriptionId: string) {
                 { slug: paypalPlanId === process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD ? "gold" : undefined },
                 { slug: paypalPlanId === process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER ? "silver" : undefined }
             ]
+        },
+        include: {
+            entitlements: {
+                include: {
+                    definition: true
+                }
+            }
         }
     });
 
@@ -168,14 +175,16 @@ export async function activateSubscription(paypalSubscriptionId: string) {
             });
 
             // E. Grant Entitlements
-            await EntitlementService.grant(
-                session.user.id, 
-                'PROPERTY_SLOT', 
-                dbPlan.maxListings, 
-                subscription.id,
-                "SUBSCRIPTION",
-                tx
-            );
+            for (const ent of dbPlan.entitlements) {
+              await EntitlementService.grant(
+                  session.user.id, 
+                  ent.definition.code, 
+                  ent.amount, 
+                  subscription.id,
+                  "SUBSCRIPTION",
+                  tx
+              );
+            }
         }
 
         return { planName: dbPlan.name };

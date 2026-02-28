@@ -8,18 +8,21 @@ import {
     ProjectFilterInput,
 } from "../validators/project.validator";
 
+import { EntitlementService } from "@/modules/entitlement/entitlement.service";
+
 export class ProjectService {
     /**
      * Create a new project with all relations
      */
-    static async createProject(userId: number, data: CreateProjectInput) {
+    static async createProject(userId: number, data: CreateProjectInput, isAdmin = false) {
+        return await prisma.$transaction(async (tx) => {
         // Generate unique slug
         let slug = slugify(data.name, { lower: true, strict: true });
         let counter = 1;
         let isUnique = false;
 
         while (!isUnique) {
-            const existing = await prisma.project.findUnique({
+            const existing = await tx.project.findUnique({
                 where: { slug },
             });
 
@@ -31,7 +34,7 @@ export class ProjectService {
             }
         }
 
-        const project = await prisma.project.create({
+        const project = await tx.project.create({
             data: {
                 name: data.name,
                 slug,
@@ -138,7 +141,7 @@ export class ProjectService {
 
         // Create MediaUsage entries for logo, cover, gallery
         if (data.logoId) {
-            await prisma.mediaUsage.create({
+            await tx.mediaUsage.create({
                 data: {
                     mediaId: data.logoId,
                     entityType: "PROJECT",
@@ -149,7 +152,7 @@ export class ProjectService {
         }
 
         if (data.coverImageId) {
-            await prisma.mediaUsage.create({
+            await tx.mediaUsage.create({
                 data: {
                     mediaId: data.coverImageId,
                     entityType: "PROJECT",
@@ -160,7 +163,7 @@ export class ProjectService {
         }
 
         for (const galleryId of data.galleryIds) {
-            await prisma.mediaUsage.create({
+            await tx.mediaUsage.create({
                 data: {
                     mediaId: galleryId,
                     entityType: "PROJECT",
@@ -170,7 +173,12 @@ export class ProjectService {
             });
         }
 
+        if (!isAdmin) {
+            await EntitlementService.consume(userId, "PROJECT_SLOT", tx);
+        }
+
         return serializeDecimals(project);
+        });
     }
 
     /**

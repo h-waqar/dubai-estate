@@ -20,6 +20,7 @@ export class PricingService {
     return prisma.pricingPlan.findUnique({
       where: { id },
       include: {
+        entitlements: true,
         _count: {
           select: { users: true }
         }
@@ -63,16 +64,25 @@ export class PricingService {
       }
     }
 
+    const { entitlements, ...restData } = data;
+
     return prisma.pricingPlan.create({
       data: {
-        ...data,
+        ...restData,
         type: data.type as PlanType,
-        maxListings: data.maxListings ?? 3,
         priceMonthly: data.priceMonthly?.toString(),
         priceYearly: data.priceYearly?.toString(),
         priceOneTime: data.priceOneTime?.toString(),
         paypalPlanId: paypalPlanId,
         paypalProductId: paypalProductId,
+        ...(entitlements && entitlements.length > 0 && {
+          entitlements: {
+            create: entitlements.map(e => ({
+              definitionId: e.definitionId,
+              amount: e.amount
+            }))
+          }
+        })
       },
     }).then(plan => {
         console.log("Prisma create result:", plan);
@@ -81,16 +91,27 @@ export class PricingService {
   }
 
   static async updatePlan(id: number, data: UpdatePricingInput) {
+    const { entitlements, ...restData } = data;
+    
     return prisma.pricingPlan.update({
       where: { id },
       data: {
-        ...data,
+        ...restData,
         type: data.type as PlanType,
         priceMonthly: data.priceMonthly?.toString(),
         priceYearly: data.priceYearly?.toString(),
         priceOneTime: data.priceOneTime?.toString(),
         paypalPlanId: data.paypalPlanId,
         paypalProductId: data.paypalProductId,
+        ...(entitlements && {
+          entitlements: {
+            deleteMany: {}, // replace all existing entitlements
+            create: entitlements.map(e => ({
+              definitionId: e.definitionId,
+              amount: e.amount
+            }))
+          }
+        })
       },
     });
   }

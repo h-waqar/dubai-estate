@@ -8,6 +8,7 @@ WORKDIR /app
 # We do this separately to take advantage of Docker's caching mechanism.
 # If package.json doesn't change, Docker skips "npm install" on re-builds!
 COPY package*.json ./
+COPY prisma ./prisma/
 
 # Install dependencies
 RUN npm install

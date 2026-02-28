@@ -198,8 +198,6 @@ model PricingPlan {
   slug                String         @unique
   description         String?
   type                PlanType       @default(SUBSCRIPTION)
-  maxListings         Int            @default(3)
-  maxFeaturedListings Int            @default(0)
   priceMonthly        Decimal?       @db.Decimal(10, 2)
   priceYearly         Decimal?       @db.Decimal(10, 2)
   priceOneTime        Decimal?       @db.Decimal(10, 2)
@@ -210,6 +208,19 @@ model PricingPlan {
   updatedAt           DateTime       @updatedAt
   subscriptions       Subscription[]
   users               User[]
+  entitlements        PlanEntitlement[]
+}
+
+model PlanEntitlement {
+  id           Int                   @id @default(autoincrement())
+  planId       Int
+  definitionId String                // References EntitlementDefinition.id
+  amount       Int                   // How many of this entitlement the plan gives
+
+  plan         PricingPlan           @relation(fields: [planId], references: [id], onDelete: Cascade)
+  definition   EntitlementDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, definitionId])
 }
 
 model Property {
@@ -700,10 +711,11 @@ enum GrantStatus {
 }
 
 model EntitlementDefinition {
-  id          String             @id @default(cuid())
-  code        String             @unique // e.g., 'PROPERTY_SLOT'
-  description String?
-  grants      EntitlementGrant[]
+  id               String               @id @default(cuid())
+  code             String               @unique // e.g., 'PROPERTY_SLOT'
+  description      String?
+  grants           EntitlementGrant[]
+  planEntitlements PlanEntitlement[]
 }
 
 model EntitlementGrant {

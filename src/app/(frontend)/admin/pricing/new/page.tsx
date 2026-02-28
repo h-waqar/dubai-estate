@@ -1,7 +1,11 @@
 import { PlanForm } from "@/modules/pricing/components/PlanForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function NewPlanPage() {
+import { getEntitlementDefinitionsAction } from "@/modules/pricing/actions/managePlan";
+
+export default async function NewPlanPage() {
+  const definitions = await getEntitlementDefinitionsAction();
+
   return (
     <div className="space-y-6">
       <div>
@@ -16,7 +20,7 @@ export default function NewPlanPage() {
           <CardTitle>Plan Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <PlanForm />
+          <PlanForm definitions={definitions} />
         </CardContent>
       </Card>
     </div>

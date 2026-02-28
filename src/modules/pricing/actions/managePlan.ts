@@ -1,31 +1,60 @@
 "use server";
 
 import { PricingService } from "../services/service";
-import { CreatePricingInput } from "../validators/createPricing.validator";
+import { createPricingSchema, CreatePricingInput } from "../validators/createPricing.validator";
 import { UpdatePricingInput } from "../validators/updatePricing.validator";
 import { revalidatePath } from "next/cache";
 
 export async function createPlanAction(data: CreatePricingInput) {
   try {
     console.log("Creating plan with data:", JSON.stringify(data, null, 2));
-    const plan = await PricingService.createPlan(data);
+    
+    // Validate on the server
+    const validatedData = createPricingSchema.parse(data);
+
+    // Check uniqueness early to provide clear errors
+    const { prisma } = await import("@/lib/prisma");
+    const existingName = await prisma.pricingPlan.findUnique({ where: { name: validatedData.name } });
+    if (existingName) return { success: false, error: `Plan with name '${validatedData.name}' already exists.` };
+    
+    const existingSlug = await prisma.pricingPlan.findUnique({ where: { slug: validatedData.slug } });
+    if (existingSlug) return { success: false, error: `slug '${validatedData.slug}' is already in use by another plan.` };
+
+    const plan = await PricingService.createPlan(validatedData);
     console.log("Plan created successfully:", plan);
     revalidatePath("/admin/pricing");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create plan:", error);
-    return { success: false, error: "Failed to create plan" };
+    if (error?.name === 'ZodError') {
+      return { success: false, error: "Validation failed: " + error.errors.map((e: any) => e.message).join(", ") };
+    }
+    return { success: false, error: error.message || "Failed to create plan. See server log." };
   }
 }
 
 export async function updatePlanAction(id: number, data: UpdatePricingInput) {
   try {
-    await PricingService.updatePlan(id, data);
+    const { prisma } = await import("@/lib/prisma");
+    const { updatePricingSchema } = await import("../validators/updatePricing.validator");
+    const validatedData = updatePricingSchema.parse(data);
+
+    // Uniqueness checks, excluding current plan
+    const existingName = await prisma.pricingPlan.findFirst({ where: { name: validatedData.name, id: { not: id } } });
+    if (existingName) return { success: false, error: `Plan with name '${validatedData.name}' already exists.` };
+    
+    const existingSlug = await prisma.pricingPlan.findFirst({ where: { slug: validatedData.slug, id: { not: id } } });
+    if (existingSlug) return { success: false, error: `slug '${validatedData.slug}' is already in use by another plan.` };
+
+    await PricingService.updatePlan(id, validatedData);
     revalidatePath("/admin/pricing");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update plan:", error);
-    return { success: false, error: "Failed to update plan" };
+    if (error?.name === 'ZodError') {
+      return { success: false, error: "Validation failed: " + error.errors.map((e: any) => e.message).join(", ") };
+    }
+    return { success: false, error: error.message || "Failed to update plan. See server log." };
   }
 }
 
@@ -45,5 +74,15 @@ export async function deletePlanAction(id: number) {
   } catch (error) {
     console.error("Failed to delete plan:", error);
     return { success: false, error: "Failed to delete plan" };
+  }
+}
+
+export async function getEntitlementDefinitionsAction() {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    return await prisma.entitlementDefinition.findMany();
+  } catch (error) {
+    console.error("Failed to fetch definitions", error);
+    return [];
   }
 }

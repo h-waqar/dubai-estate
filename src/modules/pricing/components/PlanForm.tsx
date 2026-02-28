@@ -31,10 +31,11 @@ import { Loader2 } from "lucide-react";
 
 interface PlanFormProps {
   initialData?: CreatePricingInput & { id?: number };
+  definitions?: any[];
   isEditing?: boolean;
 }
 
-export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
+export function PlanForm({ initialData, definitions = [], isEditing = false }: PlanFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -45,13 +46,13 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
       slug: "",
       description: "",
       type: "SUBSCRIPTION",
-      maxListings: 3,
       priceMonthly: 0,
       priceYearly: 0,
       priceOneTime: 0,
       isActive: true,
       paypalPlanId: "",
       paypalProductId: "",
+      entitlements: initialData?.entitlements || definitions.map(d => ({ definitionId: d.id, amount: 0 }))
     },
   });
 
@@ -196,27 +197,37 @@ export function PlanForm({ initialData, isEditing = false }: PlanFormProps) {
                 </FormItem>
               )}
             />
-             <FormField
-                control={form.control}
-                name="maxListings"
-                render={({ field }) => (
+            {definitions.map((def, idx) => {
+              // Ensure the field exists in the form state array
+              // If not mapped, we find its index or append it (for robustness, we trust the defaultValues mapping above).
+              const fieldIndex = form.watch("entitlements")?.findIndex(e => e.definitionId === def.id) ?? -1;
+              if (fieldIndex === -1) return null; // Fallback if missing
+
+              return (
+                <FormField
+                  key={def.id}
+                  control={form.control}
+                  name={`entitlements.${fieldIndex}.amount`}
+                  render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Max Listings Limit</FormLabel>
-                    <FormControl>
-                        <Input 
-                            type="number" 
-                            {...field} 
-                            value={field.value ?? ""}
-                            onChange={e => {
-                              const val = parseInt(e.target.value);
-                              field.onChange(isNaN(val) ? 0 : val);
-                            }}
+                      <FormLabel>{def.description || def.code}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={e => {
+                            const val = parseInt(e.target.value);
+                            field.onChange(isNaN(val) ? 0 : val);
+                          }}
                         />
-                    </FormControl>
-                    <FormMessage />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
-                )}
-            />
+                  )}
+                />
+              );
+            })}
           </div>
         )}
 

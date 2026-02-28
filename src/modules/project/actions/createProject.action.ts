@@ -108,8 +108,20 @@ export async function createProjectAction(formData: FormData) {
         // Validate data
         const validatedData = createProjectValidator.parse(data);
 
+        // Check quota before creating
+        const userRoles = session.user.roles || [];
+        const isAdmin = userRoles.includes('ADMIN') || userRoles.includes('SUPER_ADMIN');
+
+        if (!isAdmin) {
+             const { EntitlementService } = await import("@/modules/entitlement/entitlement.service");
+             const hasQuota = await EntitlementService.checkCapacity(user.id, "PROJECT_SLOT");
+             if (!hasQuota) {
+                  return { success: false, error: "You have reached your project limit. Please upgrade your plan." };
+             }
+        }
+
         // Create project
-        const project = await ProjectService.createProject(user.id, validatedData);
+        const project = await ProjectService.createProject(user.id, validatedData, isAdmin);
 
         return {
             success: true,
