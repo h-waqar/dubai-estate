@@ -59,12 +59,13 @@ export const aboutFeatureValidator = z.object({
     order: z.number().int().default(0),
 });
 
-// Main project creation validator
-export const createProjectValidator = z.object({
+// Base project creation object mapping
+export const createProjectBaseValidator = z.object({
     // Basic Info
     projectType: projectTypeEnum.default("CURRENT"),
     name: z.string().min(1, "Project name is required"),
-    developerId: z.number().int().positive("Developer is required"),
+    developerId: z.number().int().positive().optional(),
+    proposedDeveloperName: z.string().min(3).optional(),
     community: z.string().optional(),
     location: z.string().min(1, "Location is required"),
     address: z.string().optional(),
@@ -109,8 +110,13 @@ export const createProjectValidator = z.object({
     amenityIds: z.array(z.number().int().positive()).default([]),
 });
 
+export const createProjectValidator = createProjectBaseValidator.refine(data => data.developerId || data.proposedDeveloperName, {
+    message: "Either developerId or proposedDeveloperName is required",
+    path: ["developerId"],
+});
+
 // Update validator (all fields optional except id)
-export const updateProjectValidator = createProjectValidator.partial().extend({
+export const updateProjectValidator = createProjectBaseValidator.partial().extend({
     id: z.number().int().positive(),
 });
 

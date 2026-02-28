@@ -65,7 +65,7 @@ export default async function MyPropertiesPage() {
                 {properties.length === 0 ? (
                     <div className="p-6 text-center py-12">
                         <p className="text-muted-foreground">No properties found.</p>
-                        <Link href="/advertise" className="text-primary hover:underline mt-2 inline-block">
+                        <Link href="/advertise/property" className="text-primary hover:underline mt-2 inline-block">
                             Start your first listing &rarr;
                         </Link>
                     </div>

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import slugify from "slugify";
+import { DeveloperStatus } from "@prisma/client";
 import { GovernanceService } from "@/modules/governance/governance.service";
 
 export class DeveloperService {
@@ -27,8 +28,9 @@ export class DeveloperService {
     /**
      * Get all developers
      */
-    static async listDevelopers() {
+    static async listDevelopers(status?: DeveloperStatus) {
         return prisma.developer.findMany({
+            where: status ? { status } : undefined,
             orderBy: { name: "asc" },
             include: {
                 _count: {

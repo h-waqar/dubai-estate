@@ -28,7 +28,6 @@ export const useProjectStepStore = create<ProjectStepState>()(
                 { title: "Amenities", description: "Features and facilities" },
                 { title: "Account", description: "User registration" },
                 { title: "Review", description: "Review details" },
-                { title: "Payment", description: "Secure checkout" },
                 { title: "Success", description: "Submission complete" },
             ],
             step: 0,

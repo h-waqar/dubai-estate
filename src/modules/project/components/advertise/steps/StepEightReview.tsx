@@ -117,8 +117,8 @@ export default function StepEightReview() {
                 <Button onClick={prev} variant="outline">
                     Back
                 </Button>
-                <Button onClick={() => next()} className="gap-2">
-                    Proceed to Payment
+                <Button onClick={handleSubmit} disabled={isSubmitting} className="gap-2">
+                    {isSubmitting ? "Submitting..." : "Submit Project"}
                     <ArrowRight className="w-4 h-4" />
                 </Button>
             </div>

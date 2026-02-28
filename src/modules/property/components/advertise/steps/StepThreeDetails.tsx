@@ -12,7 +12,7 @@ import {
 import StepController from "./StepController";
 import { useStepStore } from "../../../stores/useStepStore";
 import { useAdvertiseFormStore } from "../../../stores/useAdvertiseForm";
-import DeveloperSelector from "../DeveloperSelector";
+import { DeveloperSelector } from "@/components/shared/DeveloperSelector";
 import { Building2, Bed, Bath, Maximize2, DollarSign, Tag, PenLine } from "lucide-react";
 import { stepThreeSchema } from "../../../validators/advertise-steps.validator";
 import { z } from "zod";
@@ -247,7 +247,18 @@ function StepThreeDetails({ }: StepThreeDetailsProps) {
 
         {/* Developer Selection */}
         <div className="md:col-span-2">
-          <DeveloperSelector />
+          <DeveloperSelector
+            value={{
+              developerId: useAdvertiseFormStore.getState().developerId,
+              proposedDeveloperName: useAdvertiseFormStore.getState().proposedDeveloperName,
+            }}
+            onChange={(val) => {
+              update({
+                developerId: val.developerId,
+                proposedDeveloperName: val.proposedDeveloperName,
+              });
+            }}
+          />
         </div>
       </div>
 

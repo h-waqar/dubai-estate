@@ -169,7 +169,7 @@ export default async function DashboardPage() {
                                     </div>
                                 </button>
                             </Link>
-                            <Link href="/advertise" className="block">
+                            <Link href="/advertise/property" className="block">
                                 <button className="w-full h-full p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left flex items-start gap-3">
                                     <PlusCircle className="h-5 w-5 text-green-500 mt-0.5" />
                                     <div>

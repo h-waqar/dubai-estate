@@ -40,7 +40,8 @@ export async function createProjectAction(formData: FormData) {
         // Parse JSON fields
         const data = {
             ...rawData,
-            developerId: Number(rawData.developerId),
+            developerId: rawData.developerId ? Number(rawData.developerId) : undefined,
+            proposedDeveloperName: rawData.proposedDeveloperName as string | undefined,
             priceFrom: rawData.priceFrom ? Number(rawData.priceFrom) : undefined,
             latitude: rawData.latitude ? Number(rawData.latitude) : undefined,
             longitude: rawData.longitude ? Number(rawData.longitude) : undefined,

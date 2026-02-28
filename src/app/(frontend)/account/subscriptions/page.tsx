@@ -27,7 +27,7 @@ export default async function SubscriptionsPage() {
               </p>
             </div>
             <Button asChild>
-              <Link href="/advertise">View Plans</Link>
+              <Link href="/pricing">View Plans</Link>
             </Button>
           </CardContent>
         </Card>

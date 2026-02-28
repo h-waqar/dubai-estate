@@ -84,13 +84,13 @@ export async function AgentDashboard({ session }: { session: any }) {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <Link href="/advertise">
+                        <Link href="/advertise/property">
                             <DropdownMenuItem className="cursor-pointer">
                                 <Building2 className="w-4 h-4 mr-2" />
                                 New Property
                             </DropdownMenuItem>
                         </Link>
-                        <Link href="/advertise/project">
+                        <Link href="/advertise/projects">
                             <DropdownMenuItem className="cursor-pointer">
                                 <LayoutTemplate className="w-4 h-4 mr-2" />
                                 New Project
@@ -132,7 +132,7 @@ export async function AgentDashboard({ session }: { session: any }) {
                         {properties.length === 0 ? (
                             <div className="p-6 text-center py-12">
                                 <p className="text-muted-foreground">No properties found.</p>
-                                <Link href="/advertise" className="text-primary hover:underline mt-2 inline-block">
+                                <Link href="/advertise/property" className="text-primary hover:underline mt-2 inline-block">
                                     Start your first listing &rarr;
                                 </Link>
                             </div>
@@ -229,7 +229,7 @@ export async function AgentDashboard({ session }: { session: any }) {
                         {projects.length === 0 ? (
                             <div className="p-6 text-center py-12">
                                 <p className="text-muted-foreground">No projects found.</p>
-                                <Link href="/advertise/project" className="text-primary hover:underline mt-2 inline-block">
+                                <Link href="/advertise/projects" className="text-primary hover:underline mt-2 inline-block">
                                     Start your first project listing &rarr;
                                 </Link>
                             </div>
@@ -300,7 +300,7 @@ export async function AgentDashboard({ session }: { session: any }) {
                                                                 <Eye className="w-4 h-4" />
                                                             </Button>
                                                         </Link>
-                                                        <Link href={`/advertise/project/edit/${project.id}`}>
+                                                        <Link href={`/advertise/projects/edit/${project.id}`}>
                                                             <Button variant="outline" size="sm" className="h-8 gap-2">
                                                                 <Edit2 className="w-3.5 h-3.5" />
                                                                 Edit

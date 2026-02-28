@@ -401,7 +401,8 @@ model Project {
   progressPercentage    Int?
   progressStatus        String?
   progressImage         String?
-  developerId           Int
+  developerId           Int?
+  proposedDeveloperName String?
   createdById           Int
   approvedById          Int?
   /// @deprecated Use editorialStatus, moderationStatus, and systemStatus instead
@@ -414,7 +415,7 @@ model Project {
   paymentPlan           PaymentPlanStage[]
   approvedBy            User?              @relation("ProjectApprovals", fields: [approvedById], references: [id])
   createdBy             User               @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  developer             Developer          @relation(fields: [developerId], references: [id])
+  developer             Developer?         @relation(fields: [developerId], references: [id])
   faqs                  ProjectFAQ[]
   features              ProjectFeature[]
   floorplans            ProjectFloorplan[]

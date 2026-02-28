@@ -11,7 +11,6 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-    CommandSeparator,
 } from "@/components/ui/command";
 import {
     Popover,
@@ -20,20 +19,28 @@ import {
 } from "@/components/ui/popover";
 import { getDevelopers } from "@/modules/admin/actions/developer.actions";
 import { DeveloperStatus } from "@prisma/client";
-import { useAdvertiseFormStore } from "../../stores/useAdvertiseForm";
 
 interface Developer {
     id: number;
     name: string;
 }
 
-export default function DeveloperSelector() {
+export interface DeveloperSelectorProps {
+    value?: {
+        developerId?: number;
+        proposedDeveloperName?: string;
+    };
+    onChange: (value: { developerId?: number; proposedDeveloperName?: string }) => void;
+}
+
+export function DeveloperSelector({ value, onChange }: DeveloperSelectorProps) {
     const [open, setOpen] = useState(false);
     const [developers, setDevelopers] = useState<Developer[]>([]);
     const [loading, setLoading] = useState(false);
     const [inputValue, setInputValue] = useState("");
 
-    const { developerId, proposedDeveloperName, update } = useAdvertiseFormStore();
+    const developerId = value?.developerId;
+    const proposedDeveloperName = value?.proposedDeveloperName;
 
     useEffect(() => {
         const fetchDevelopers = async () => {
@@ -58,20 +65,17 @@ export default function DeveloperSelector() {
         );
 
         if (selectedDev) {
-            update({
+            onChange({
                 developerId: selectedDev.id,
                 proposedDeveloperName: undefined,
             });
-        } else {
-            // Logic for new proposal handled via specific click, but if they enter text and hit enter/click?
-            // Since CommandItem value is usually lowercase, we use inputValue for the real name
         }
         setOpen(false);
     };
 
     const handleCreateProposal = () => {
         if (inputValue.trim().length < 3) return;
-        update({
+        onChange({
             developerId: undefined,
             proposedDeveloperName: inputValue.trim(),
         });
@@ -129,6 +133,7 @@ export default function DeveloperSelector() {
                                         )}
                                     </div>
                                 </CommandEmpty>
+
                                 <CommandGroup heading="Approved Developers">
                                     {developers.map((dev) => (
                                         <CommandItem
@@ -147,6 +152,18 @@ export default function DeveloperSelector() {
                                         </CommandItem>
                                     ))}
                                 </CommandGroup>
+                                
+                                {inputValue.length > 2 && !developers.some(dev => dev.name.toLowerCase() === inputValue.toLowerCase()) && (
+                                     <CommandGroup heading="New Proposal">
+                                        <div
+                                            className="cursor-pointer hover:bg-accent hover:text-accent-foreground p-2 text-sm rounded-sm flex flex-col gap-1 mx-1"
+                                            onClick={handleCreateProposal}
+                                        >
+                                            <span className="font-medium text-primary">Propose "{inputValue}"</span>
+                                            <span className="text-xs text-muted-foreground">Submit for admin review</span>
+                                        </div>
+                                    </CommandGroup>
+                                )}
                             </CommandList>
                         </Command>
                     </PopoverContent>
@@ -158,7 +175,7 @@ export default function DeveloperSelector() {
                         <div className="flex flex-col gap-1">
                             <p className="font-semibold">Pending Approval</p>
                             <p className="text-xs opacity-90">
-                                "{proposedDeveloperName}" will be reviewed by an admin. Your property will remain unlinked until approved.
+                                "{proposedDeveloperName}" will be reviewed by an admin. Your project will remain unlinked until approved.
                             </p>
                         </div>
                     </div>

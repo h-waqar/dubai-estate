@@ -182,7 +182,8 @@ export async function activateSubscription(paypalSubscriptionId: string) {
     });
 
     revalidatePath("/account");
-    revalidatePath("/advertise");
+    revalidatePath("/advertise/property");
+    revalidatePath("/advertise/projects");
     
     return { success: true, plan: result.planName };
 

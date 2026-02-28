@@ -69,7 +69,7 @@ export default function AdminPropertiesPage() {
         <div className="container mx-auto py-8 px-4">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">All Properties</h1>
-                <Link href="/advertise">
+                <Link href="/advertise/property">
                     <Button>Add New Property</Button>
                 </Link>
             </div>

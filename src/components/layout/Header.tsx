@@ -31,8 +31,8 @@ const navigation: NavItem[] = [
   {
     title: "Add Listing",
     items: [
-      { name: "Property", href: "/advertise" },
-      { name: "Project", href: "/advertise/project" },
+      { name: "Property", href: "/advertise/property" },
+      { name: "Project", href: "/advertise/projects" },
     ],
   },
 

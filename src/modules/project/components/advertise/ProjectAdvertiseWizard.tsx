@@ -15,7 +15,6 @@ import StepFiveFloorplans from "./steps/StepFiveFloorplans";
 import StepSixAmenities from "./steps/StepSixAmenities";
 import StepSevenAccount from "./steps/StepSevenAccount";
 import StepEightReview from "./steps/StepEightReview";
-import StepNinePayment from "./steps/StepNinePayment";
 import StepNineSuccess from "./steps/StepNineSuccess";
 
 interface ProjectAdvertiseWizardProps {
@@ -34,7 +33,6 @@ const allSteps = [
     StepSixAmenities,
     StepSevenAccount,
     StepEightReview,
-    StepNinePayment,
     StepNineSuccess,
 ];
 

@@ -35,7 +35,7 @@ const footerSections: FooterSection[] = [
   {
     title: "Services",
     links: [
-      { name: "List Property", href: "/advertise" },
+      { name: "List Property", href: "/advertise/property" },
       { name: "Off-Plan Projects", href: "/projects" },
       { name: "Investment Guides", href: "/blogs" },
       { name: "Market Reports", href: "/blogs" },

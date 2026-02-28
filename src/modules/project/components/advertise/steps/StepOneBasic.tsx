@@ -16,11 +16,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { DeveloperSelector } from "@/components/shared/DeveloperSelector";
 
 const stepOneSchema = z.object({
     projectType: z.enum(["FUTURE", "CURRENT", "PAST"]),
     name: z.string().min(1, "Project name is required"),
-    developerId: z.coerce.number().positive("Please select a developer"),
     community: z.string().optional(),
     location: z.string().min(1, "Location is required"),
     address: z.string().optional(),
@@ -44,7 +44,6 @@ export default function StepOneBasic({ developers }: { developers: any[] }) {
         defaultValues: {
             projectType: store.projectType,
             name: store.name,
-            developerId: store.developerId,
             community: store.community,
             location: store.location,
             address: store.address,
@@ -53,9 +52,11 @@ export default function StepOneBasic({ developers }: { developers: any[] }) {
     });
 
     const projectType = watch("projectType");
-    const developerId = watch("developerId");
 
     const onSubmit = (data: any) => {
+        if (!store.developerId && !store.proposedDeveloperName) {
+            return; // Prevent submission if both are empty
+        }
         store.update(data);
         next();
     };
@@ -99,24 +100,20 @@ export default function StepOneBasic({ developers }: { developers: any[] }) {
 
                 {/* Developer */}
                 <div>
-                    <Label htmlFor="developerId">Developer *</Label>
-                    <Select
-                        value={developerId?.toString()}
-                        onValueChange={(value) => setValue("developerId", Number(value))}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select developer" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {developers.map((dev) => (
-                                <SelectItem key={dev.id} value={dev.id.toString()}>
-                                    {dev.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    {errors.developerId && (
-                        <p className="text-sm text-red-500 mt-1">{errors.developerId.message}</p>
+                    <DeveloperSelector
+                        value={{
+                            developerId: store.developerId,
+                            proposedDeveloperName: store.proposedDeveloperName,
+                        }}
+                        onChange={(val) => {
+                            store.update({
+                                developerId: val.developerId,
+                                proposedDeveloperName: val.proposedDeveloperName,
+                            });
+                        }}
+                    />
+                    {!store.developerId && !store.proposedDeveloperName && (
+                        <p className="text-sm text-red-500 mt-1">Please select or propose a developer</p>
                     )}
                 </div>
 

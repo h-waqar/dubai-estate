@@ -62,7 +62,8 @@ interface ProjectAdvertiseFormState {
     // Step 1: Basic Info
     projectType: "FUTURE" | "CURRENT" | "PAST";
     name: string;
-    developerId: number | undefined;
+    developerId?: number;
+    proposedDeveloperName?: string;
     community: string;
     location: string;
     address: string;
@@ -119,18 +120,6 @@ interface ProjectAdvertiseFormState {
     password?: string;
     repeatPassword?: string;
 
-    // Step 9: Payment
-    paymentMethod?: "card" | "paypal" | "pay-later";
-    cardholderName?: string;
-    cardNumber?: string;
-    expiryDate?: string;
-    cvv?: string;
-    billingAddress1?: string;
-    billingAddress2?: string;
-    billingCity?: string;
-    billingState?: string;
-    billingPostalCode?: string;
-
     // Methods
     update: (data: Partial<ProjectAdvertiseFormState>) => void;
     reset: () => void;
@@ -154,6 +143,7 @@ const initialState = {
     projectType: "CURRENT" as const,
     name: "",
     developerId: undefined,
+    proposedDeveloperName: undefined,
     community: "",
     location: "",
     address: "",
@@ -193,16 +183,6 @@ const initialState = {
     phone: "",
     userType: "DEVELOPER" as const,
     repeatPassword: "",
-    paymentMethod: "card" as const,
-    cardholderName: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    billingAddress1: "",
-    billingAddress2: "",
-    billingCity: "",
-    billingState: "",
-    billingPostalCode: "",
 };
 
 export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(

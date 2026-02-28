@@ -25,7 +25,7 @@ export default async function AdminProjectsPage() {
                     <Link href="/admin/project-approvals">
                         <Button variant="outline">Pending Approvals</Button>
                     </Link>
-                    <Link href="/advertise/project">
+                    <Link href="/advertise/projects">
                         <Button>Add New Project</Button>
                     </Link>
                 </div>
@@ -51,7 +51,7 @@ export default async function AdminProjectsPage() {
                             <TableRow key={project.id}>
                                 <TableCell className="font-medium">{project.name}</TableCell>
                                 <TableCell className="text-xs">{project.projectType}</TableCell>
-                                <TableCell className="text-xs">{project.developer.name}</TableCell>
+                                <TableCell className="text-xs">{project.developer?.name || project.proposedDeveloperName || "Unknown"}</TableCell>
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded text-[10px] font-medium ${
                                         project.editorialStatus === "SUBMITTED" ? "bg-blue-100 text-blue-800" :
