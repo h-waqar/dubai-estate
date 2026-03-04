@@ -17,7 +17,15 @@ async function main() {
       status: SubscriptionStatus.ACTIVE,
     },
     include: {
-      plan: true,
+      plan: {
+        include: {
+            entitlements: {
+                include: {
+                    definition: true
+                }
+            }
+        }
+      },
       user: true,
     },
   });
@@ -77,14 +85,18 @@ async function main() {
 
     const usedSoFar = alreadyUsed._sum.used || 0;
     const remainingToAssign = Math.max(0, totalProperties - usedSoFar);
-    const assignedUsed = Math.min(remainingToAssign, sub.plan.maxListings);
+
+    const propertyEntitlement = sub.plan.entitlements.find(e => e.definition.code === "PROPERTY_SLOT");
+    const maxListings = propertyEntitlement ? propertyEntitlement.amount : 0;
+
+    const assignedUsed = Math.min(remainingToAssign, maxListings);
 
     // Create grant
     await prisma.entitlementGrant.create({
       data: {
         userId: sub.userId,
         definitionId: propertySlotDef.id,
-        amount: sub.plan.maxListings,
+        amount: maxListings,
         used: assignedUsed,
         sourceId: sub.id,
         sourceType: "SUBSCRIPTION",
@@ -92,7 +104,7 @@ async function main() {
       },
     });
 
-    console.log(`  ✅ Granted ${sub.plan.maxListings} property slots (Used: ${assignedUsed}).`);
+    console.log(`  ✅ Granted ${maxListings} property slots (Used: ${assignedUsed}).`);
   }
 
   console.log("✨ Backfill completed!");

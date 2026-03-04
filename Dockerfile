@@ -1,6 +1,9 @@
 # Use Node.js version 20 (Lightweight version based on Alpine Linux)
 FROM node:20-alpine
 
+# Required for Next.js SWC/Turbopack binaries on Alpine Linux
+RUN apk update && apk add --no-cache libc6-compat
+
 # Set the working directory inside the container (like 'cd /app')
 WORKDIR /app
 
