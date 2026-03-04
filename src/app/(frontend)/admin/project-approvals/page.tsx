@@ -48,7 +48,7 @@ export default async function ProjectApprovalsPage() {
                             <div>
                                 <h2 className="text-xl font-semibold">{project.name}</h2>
                                 <p className="text-sm text-gray-500">
-                                    Type: {project.projectType} | Developer: {project.developer.name}
+                                Type: {project.projectType} | Developer: {project.developer?.name || "Unknown"}
                                 </p>
                                 <p className="text-sm text-gray-500">
                                     Submitted by: {project.createdBy.name} ({project.createdBy.email})

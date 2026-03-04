@@ -29,7 +29,10 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface PricingAdminListProps {
-    initialPlans: (PricingPlan & { _count: { users: number } })[];
+    initialPlans: (PricingPlan & { 
+      _count: { users: number },
+      entitlements?: { amount: number, definition: { code: string } }[]
+    })[];
 }
 
 export default function PricingAdminList({ initialPlans }: PricingAdminListProps) {
@@ -104,7 +107,11 @@ export default function PricingAdminList({ initialPlans }: PricingAdminListProps
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    plans.map((plan) => (
+                                    plans.map((plan) => {
+                                        const propertySlotEntitlement = plan.entitlements?.find(e => e.definition.code === 'PROPERTY_SLOT');
+                                        const maxListings = propertySlotEntitlement ? propertySlotEntitlement.amount : (plan as any).maxListings || 0;
+                                        
+                                        return (
                                         <TableRow key={plan.id}>
                                             <TableCell className="font-medium">{plan.name}</TableCell>
                                             <TableCell><Badge variant="outline">{plan.type}</Badge></TableCell>
@@ -118,7 +125,7 @@ export default function PricingAdminList({ initialPlans }: PricingAdminListProps
                                                     ? `AED ${Number(plan.priceYearly).toLocaleString()}` 
                                                     : "-"}
                                             </TableCell>
-                                            <TableCell className="text-center">{plan.maxListings}</TableCell>
+                                            <TableCell className="text-center">{maxListings}</TableCell>
                                             <TableCell className="text-center">{plan._count?.users || 0}</TableCell>
                                             <TableCell>
                                                 <div className="flex justify-center">
@@ -152,7 +159,8 @@ export default function PricingAdminList({ initialPlans }: PricingAdminListProps
                                                 </div>
                                             </TableCell>
                                         </TableRow>
-                                    ))
+                                        );
+                                    })
                                 )}
                             </TableBody>
                         </Table>

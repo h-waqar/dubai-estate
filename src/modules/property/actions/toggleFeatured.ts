@@ -26,7 +26,13 @@ export async function toggleFeatured(propertyId: number) {
      // Feature: Check quota
      const user = await prisma.user.findUnique({
         where: { id: session.user.id },
-        include: { pricingPlan: true }
+        include: { 
+            pricingPlan: true,
+            entitlementGrants: {
+                include: { definition: true },
+                where: { status: 'ACTIVE' }
+            }
+        }
      });
      
      const subscription = await prisma.subscription.findFirst({
@@ -46,7 +52,10 @@ export async function toggleFeatured(propertyId: number) {
         return { success: false, error: "No active subscription" };
      }
 
-     if (subscription.featuredCreditsUsed >= user.pricingPlan.maxFeaturedListings) {
+     const featuredSlotGrant = user.entitlementGrants.find(g => g.definition.code === 'FEATURED_PROPERTY');
+     const featuredLimit = featuredSlotGrant ? featuredSlotGrant.amount : 0;
+
+     if (subscription.featuredCreditsUsed >= featuredLimit) {
         return { success: false, error: "Featured quota exceeded" };
      }
 

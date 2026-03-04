@@ -5,13 +5,16 @@ export interface PricingPlan {
   name: string;
   slug: string;
   description: string | null;
-  maxListings: number;
   priceMonthly: any; // Decimal
   priceYearly: any; // Decimal
+  priceOneTime?: any; // Decimal
+  type?: any; // PlanType
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  entitlements?: any[];
   _count?: {
     users: number;
   };
 }
+

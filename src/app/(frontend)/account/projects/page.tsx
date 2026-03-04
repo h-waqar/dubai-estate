@@ -114,7 +114,7 @@ export default async function MyProjectsPage() {
                                                         </div>
                                                         {project.developer && (
                                                             <div className="text-xs text-primary mt-1">
-                                                                By {project.developer.name}
+                                                                By {project.developer?.name || "Unknown"}
                                                             </div>
                                                         )}
                                                     </div>

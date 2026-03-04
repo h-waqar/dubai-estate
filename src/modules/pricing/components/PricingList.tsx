@@ -26,8 +26,10 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useState } from "react";
 import { PayPalSubscriptionModal } from "./PayPalSubscriptionModal";
 
+import { PricingPlanWithEntitlements } from "./PricingCard";
+
 interface PricingListProps {
-  plans: PricingPlan[];
+  plans: PricingPlanWithEntitlements[];
   userId?: number | string | null;
 }
 

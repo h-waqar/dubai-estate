@@ -80,7 +80,7 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
                                 {/* Developer Badge (Top Left) */}
                                 <div className="absolute top-6 left-6 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-4 py-2 rounded-md z-10">
                                     <span className="text-xs font-bold uppercase tracking-wider text-black dark:text-white">
-                                        {project.developer.name}
+                                        {project.developer?.name || "Unknown"}
                                     </span>
                                 </div>
 
@@ -128,7 +128,7 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
 
                                             {/* Developer Badge */}
                                             <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-black dark:text-white z-10">
-                                                {project.developer.name}
+                                                {project.developer?.name || "Unknown"}
                                             </div>
 
                                             {/* Content */}

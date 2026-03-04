@@ -1,18 +1,28 @@
 "use client";
 
-import { PricingPlan } from "@prisma/client";
+import { PricingPlan, PlanEntitlement, EntitlementDefinition } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+export type PricingPlanWithEntitlements = PricingPlan & { 
+  entitlements?: (PlanEntitlement & { definition: EntitlementDefinition })[] 
+};
+
 interface PricingCardProps {
-  plan: PricingPlan;
+  plan: PricingPlanWithEntitlements;
   userId?: number | string | null;
   onSubscribe: (plan: PricingPlan) => void;
 }
 
 export default function PricingCard({ plan, userId, onSubscribe }: PricingCardProps) {
   const router = useRouter();
+
+  const propertySlotEntitlement = plan.entitlements?.find(e => e.definition.code === 'PROPERTY_SLOT');
+  const maxListings = propertySlotEntitlement ? propertySlotEntitlement.amount : (plan as any).maxListings || 0;
+  
+  const featuredSlotEntitlement = plan.entitlements?.find(e => e.definition.code === 'FEATURED_PROPERTY');
+  const maxFeaturedListings = featuredSlotEntitlement ? featuredSlotEntitlement.amount : (plan as any).maxFeaturedListings || 0;
 
   return (
     <div className="flex flex-col p-6 bg-card border rounded-xl shadow-xs hover:shadow-md transition-shadow relative overflow-hidden h-full">
@@ -37,11 +47,11 @@ export default function PricingCard({ plan, userId, onSubscribe }: PricingCardPr
       <ul className="space-y-3 mb-8 flex-1">
         <li className="flex items-center gap-2 text-sm">
           <Check className="w-4 h-4 text-green-500" />
-          <span>{plan.maxListings} Listings Quota</span>
+          <span>{maxListings} Listings Quota</span>
         </li>
         <li className="flex items-center gap-2 text-sm">
           <Check className="w-4 h-4 text-green-500" />
-          <span>{plan.maxFeaturedListings} Featured Credits</span>
+          <span>{maxFeaturedListings} Featured Credits</span>
         </li>
         <li className="flex items-center gap-2 text-sm">
             <Check className="w-4 h-4 text-green-500" />

@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             project.name,
             project.location,
             project.community || '',
-            project.developer.name,
+            project.developer?.name || '',
             'Dubai Real Estate',
             'Property Development',
             'Luxury Apartments',
@@ -147,7 +147,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         }),
         developer: {
             "@type": "Organization",
-            name: project.developer.name,
+            name: project.developer?.name || "Unknown",
         },
         ...(project.handoverDate && {
             expectedCompletionDate: project.handoverDate,

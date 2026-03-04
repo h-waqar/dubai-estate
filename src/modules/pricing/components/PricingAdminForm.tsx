@@ -36,7 +36,6 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
       name: initialData.name,
       slug: initialData.slug,
       description: initialData.description || "",
-      maxListings: initialData.maxListings,
       priceMonthly: Number(initialData.priceMonthly),
       priceYearly: Number(initialData.priceYearly),
       isActive: initialData.isActive,
@@ -44,7 +43,6 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
       name: "",
       slug: "",
       description: "",
-      maxListings: 3,
       priceMonthly: 0,
       priceYearly: 0,
       isActive: true,
@@ -119,7 +117,7 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="priceMonthly"
@@ -139,19 +137,6 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Yearly Price (AED)</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="maxListings"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max Listings</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                 </FormControl>

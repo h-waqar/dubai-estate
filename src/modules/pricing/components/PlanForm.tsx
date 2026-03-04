@@ -52,7 +52,7 @@ export function PlanForm({ initialData, definitions = [], isEditing = false }: P
       isActive: true,
       paypalPlanId: "",
       paypalProductId: "",
-      entitlements: initialData?.entitlements || definitions.map(d => ({ definitionId: d.id, amount: 0 }))
+      entitlements: definitions.map(d => ({ definitionId: d.id, amount: 0 })) as any
     },
   });
 

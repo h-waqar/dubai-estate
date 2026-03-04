@@ -11,7 +11,11 @@ export async function UserDashboard({ session }: { session: any }) {
       properties: {
         select: { id: true, views: true }
       },
-      pricingPlan: true
+      pricingPlan: true,
+      entitlementGrants: {
+        include: { definition: true },
+        where: { status: 'ACTIVE' }
+      }
     }
   });
 
@@ -20,14 +24,18 @@ export async function UserDashboard({ session }: { session: any }) {
   const activeListings = user.properties.length;
   const totalViews = user.properties.reduce((sum, p) => sum + (p.views || 0), 0);
   const planName = user.pricingPlan?.name || "No Plan";
-  const limit = user.pricingPlan?.maxListings || 3;
+  
+  const propertySlotGrant = user.entitlementGrants.find(g => g.definition.code === 'PROPERTY_SLOT');
+  const limit = propertySlotGrant ? propertySlotGrant.amount : 0;
   
   // Fetch active subscription for quota usage
   const subscription = await prisma.subscription.findFirst({
       where: { userId: session.user.id, status: 'ACTIVE' }
   });
+  
+  const featuredSlotGrant = user.entitlementGrants.find(g => g.definition.code === 'FEATURED_PROPERTY');
   const featuredUsed = subscription?.featuredCreditsUsed || 0;
-  const featuredLimit = user.pricingPlan?.maxFeaturedListings || 0;
+  const featuredLimit = featuredSlotGrant ? featuredSlotGrant.amount : 0;
 
   const stats = [
     {
