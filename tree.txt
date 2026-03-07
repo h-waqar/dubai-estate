@@ -1,24 +1,30 @@
-prisma migrate deploy && ts-node --esm prisma/seed.ts &&
-
 .
+├── Dockerfile
+├── README.md
 ├── components.json
 ├── docker-compose.yml
-├── Dockerfile
-├── .dockerignore
-├── .env
-├── .env.example
 ├── eslint.config.mjs
-├── GEMINI.md
-├── .gitignore
-├── .mcp.json
 ├── next.config.ts
-├── next-env.d.ts
 ├── package.json
-├── package-lock.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
 ├── postcss.config.mjs
 ├── prisma
+│   ├── migrations
+│   │   ├── 20260121000000_init_fresh
+│   │   ├── 20260123064507_start_new
+│   │   ├── 20260130194319_add_coupon_system
+│   │   ├── 20260205124440_add_ledger_transactions
+│   │   ├── 20260213123043_add_entitlements
+│   │   ├── 20260213170710_add_tri_state_governance
+│   │   ├── 20260214000627_add_info_to_transaction_type
+│   │   ├── 20260214124837_remove_legacy_payment_model
+│   │   ├── 20260226090657_add_project_proposed_developer
+│   │   └── migration_lock.toml
 │   ├── schema.prisma
-│   └── seed.ts
+│   ├── seed.ts
+│   └── seed_entitlements.ts
+├── prisma.config.ts
 ├── public
 │   ├── ai
 │   │   ├── dubai_amenity_infinity_pool_1766239097220.png
@@ -56,315 +62,38 @@ prisma migrate deploy && ts-node --esm prisma/seed.ts &&
 │   ├── next.svg
 │   ├── vercel.svg
 │   └── window.svg
-├── README.md
 ├── src
 │   ├── actions
 │   │   ├── auth.ts
+│   │   ├── coupon.ts
 │   │   ├── dashboard.ts
 │   │   └── location.ts
 │   ├── app
+│   │   ├── (frontend)
 │   │   ├── actions
-│   │   │   ├── contact.ts
-│   │   │   └── newsletter.ts
 │   │   ├── actions.ts
 │   │   ├── api
-│   │   │   ├── admin
-│   │   │   │   ├── secret
-│   │   │   │   │   └── route.ts
-│   │   │   │   └── users
-│   │   │   │       ├── [id]
-│   │   │   │       │   └── route.ts
-│   │   │   │       └── route.ts
-│   │   │   ├── auth
-│   │   │   │   ├── [...nextauth]
-│   │   │   │   │   └── route.ts
-│   │   │   │   └── register
-│   │   │   │       └── route.ts
-│   │   │   ├── categories
-│   │   │   │   ├── [id]
-│   │   │   │   │   └── route.ts
-│   │   │   │   └── route.ts
-│   │   │   ├── dev
-│   │   │   │   └── login
-│   │   │   │       └── route.ts
-│   │   │   ├── posts
-│   │   │   │   ├── [id]
-│   │   │   │   │   ├── duplicate
-│   │   │   │   │   │   └── route.ts
-│   │   │   │   │   ├── publish
-│   │   │   │   │   │   └── route.ts
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── public
-│   │   │   │   │   ├── route.ts
-│   │   │   │   │   └── [slug]
-│   │   │   │   │       └── route.ts
-│   │   │   │   └── route.ts
-│   │   │   ├── properties
-│   │   │   │   └── route.ts
-│   │   │   └── property-types
-│   │   │       ├── [id]
-│   │   │       │   └── route.ts
-│   │   │       └── route.ts
 │   │   ├── favicon.ico
-│   │   ├── (frontend)
-│   │   │   ├── about
-│   │   │   │   └── page.tsx
-│   │   │   ├── account
-│   │   │   │   ├── AccountForm.tsx
-│   │   │   │   ├── ChangePasswordForm.tsx
-│   │   │   │   ├── dashboard
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── layout.tsx
-│   │   │   │   ├── page.tsx
-│   │   │   │   ├── projects
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── properties
-│   │   │   │   │   ├── [id]
-│   │   │   │   │   │   └── edit
-│   │   │   │   │   │       └── page.tsx
-│   │   │   │   │   └── page.tsx
-│   │   │   │   └── subscriptions
-│   │   │   │       ├── history
-│   │   │   │       │   └── page.tsx
-│   │   │   │       └── page.tsx
-│   │   │   ├── admin
-│   │   │   │   ├── admins
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── approvals
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── blog
-│   │   │   │   │   ├── edit
-│   │   │   │   │   │   └── [id]
-│   │   │   │   │   │       └── page.tsx
-│   │   │   │   │   ├── new
-│   │   │   │   │   │   └── page.tsx
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── categories
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── dashboard
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── developers
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── features
-│   │   │   │   │   ├── FeatureClient.tsx
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── layout.tsx
-│   │   │   │   ├── media
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── page.tsx
-│   │   │   │   ├── pricing
-│   │   │   │   │   ├── edit
-│   │   │   │   │   │   └── [id]
-│   │   │   │   │   │       └── page.tsx
-│   │   │   │   │   ├── new
-│   │   │   │   │   │   └── page.tsx
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── products
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── project-approvals
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── projects
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── properties
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── property-types
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── revenue
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── settings
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── subscribers
-│   │   │   │   │   └── page.tsx
-│   │   │   │   └── users
-│   │   │   │       └── page.tsx
-│   │   │   ├── advertise
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── project
-│   │   │   │       ├── edit
-│   │   │   │       │   └── [id]
-│   │   │   │       │       ├── page.tsx
-│   │   │   │       │       └── ProjectEditWrapper.tsx
-│   │   │   │       └── page.tsx
-│   │   │   ├── (auth)
-│   │   │   │   ├── forgot-password
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── login
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── register
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── reset-password
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── verify-email
-│   │   │   │   │   └── page.tsx
-│   │   │   │   └── verify-email-sent
-│   │   │   │       └── page.tsx
-│   │   │   ├── blogs
-│   │   │   │   ├── actions.ts
-│   │   │   │   ├── page.tsx
-│   │   │   │   ├── readme.md
-│   │   │   │   └── [slug]
-│   │   │   │       ├── not-found.tsx
-│   │   │   │       └── page.tsx
-│   │   │   ├── contact
-│   │   │   │   └── page.tsx
-│   │   │   ├── for-rent
-│   │   │   │   └── page.tsx
-│   │   │   ├── for-sale
-│   │   │   │   └── page.tsx
-│   │   │   ├── lead
-│   │   │   │   └── page.tsx
-│   │   │   ├── media
-│   │   │   │   └── page.tsx
-│   │   │   ├── off-plan
-│   │   │   │   └── page.tsx
-│   │   │   ├── pricing
-│   │   │   │   └── page.tsx
-│   │   │   ├── projects
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [slug]
-│   │   │   │       └── page.tsx
-│   │   │   ├── properties
-│   │   │   │   ├── actions.ts
-│   │   │   │   ├── page.tsx
-│   │   │   │   └── [slug]
-│   │   │   │       └── page.tsx
-│   │   │   └── unauthorized
-│   │   │       └── page.tsx
 │   │   ├── globals.css
 │   │   ├── layout.tsx
 │   │   ├── page.tsx
 │   │   ├── select
-│   │   │   └── page.tsx
 │   │   └── styles
-│   │       ├── base.css
-│   │       ├── components.css
-│   │       ├── prose-styles.css
-│   │       ├── theme.css
-│   │       ├── tiptap-editor.css
-│   │       ├── utilities.css
-│   │       └── variables.css
 │   ├── components
-│   │   ├── account
-│   │   │   ├── accountLinks.ts
-│   │   │   ├── CancelSubscriptionButton.tsx
-│   │   │   ├── dashboard
-│   │   │   │   ├── AgentDashboard.tsx
-│   │   │   │   └── UserDashboard.tsx
-│   │   │   └── RefundRequestDialog.tsx
-│   │   ├── admin
-│   │   │   └── FeaturedToggle.tsx
-│   │   ├── auth
-│   │   │   ├── AuthLayout.tsx
-│   │   │   └── SocialAuth.tsx
 │   │   ├── ClientThemeProvider.tsx
-│   │   ├── common
-│   │   │   ├── UserProfileDropdown.tsx
-│   │   │   └── WhatsAppButton.tsx
-│   │   ├── dashboard
-│   │   │   ├── ContentArea.tsx
-│   │   │   ├── PageHeader.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── Topbar.tsx
-│   │   ├── layout
-│   │   │   ├── Footer.tsx
-│   │   │   └── Header.tsx
-│   │   ├── project
-│   │   │   ├── FullscreenLightbox.tsx
-│   │   │   ├── GallerySlider.tsx
-│   │   │   ├── ProjectHeroOverlay.tsx
-│   │   │   ├── ProjectHeroSlider.tsx
-│   │   │   ├── ProjectNavigation.tsx
-│   │   │   └── sections
-│   │   │       ├── AboutSection.tsx
-│   │   │       ├── FeaturesAmenitiesSection.tsx
-│   │   │       ├── LocationSection.tsx
-│   │   │       ├── PaymentPlanSection.tsx
-│   │   │       ├── ProjectProgressSection.tsx
-│   │   │       └── UnitsFloorplansSection.tsx
-│   │   ├── properties
-│   │   │   ├── ImageGallery.tsx
-│   │   │   ├── PropertiesListWithLoadMore.tsx
-│   │   │   ├── PropertyBreadcrumb.tsx
-│   │   │   ├── PropertyCard.tsx
-│   │   │   ├── PropertyFilters.tsx
-│   │   │   ├── PropertyGallery.tsx
-│   │   │   ├── PropertyHeader.tsx
-│   │   │   └── PropertyListings.tsx
-│   │   ├── property
-│   │   │   └── PropertyLocationSection.tsx
-│   │   ├── sections
-│   │   │   ├── Categories.tsx
-│   │   │   ├── DevelopersCarousel.tsx
-│   │   │   ├── FeaturedArticlesSection.tsx
-│   │   │   ├── FeaturedArticles.tsx
-│   │   │   ├── FeaturedProjectGrid.tsx
-│   │   │   ├── FeaturedProjectsSection.tsx
-│   │   │   ├── FeaturedPropertiesSection.tsx
-│   │   │   ├── FeaturedProperties.tsx
-│   │   │   ├── Hero.tsx
-│   │   │   ├── Newsletter.tsx
-│   │   │   └── StatsFeatureSection.tsx
 │   │   ├── SessionProvider.tsx
+│   │   ├── account
+│   │   ├── admin
+│   │   ├── auth
+│   │   ├── common
+│   │   ├── dashboard
+│   │   ├── layout
+│   │   ├── project
+│   │   ├── properties
+│   │   ├── property
+│   │   ├── sections
+│   │   ├── shared
 │   │   └── ui
-│   │       ├── alert-dialog.tsx
-│   │       ├── avatar.tsx
-│   │       ├── avatar-upload.tsx
-│   │       ├── badge.tsx
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── checkbox.tsx
-│   │       ├── command.tsx
-│   │       ├── dialog.tsx
-│   │       ├── dropdown-menu.tsx
-│   │       ├── form.tsx
-│   │       ├── input.tsx
-│   │       ├── label.tsx
-│   │       ├── navigation-menu.tsx
-│   │       ├── popover.tsx
-│   │       ├── radio-group.tsx
-│   │       ├── select.tsx
-│   │       ├── separator.tsx
-│   │       ├── sheet.tsx
-│   │       ├── sonner.tsx
-│   │       ├── switch.tsx
-│   │       ├── table.tsx
-│   │       ├── tabs.tsx
-│   │       ├── textarea.tsx
-│   │       ├── theme-toggle.tsx
-│   │       ├── toggle-group.tsx
-│   │       ├── toggle.tsx
-│   │       └── TurnstileWidget.tsx
-│   ├── generated
-│   │   └── prisma
-│   │       ├── client.d.ts
-│   │       ├── client.js
-│   │       ├── default.d.ts
-│   │       ├── default.js
-│   │       ├── edge.d.ts
-│   │       ├── edge.js
-│   │       ├── index-browser.js
-│   │       ├── index.d.ts
-│   │       ├── index.js
-│   │       ├── libquery_engine-debian-openssl-3.0.x.so.node
-│   │       ├── libquery_engine-linux-musl-openssl-3.0.x.so.node
-│   │       ├── package.json
-│   │       ├── query_engine_bg.js
-│   │       ├── query_engine_bg.wasm
-│   │       ├── runtime
-│   │       │   ├── edge-esm.js
-│   │       │   ├── edge.js
-│   │       │   ├── index-browser.d.ts
-│   │       │   ├── index-browser.js
-│   │       │   ├── library.d.ts
-│   │       │   ├── library.js
-│   │       │   ├── react-native.js
-│   │       │   ├── wasm-compiler-edge.js
-│   │       │   └── wasm-engine-edge.js
-│   │       ├── schema.prisma
-│   │       ├── wasm.d.ts
-│   │       ├── wasm-edge-light-loader.mjs
-│   │       ├── wasm.js
-│   │       └── wasm-worker-loader.mjs
 │   ├── hooks
 │   │   └── use-debounce.ts
 │   ├── lib
@@ -383,230 +112,17 @@ prisma migrate deploy && ts-node --esm prisma/seed.ts &&
 │   │   └── verifyTurnstile.ts
 │   ├── modules
 │   │   ├── admin
-│   │   │   ├── actions
-│   │   │   │   ├── developer.actions.ts
-│   │   │   │   ├── feature.actions.ts
-│   │   │   │   └── subscription.ts
-│   │   │   └── components
-│   │   │       ├── DeveloperActions.tsx
-│   │   │       ├── SubscriptionActions.tsx
-│   │   │       └── TransactionList.tsx
 │   │   ├── blog
-│   │   │   ├── actions
-│   │   │   │   └── category.actions.ts
-│   │   │   ├── components
-│   │   │   │   ├── BlogList.tsx
-│   │   │   │   ├── BlogsClient.tsx
-│   │   │   │   ├── CategorySelect.tsx
-│   │   │   │   ├── CommentsSection.tsx
-│   │   │   │   ├── CoverImageInput.tsx
-│   │   │   │   ├── Editor.tsx
-│   │   │   │   ├── FeedbackButtons.tsx
-│   │   │   │   ├── LikeSaveShare.tsx
-│   │   │   │   ├── Newsletter.tsx
-│   │   │   │   ├── PostForm.tsx
-│   │   │   │   ├── PreviewModal.tsx
-│   │   │   │   ├── PrintDownload.tsx
-│   │   │   │   ├── PublishToggle.tsx
-│   │   │   │   ├── ReadingProgressBar.tsx
-│   │   │   │   ├── ShareButtons.tsx
-│   │   │   │   ├── TableOfContents.tsx
-│   │   │   │   ├── TagsInput.tsx
-│   │   │   │   └── TwoColumnView.tsx
-│   │   │   ├── services
-│   │   │   │   ├── category.service.ts
-│   │   │   │   └── post.service.ts
-│   │   │   ├── stores
-│   │   │   │   └── usePostStore.ts
-│   │   │   ├── types
-│   │   │   │   ├── category.types.ts
-│   │   │   │   └── post.types.ts
-│   │   │   └── validators
-│   │   │       ├── category.validator.ts
-│   │   │       ├── postUpdate.validator.ts
-│   │   │       └── post.validator.ts
+│   │   ├── coupon
+│   │   ├── entitlement
+│   │   ├── finance
+│   │   ├── governance
 │   │   ├── lead
-│   │   │   ├── actions
-│   │   │   │   └── createCallbackRequest.ts
-│   │   │   ├── components
-│   │   │   │   └── CallbackRequestForm.tsx
-│   │   │   ├── services
-│   │   │   │   └── saveCallbackRequest.ts
-│   │   │   └── validators
-│   │   │       └── callbackRequestSchema.ts
 │   │   ├── media
-│   │   │   ├── actions
-│   │   │   │   ├── deleteMedia.ts
-│   │   │   │   ├── listMedia.ts
-│   │   │   │   ├── upload.action.ts
-│   │   │   │   └── uploadMedia.ts
-│   │   │   ├── components
-│   │   │   │   ├── MediaCard.tsx
-│   │   │   │   ├── MediaEmptyState.tsx
-│   │   │   │   ├── MediaErrorState.tsx
-│   │   │   │   ├── MediaGrid.tsx
-│   │   │   │   ├── MediaLibraryButton.tsx
-│   │   │   │   ├── MediaLibraryContent.tsx
-│   │   │   │   ├── MediaLibraryFooter.tsx
-│   │   │   │   ├── MediaLibraryModal.tsx
-│   │   │   │   ├── MediaLibraryTabs.tsx
-│   │   │   │   ├── MediaLibraryView.tsx
-│   │   │   │   ├── MediaListItem.tsx
-│   │   │   │   ├── MediaList.tsx
-│   │   │   │   ├── MediaLoadingState.tsx
-│   │   │   │   ├── MediaPreview.tsx
-│   │   │   │   ├── MediaToolbar.tsx
-│   │   │   │   └── MediaUploadView.tsx
-│   │   │   ├── hooks
-│   │   │   │   └── useMedia.ts
-│   │   │   ├── services
-│   │   │   │   └── service.ts
-│   │   │   ├── stores
-│   │   │   │   └── store.ts
-│   │   │   ├── types
-│   │   │   │   └── media.types.ts
-│   │   │   ├── utils
-│   │   │   │   ├── formatFileSize.ts
-│   │   │   │   └── getMediaIcon.tsx
-│   │   │   └── validators
-│   │   │       └── media.validator.ts
 │   │   ├── pricing
-│   │   │   ├── actions
-│   │   │   │   ├── createPlan.ts
-│   │   │   │   ├── deletePlan.ts
-│   │   │   │   ├── getPlan.ts
-│   │   │   │   ├── getSubscribers.ts
-│   │   │   │   ├── listPlans.ts
-│   │   │   │   ├── managePlan.ts
-│   │   │   │   └── updatePlan.ts
-│   │   │   ├── components
-│   │   │   │   ├── PayPalSubscriptionModal.tsx
-│   │   │   │   ├── PlanForm.tsx
-│   │   │   │   ├── PricingAdminForm.tsx
-│   │   │   │   ├── PricingAdminList.tsx
-│   │   │   │   ├── PricingCard.tsx
-│   │   │   │   ├── PricingList.tsx
-│   │   │   │   └── PricingTable.tsx
-│   │   │   ├── hooks
-│   │   │   │   └── usePricing.ts
-│   │   │   ├── services
-│   │   │   │   └── service.ts
-│   │   │   ├── stores
-│   │   │   │   └── store.ts
-│   │   │   ├── types
-│   │   │   │   └── pricing.types.ts
-│   │   │   └── validators
-│   │   │       ├── createPricing.validator.ts
-│   │   │       └── updatePricing.validator.ts
 │   │   ├── project
-│   │   │   ├── actions
-│   │   │   │   ├── createProject.action.ts
-│   │   │   │   ├── incrementProjectViews.ts
-│   │   │   │   └── updateProject.action.ts
-│   │   │   ├── components
-│   │   │   │   ├── advertise
-│   │   │   │   │   ├── ProjectAdvertiseWizard.tsx
-│   │   │   │   │   ├── ProjectStepHeader.tsx
-│   │   │   │   │   └── steps
-│   │   │   │   │       ├── StepEightReview.tsx
-│   │   │   │   │       ├── StepFiveFloorplans.tsx
-│   │   │   │   │       ├── StepFourMedia.tsx
-│   │   │   │   │       ├── StepNinePayment.tsx
-│   │   │   │   │       ├── StepNineSuccess.tsx
-│   │   │   │   │       ├── StepOneBasic.tsx
-│   │   │   │   │       ├── StepSevenAccount.tsx
-│   │   │   │   │       ├── StepSixAmenities.tsx
-│   │   │   │   │       ├── StepThreePricing.tsx
-│   │   │   │   │       ├── StepTwoDescription.tsx
-│   │   │   │   │       └── StepTwoPointFiveAboutFeatures.tsx
-│   │   │   │   └── ProjectViewCounter.tsx
-│   │   │   ├── services
-│   │   │   │   ├── amenity.service.ts
-│   │   │   │   ├── developer.service.ts
-│   │   │   │   └── project.service.ts
-│   │   │   ├── stores
-│   │   │   │   ├── useProjectAdvertiseStore.ts
-│   │   │   │   └── useProjectStepStore.ts
-│   │   │   └── validators
-│   │   │       └── project.validator.ts
 │   │   ├── property
-│   │   │   ├── actions
-│   │   │   │   ├── approveProperty.ts
-│   │   │   │   ├── checkQuota.ts
-│   │   │   │   ├── createProperty.ts
-│   │   │   │   ├── createPropertyType.ts
-│   │   │   │   ├── deleteProperty.ts
-│   │   │   │   ├── feature.ts
-│   │   │   │   ├── getProperty.ts
-│   │   │   │   ├── incrementPropertyViews.ts
-│   │   │   │   ├── listProperties.ts
-│   │   │   │   ├── propertyType.actions.ts
-│   │   │   │   ├── publishProperty.ts
-│   │   │   │   ├── toggleFeatured.ts
-│   │   │   │   └── updateProperty.ts
-│   │   │   ├── components
-│   │   │   │   ├── advertise
-│   │   │   │   │   ├── AdvertiseWizard.tsx
-│   │   │   │   │   ├── DeveloperSelector.tsx
-│   │   │   │   │   ├── DevStepSwitcher.tsx
-│   │   │   │   │   ├── FormComponents.tsx
-│   │   │   │   │   ├── LocationSelector.tsx
-│   │   │   │   │   ├── StepHeader.tsx
-│   │   │   │   │   └── steps
-│   │   │   │   │       ├── StepController.tsx
-│   │   │   │   │       ├── StepFiveReview.tsx
-│   │   │   │   │       ├── StepFourMedia.tsx
-│   │   │   │   │       ├── StepNavigation.tsx
-│   │   │   │   │       ├── StepOneCreate.tsx
-│   │   │   │   │       ├── StepSevenSuccess.tsx
-│   │   │   │   │       ├── StepThreeDetails.tsx
-│   │   │   │   │       └── StepTwoDescription.tsx
-│   │   │   │   ├── PropertyForm.tsx
-│   │   │   │   └── ViewCounter.tsx
-│   │   │   ├── hooks
-│   │   │   │   └── useProperty.ts
-│   │   │   ├── services
-│   │   │   │   ├── createProperty.ts
-│   │   │   │   ├── feature.ts
-│   │   │   │   ├── listProperties.ts
-│   │   │   │   ├── listPropertyTypes.ts
-│   │   │   │   ├── propertyType.service.ts
-│   │   │   │   └── propertyType.ts
-│   │   │   ├── stores
-│   │   │   │   ├── store.ts
-│   │   │   │   ├── useAdvertiseForm.ts
-│   │   │   │   └── useStepStore.ts
-│   │   │   ├── types
-│   │   │   │   └── property.types.ts
-│   │   │   ├── utils
-│   │   │   │   └── mapPropertyToCard.ts
-│   │   │   └── validators
-│   │   │       ├── advertise-steps.validator.ts
-│   │   │       ├── createProperty.validator.ts
-│   │   │       ├── feature.validator.ts
-│   │   │       ├── propertyFilter.validator.ts
-│   │   │       ├── propertyTypes.validator.ts
-│   │   │       ├── propertyType.validator.ts
-│   │   │       └── updateProperty.validator.ts
 │   │   └── user
-│   │       ├── actions
-│   │       │   ├── activateSubscription.ts
-│   │       │   ├── admin.actions.ts
-│   │       │   ├── change-password.action.ts
-│   │       │   ├── forgot-password.action.ts
-│   │       │   ├── register.action.ts
-│   │       │   ├── reset-password.action.ts
-│   │       │   ├── subscription.ts
-│   │       │   ├── update-profile.action.ts
-│   │       │   └── verify-email.action.ts
-│   │       ├── components
-│   │       │   └── LoginModal.tsx
-│   │       ├── hooks
-│   │       │   └── useAuth.ts
-│   │       ├── routes
-│   │       │   └── auth.ts
-│   │       └── services
-│   │           └── auth.service.ts
 │   ├── proxy.ts
 │   ├── scripts
 │   │   ├── check_db.cjs
@@ -616,6 +132,7 @@ prisma migrate deploy && ts-node --esm prisma/seed.ts &&
 │   │   └── test-email.ts
 │   ├── stores
 │   │   ├── counterStore.ts
+│   │   ├── useCouponStore.ts
 │   │   └── useLocationStore.ts
 │   ├── types
 │   │   ├── featured-properties.ts
@@ -625,9 +142,10 @@ prisma migrate deploy && ts-node --esm prisma/seed.ts &&
 │   ├── utils
 │   │   └── slug.ts
 │   └── validators
-│       └── contact.ts
+│       ├── contact.ts
+│       ├── coupon.ts
+│       └── password.validator.ts
 ├── tree.txt
-├── tsconfig.json
-└── tsconfig.tsbuildinfo
+└── tsconfig.json
 
-175 directories, 454 files
+57 directories, 92 files
