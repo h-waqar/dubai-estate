@@ -74,6 +74,9 @@ importers:
       '@radix-ui/react-toggle-group':
         specifier: ^1.1.11
         version: 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tiptap/core':
+        specifier: ^3.20.1
+        version: 3.20.1(@tiptap/pm@3.20.1)
       '@tiptap/extension-code-block':
         specifier: ^3.6.5
         version: 3.20.1(@tiptap/core@3.20.1(@tiptap/pm@3.20.1))(@tiptap/pm@3.20.1)
@@ -95,6 +98,9 @@ importers:
       '@tiptap/extension-text-align':
         specifier: ^3.6.6
         version: 3.20.1(@tiptap/core@3.20.1(@tiptap/pm@3.20.1))
+      '@tiptap/pm':
+        specifier: ^3.20.1
+        version: 3.20.1
       '@tiptap/react':
         specifier: ^3.6.6
         version: 3.20.1(@floating-ui/dom@1.7.6)(@tiptap/core@3.20.1(@tiptap/pm@3.20.1))(@tiptap/pm@3.20.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -119,6 +125,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      cookie:
+        specifier: ^1.1.1
+        version: 1.1.1
       country-state-city:
         specifier: ^3.2.1
         version: 3.2.1
@@ -2086,6 +2095,10 @@ packages:
   cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
+
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
+    engines: {node: '>=18'}
 
   cors@2.8.6:
     resolution: {integrity: sha512-tJtZBBHA6vjIAaF6EnIaq6laBBP9aq/Y3ouVJjEfoHbRBcHBAHYcMh/w8LDrk2PvIMMq8gmopa5D4V8RmbrxGw==}
@@ -5966,6 +5979,8 @@ snapshots:
   cookie-signature@1.2.2: {}
 
   cookie@0.7.2: {}
+
+  cookie@1.1.1: {}
 
   cors@2.8.6:
     dependencies:
