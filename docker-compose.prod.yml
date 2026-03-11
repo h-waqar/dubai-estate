@@ -1,0 +1,44 @@
+services:
+  # The Database (PostgreSQL) - Isolated
+  db:
+    image: postgres:15-alpine
+    container_name: dubai-estate-db-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-dubai_estate}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # The Web Application (Next.js)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: dubai-estate-app-prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Database Connection (Internal Docker Network)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-dubai_estate}?schema=public
+      DIRECT_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-dubai_estate}?schema=public
+      
+      # NextAuth URLs
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data_prod:
