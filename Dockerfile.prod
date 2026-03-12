@@ -4,7 +4,7 @@ RUN apk add --no-cache libc6-compat
 RUN corepack enable
 WORKDIR /app
 
-COPY package.json prisma.config.ts* ./
+COPY package.json ./
 COPY prisma ./prisma
 RUN pnpm install
 
@@ -38,7 +38,6 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma/seed-prod.cjs ./prisma/seed-prod.cjs
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 EXPOSE 3000
 ENV PORT 3000
