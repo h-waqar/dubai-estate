@@ -20,7 +20,7 @@ RUN pnpm exec prisma generate
 RUN pnpm run build
 
 # Bundle the seed script to run without ts-node and node_modules in production
-RUN pnpm add -g esbuild
+RUN npm install -g esbuild
 RUN esbuild prisma/seed-prod.ts --bundle --platform=node --target=node20 --external:@prisma/client --external:bcryptjs --outfile=prisma/seed-prod.cjs
 # Stage 3: Runner
 FROM node:20-alpine AS runner
@@ -29,7 +29,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 # Add Prisma CLI tool to runner for migrations
-RUN pnpm add -g prisma
+RUN npm install -g prisma
 
 COPY --from=builder /app/public ./public
 # Automatically leverage output traces to reduce image size
