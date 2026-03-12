@@ -38,11 +38,10 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma/seed-prod.cjs ./prisma/seed-prod.cjs
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
 # Run migrations and start the app
-CMD prisma migrate deploy && node server.js
+CMD ["sh", "-c", "prisma migrate deploy && node server.js"]
