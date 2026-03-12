@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 const createPrismaClient = () => {
   const connectionString = `${process.env.DATABASE_URL}`;
   const pool = new Pool({ connectionString });
-  const adapter = new PrismaPg(pool);
+  const adapter = new PrismaPg(pool as any);
   return new PrismaClient({
     adapter,
     // log: ["error"], // helps during dev
