@@ -1,10 +1,10 @@
 import Link from "next/link"; // For navigation
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-    Users, 
-    Building2, 
-    FileText, 
-    TrendingUp, 
+import {
+    Users,
+    Building2,
+    FileText,
+    TrendingUp,
     DollarSign,
     LayoutDashboard,
     PlusCircle,
@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { getDashboardStats } from "@/actions/dashboard";
 import { formatDistanceToNow } from "date-fns";
+
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
     const data = await getDashboardStats();
