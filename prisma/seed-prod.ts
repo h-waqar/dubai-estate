@@ -46,6 +46,7 @@ async function main() {
             username: "super_admin",
             roles: [Role.SUPER_ADMIN],
             password: hashedPassword,
+            emailVerified: new Date(),
         },
     });
     console.log(`✅ Admin User Encrypted & Created: ${admin.email}`);
