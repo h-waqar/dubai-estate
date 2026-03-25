@@ -80,7 +80,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
         }),
     ]);
 
-    const totalMonthlyRevenue = plansWithUserCount.reduce((acc, plan) => {
+    const totalMonthlyRevenue = plansWithUserCount.reduce((acc: number, plan: any) => {
         return acc + (Number(plan.priceMonthly) * plan._count.users);
     }, 0);
 
@@ -116,25 +116,25 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     ]);
 
     const activity: ActivityItem[] = [
-        ...recentUsers.map(u => ({
+        ...recentUsers.map((u: any) => ({
             id: `user-${u.id}`,
             type: "USER" as const,
             message: `New user joined: ${u.name || 'Unknown'}`,
             createdAt: u.createdAt
         })),
-        ...properties.total > 0 ? recentProperties.map(p => ({
+        ...properties.total > 0 ? recentProperties.map((p: any) => ({
             id: `prop-${p.id}`,
             type: "PROPERTY" as const,
             message: `New property listed: ${p.title}`,
             createdAt: p.createdAt
         })) : [],
-        ...posts.total > 0 ? recentPosts.map(p => ({
+        ...posts.total > 0 ? recentPosts.map((p: any) => ({
             id: `post-${p.id}`,
             type: "POST" as const,
             message: `New blog post: ${p.title}`,
             createdAt: p.createdAt
         })) : [],
-        ...leads.total > 0 ? recentLeads.map(l => ({
+        ...leads.total > 0 ? recentLeads.map((l: any) => ({
             id: `lead-${l.id}`,
             type: "LEAD" as const,
             message: `New lead: ${l.fullName}`,

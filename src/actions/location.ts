@@ -33,7 +33,7 @@ export async function searchLocations(query: string, listingType?: string) {
             distinct: ["location"],
             take: 10,
         });
-        return locations.map((l) => l.location).filter(Boolean);
+        return locations.map((l: any) => l.location).filter(Boolean);
     }
 
     // Find unique locations that match the query
@@ -52,5 +52,5 @@ export async function searchLocations(query: string, listingType?: string) {
         take: 10,
     });
 
-    return locations.map((l) => l.location).filter(Boolean);
+    return locations.map((l: any) => l.location).filter(Boolean);
 }

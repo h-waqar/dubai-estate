@@ -19,9 +19,16 @@ import { PasswordInput } from "@/components/auth/PasswordInput";
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!agreeToTerms) {
+      toast.error("Please agree to the Privacy Policy and Terms of Service to continue.");
+      return;
+    }
+
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -128,6 +135,25 @@ export default function RegisterPage() {
             />
           </div>
           
+          <div className="flex items-start space-x-2">
+            <Checkbox
+              id="agreeToTerms"
+              checked={agreeToTerms}
+              onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
+              className="mt-0.5"
+            />
+            <Label htmlFor="agreeToTerms" className="text-sm font-normal text-muted-foreground leading-relaxed">
+              I agree to the{" "}
+              <Link href="/privacy" target="_blank" className="font-medium text-foreground underline underline-offset-2 hover:text-yellow-600 dark:hover:text-yellow-400 transition-colors">
+                Privacy Policy
+              </Link>
+              {" "}and{" "}
+              <Link href="/terms" target="_blank" className="font-medium text-foreground underline underline-offset-2 hover:text-yellow-600 dark:hover:text-yellow-400 transition-colors">
+                Terms of Service
+              </Link>
+            </Label>
+          </div>
+
           <div className="flex items-center space-x-2">
             <Checkbox id="newsletter" name="newsletter" defaultChecked />
             <Label htmlFor="newsletter" className="text-sm font-normal text-muted-foreground">

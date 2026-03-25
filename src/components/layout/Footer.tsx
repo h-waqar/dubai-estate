@@ -4,7 +4,6 @@
 import Link from "next/link";
 import {
   Facebook,
-  Twitter,
   Instagram,
   Linkedin,
   Mail,
@@ -53,10 +52,9 @@ const footerSections: FooterSection[] = [
 ];
 
 const socialLinks = [
-  { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
-  { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
+  { icon: Facebook, href: "https://www.facebook.com/dubaiestateguide", label: "Facebook" },
+  { icon: Instagram, href: "https://www.instagram.com/dubaiestateguide1", label: "Instagram" },
+  { icon: Linkedin, href: "https://www.linkedin.com/company/dubai-estate-guide/", label: "LinkedIn" },
 ];
 
 export default function Footer() {

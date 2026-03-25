@@ -13,6 +13,8 @@ import {
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { UserProfileDropdown } from "@/components/common/UserProfileDropdown"
+import { Home } from "lucide-react"
+import Link from "next/link"
 
 interface TopbarProps {
     onMobileMenuClick?: () => void
@@ -40,6 +42,11 @@ export function Topbar({ onMobileMenuClick }: TopbarProps) {
 
             {/* Right side actions */}
             <div className="flex items-center gap-2 ml-auto">
+                <Link href="/">
+                    <Button variant="ghost" size="icon" aria-label="Go to homepage" title="Back to homepage">
+                        <Home className="h-5 w-5" />
+                    </Button>
+                </Link>
                 <ThemeToggle />
                 <UserProfileDropdown />
             </div>

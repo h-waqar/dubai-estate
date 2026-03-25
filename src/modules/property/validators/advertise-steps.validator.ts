@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { FurnishingStatus } from "@prisma/client";
 import type { Media } from "@/modules/media/types/media.types";
 
 export const stepOneSchema = z.object({
@@ -21,7 +20,7 @@ export const stepThreeSchema = z.object({
   bedrooms: z.number().int().min(0, "Bedrooms must be 0 or more."),
   bathrooms: z.number().int().min(0, "Bathrooms must be 0 or more."),
   propertySize: z.number().positive("Size must be positive."),
-  furnishing: z.enum(FurnishingStatus),
+  furnishing: z.enum(["FURNISHED", "SEMI_FURNISHED", "UNFURNISHED"]),
 });
 
 export const stepFourSchema = z.object({

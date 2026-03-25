@@ -12,11 +12,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
-      },
-      {
-        protocol: "http",
-        hostname: "**",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
       },
       {
         protocol: "https",
@@ -52,7 +49,7 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     mcpServer: true,
     serverActions: {
-      bodySizeLimit: "50mb",
+      bodySizeLimit: "10mb",
     },
   },
   async redirects() {

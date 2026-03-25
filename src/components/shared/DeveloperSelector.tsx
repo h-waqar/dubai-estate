@@ -18,7 +18,6 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { getDevelopers } from "@/modules/admin/actions/developer.actions";
-import { DeveloperStatus } from "@prisma/client";
 
 interface Developer {
     id: number;
@@ -47,7 +46,7 @@ export function DeveloperSelector({ value, onChange }: DeveloperSelectorProps) {
             setLoading(true);
             try {
                 // Only fetch APPROVED developers
-                const data = await getDevelopers(DeveloperStatus.APPROVED);
+                const data = await getDevelopers("APPROVED" as any); // using valid enum string
                 setDevelopers(data);
             } catch (error) {
                 console.error("Failed to fetch developers", error);
