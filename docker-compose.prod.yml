@@ -40,5 +40,16 @@ services:
       db:
         condition: service_healthy
 
+  # Database Admin (Adminer)
+  adminer:
+    image: adminer
+    container_name: dubai-estate-adminer-prod
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data_prod:
