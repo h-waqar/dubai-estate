@@ -23,7 +23,7 @@ RUN pnpm exec prisma generate
 RUN pnpm run build
 
 # Bundle seed script (bcryptjs kept external — we'll copy it to runner)
-RUN npm install -g esbuild
+RUN pnpm add -g esbuild
 RUN esbuild prisma/seed-prod.ts \
     --bundle --platform=node --target=node20 \
     --external:@prisma/client --external:bcryptjs \
@@ -37,10 +37,11 @@ RUN esbuild prisma.config.ts \
 
 # Stage 3: Runner
 FROM node:20-alpine AS runner
+RUN corepack enable
 WORKDIR /app
 
 ENV NODE_ENV=production
-RUN npm install -g prisma
+RUN pnpm add -g prisma
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
