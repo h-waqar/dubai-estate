@@ -20,7 +20,7 @@
 // const properties: Property[] = [
 //   {
 //     id: 1,
-//     image: "/assets/property-1.jpg",
+//     image: "/assets/images/property-1.jpg",
 //     alt: "Luxury Apartment in Downtown Dubai",
 //     featured: true,
 //     type: "Apartment",
@@ -33,7 +33,7 @@
 //   },
 //   {
 //     id: 2,
-//     image: "/assets/property-2.jpg",
+//     image: "/assets/images/property-2.jpg",
 //     alt: "Marina View Villa",
 //     featured: true,
 //     type: "Villa",
@@ -46,7 +46,7 @@
 //   },
 //   {
 //     id: 3,
-//     image: "/assets/property-3.jpg",
+//     image: "/assets/images/property-3.jpg",
 //     alt: "Penthouse with City View",
 //     featured: false,
 //     type: "Penthouse",
@@ -59,7 +59,7 @@
 //   },
 //   {
 //     id: 4,
-//     image: "/assets/property-1.jpg",
+//     image: "/assets/images/property-1.jpg",
 //     alt: "Modern Apartment in JBR",
 //     featured: false,
 //     type: "Apartment",
@@ -72,7 +72,7 @@
 //   },
 //   {
 //     id: 5,
-//     image: "/assets/property-2.jpg",
+//     image: "/assets/images/property-2.jpg",
 //     alt: "Beachfront Villa",
 //     featured: true,
 //     type: "Villa",
@@ -85,7 +85,7 @@
 //   },
 //   {
 //     id: 6,
-//     image: "/assets/property-3.jpg",
+//     image: "/assets/images/property-3.jpg",
 //     alt: "City Center Apartment",
 //     featured: false,
 //     type: "Apartment",

@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,12 +70,14 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold">
-              <span className="text-gray-900 dark:text-white">Dubai</span>
-              <span className="text-yellow-500 dark:text-yellow-400">
-                Estate
-              </span>
-            </div>
+            <Image
+              src="/assets/icons/logo.svg"
+              alt="Dubai Estate Logo"
+              width={150}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}

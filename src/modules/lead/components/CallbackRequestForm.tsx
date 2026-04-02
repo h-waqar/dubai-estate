@@ -77,7 +77,7 @@ function CallbackRequestForm() {
         </p>
         <div className="relative h-80 w-full overflow-hidden rounded-lg">
           <Image
-            src="/assets/dubai-hero.jpg"
+            src="/assets/images/dubai-hero.jpg"
             alt="Callback request illustration"
             fill
             className="object-cover"

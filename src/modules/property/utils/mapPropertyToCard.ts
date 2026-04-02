@@ -15,7 +15,7 @@ export function mapPropertyToCard(p: any): PropertyCardProps["property"] {
     ? (imageUrl.startsWith("http") || imageUrl.startsWith("/")
       ? imageUrl
       : `/uploads/${encodeURIComponent(imageUrl)}`)
-    : "/assets/nopropertyfound.jpg";
+    : "/assets/images/nopropertyfound.jpg";
 
   return {
     id: p.id,

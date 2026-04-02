@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   Facebook,
   Instagram,
@@ -68,12 +69,13 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-4">
-              <div className="text-2xl font-bold">
-                <span className="text-white">Dubai</span>
-                <span className="text-yellow-500 dark:text-yellow-400">
-                  Estate
-                </span>
-              </div>
+              <Image
+                src="/assets/icons/logo.svg"
+                alt="Dubai Estate Logo"
+                width={150}
+                height={40}
+                className="h-10 w-auto"
+              />
             </Link>
             <p className="text-sm mb-6 text-gray-400 dark:text-gray-500">
               Your trusted guide to Dubai&apos;s real estate market. Expert

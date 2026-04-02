@@ -176,7 +176,7 @@ export default function ContactPage() {
           {/* Image */}
           <div className="hidden md:block">
             <Image
-              src="/assets/dubai-hero.jpg"
+              src="/assets/images/dubai-hero.jpg"
               alt="Contact us"
               width={900}
               height={700}

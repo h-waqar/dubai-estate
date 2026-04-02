@@ -30,7 +30,7 @@ export async function FeaturedPropertiesSection() {
 
     // 2. Transform to UI props
     const formattedProperties: Property[] = properties.map((p) => {
-        const coverImage = p.mediaUsages[0]?.media?.url || "/assets/property-1.jpg";
+        const coverImage = p.mediaUsages[0]?.media?.url || "/assets/images/property-1.jpg";
 
         return {
             id: p.id,

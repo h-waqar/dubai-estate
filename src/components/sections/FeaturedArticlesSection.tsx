@@ -37,7 +37,7 @@ export async function FeaturedArticlesSection() {
             .substring(0, 150) + "...";
 
         return {
-            image: post.coverImage || "/assets/blog-placeholder.jpg",
+            image: post.coverImage || "/assets/images/nopropertyfound.jpg",
             alt: post.title,
             category: post.category?.name || "General",
             date: post.publishedAt ? format(new Date(post.publishedAt), "MMMM d, yyyy") : "",

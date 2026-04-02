@@ -21,7 +21,7 @@ export default async function ProjectsPage() {
             ? (imageUrl.startsWith("http") || imageUrl.startsWith("/")
                 ? imageUrl
                 : `/uploads/${encodeURIComponent(imageUrl)}`)
-            : "/assets/nopropertyfound.jpg";
+            : "/assets/images/nopropertyfound.jpg";
 
         return {
             ...project,

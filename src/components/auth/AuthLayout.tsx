@@ -14,7 +14,7 @@ export function AuthLayout({
   children,
   title,
   description,
-  image = "/assets/dubai-hero.jpg",
+  image = "/assets/images/dubai-hero.jpg",
   quote = "The best investment on Earth is Earth itself.",
   author = "Louis Glickman",
 }: AuthLayoutProps) {

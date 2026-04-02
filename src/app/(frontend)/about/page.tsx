@@ -73,7 +73,7 @@ export default function AboutPage() {
         "There's no one-size-fits-all when it comes to guests. Dubai Estate understands and aims to solve grievances in a meaningful manner.",
     },
     {
-      img: "/assets/dubai-hero.jpg",
+      img: "/assets/images/dubai-hero.jpg",
       title: "Guest-First Mentality",
       description:
         "We prioritise your experience and satisfaction in your modern oasis.",
@@ -178,7 +178,7 @@ export default function AboutPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="relative h-80 md:h-[450px]">
                 <Image
-                  src="/assets/property-1.jpg"
+                  src="/assets/images/property-1.jpg"
                   alt="Modern bathroom in a Dubai Estate apartment"
                   fill
                   className="rounded-xl shadow-lg object-cover w-full h-full"

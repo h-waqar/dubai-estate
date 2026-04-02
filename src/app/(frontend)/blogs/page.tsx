@@ -53,7 +53,7 @@ export default async function BlogsPage() {
       {/* Hero Section */}
       {/* <section className="bg-gradient-to-b from-muted/50 to-background py-16 border-b overflow-hidden">
         <Image
-          src={"/assets/dubai-hero.jpg"}
+          src={"/assets/images/dubai-hero.jpg"}
           alt="Dubai Estate Blog"
           fill
           className="max-h-full object-cover"
@@ -72,7 +72,7 @@ export default async function BlogsPage() {
 
       <section className="relative bg-gradient-to-b from-muted/50 to-background py-16 border-b overflow-hidden">
         <Image
-          src={"/assets/dubai-hero.jpg"}
+          src={"/assets/images/dubai-hero.jpg"}
           alt="Dubai Estate Blog"
           fill
           className="object-cover "

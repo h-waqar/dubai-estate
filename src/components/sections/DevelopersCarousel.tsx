@@ -5,13 +5,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 
 const developers = [
-    { name: "DAMAC Properties", logo: "/developers/damac-properties-dubai.png" },
-    { name: "Dubai Properties", logo: "/developers/dubai-properties.png" },
-    { name: "Ellington Properties", logo: "/developers/ellinton-properties.png" },
-    { name: "Emaar Properties", logo: "/developers/emaar-properties-dubai.png" },
-    { name: "Meraas Properties", logo: "/developers/meeras-properties.png" },
-    { name: "Nakheel Properties", logo: "/developers/nakheel-properties.png" },
-    { name: "Nshama", logo: "/developers/nshama.png" },
+    { name: "DAMAC Properties", logo: "/assets/images/developers/damac-properties-dubai.png" },
+    { name: "Dubai Properties", logo: "/assets/images/developers/dubai-properties.png" },
+    { name: "Ellington Properties", logo: "/assets/images/developers/ellinton-properties.png" },
+    { name: "Emaar Properties", logo: "/assets/images/developers/emaar-properties-dubai.png" },
+    { name: "Meraas Properties", logo: "/assets/images/developers/meeras-properties.png" },
+    { name: "Nakheel Properties", logo: "/assets/images/developers/nakheel-properties.png" },
+    { name: "Nshama", logo: "/assets/images/developers/nshama.png" },
 ];
 
 export function DevelopersCarousel() {

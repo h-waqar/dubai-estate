@@ -86,7 +86,7 @@ export function StatsFeatureSection() {
                     <div className="md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2 md:w-2/5 z-10 hidden md:block pl-4">
                         <div className="relative aspect-[4/3] w-full shadow-2xl">
                             <Image
-                                src="/assets/office_interior_branding.png" // Generated image
+                                src="/assets/images/office_interior_branding.png" // Generated image
                                 alt="Dubai Estate Office"
                                 fill
                                 className="object-cover"
@@ -97,7 +97,7 @@ export function StatsFeatureSection() {
                     <div className="block md:hidden mt-[-2rem] relative z-20 px-4">
                         <div className="relative aspect-[4/3] w-full shadow-xl">
                             <Image
-                                src="/assets/office_interior_branding.png"
+                                src="/assets/images/office_interior_branding.png"
                                 alt="Dubai Estate Office"
                                 fill
                                 className="object-cover"

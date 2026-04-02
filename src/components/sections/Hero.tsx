@@ -103,14 +103,15 @@ export default function Hero({ propertyTypes }: HeroProps) {
 
   return (
     <section className="relative min-h-[500px] h-[70vh] flex items-center justify-center">
-      {/* Background Image */}
-      <div className="absolute inset-0">
+      {/* Background GIF/Video */}
+      <div className="absolute inset-0 overflow-hidden">
         <Image
-          src="/assets/dubai-hero.jpg"
+          src="/assets/videos/home-page-hero-section.gif"
           alt="Dubai Estate Hero"
           fill
           className="object-cover"
           priority
+          unoptimized
         />
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
