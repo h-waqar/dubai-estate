@@ -9,8 +9,8 @@
     "start": "next start",
     "db": "npx prisma studio",
     "lint": "eslint",
-    "seed": "ts-node --esm prisma/seed.ts",
-    "seed:prod": "ts-node --esm prisma/seed-prod.ts",
+    "seed": "tsx prisma/seed.ts",
+    "seed:prod": "tsx prisma/seed-prod.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

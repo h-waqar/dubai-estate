@@ -12,8 +12,8 @@ import {
   UnitType,
   ContactMethod,
 } from "@prisma/client";
-import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL!,
@@ -93,77 +93,118 @@ async function main() {
       slug: "silver",
       description: "Standard visibility for agents.",
       type: PlanType.SUBSCRIPTION,
-      maxListings: 10,
-      maxFeaturedListings: 1,
       priceMonthly: "10",
       priceYearly: "100",
       priceOneTime: "0",
       isActive: true,
+      entitlements: [
+        { code: "PROPERTY_SLOT", amount: 10 },
+        { code: "PROPERTY_FEATURE_SLOT", amount: 1 },
+      ],
     },
     {
       name: "Gold Package",
       slug: "gold",
       description: "Premium visibility and more listings.",
       type: PlanType.SUBSCRIPTION,
-      maxListings: 50,
-      maxFeaturedListings: 5,
       priceMonthly: "25",
       priceYearly: "250",
       priceOneTime: "0",
       isActive: true,
+      entitlements: [
+        { code: "PROPERTY_SLOT", amount: 50 },
+        { code: "PROPERTY_FEATURE_SLOT", amount: 5 },
+      ],
     },
     {
       name: "Project Listing",
       slug: "project-listing",
       description: "One-time fee for listing a project.",
       type: PlanType.ONE_TIME,
-      maxListings: 1,
-      maxFeaturedListings: 1,
       priceMonthly: "0",
       priceYearly: "0",
       priceOneTime: "100",
       isActive: true,
+      entitlements: [
+        { code: "PROJECT_SLOT", amount: 1 },
+        { code: "PROJECT_FEATURE_SLOT", amount: 1 },
+      ],
     },
   ];
 
-  for (const plan of plans) {
-    await prisma.pricingPlan.upsert({
-      where: { slug: plan.slug },
-      update: plan,
-      create: plan,
+  for (const planData of plans) {
+    const { entitlements, ...rest } = planData;
+    const plan = await prisma.pricingPlan.upsert({
+      where: { slug: rest.slug },
+      update: rest,
+      create: rest,
     });
     console.log(`✅ Plan: ${plan.name}`);
+
+    // Create entitlements
+    for (const ent of entitlements) {
+      // Find the definition ID by code
+      const definition = await prisma.entitlementDefinition.findUnique({
+        where: { code: ent.code },
+      });
+
+      if (definition) {
+        await prisma.planEntitlement.upsert({
+          where: {
+            planId_definitionId: {
+              planId: plan.id,
+              definitionId: definition.id,
+            },
+          },
+          update: { amount: ent.amount },
+          create: {
+            planId: plan.id,
+            definitionId: definition.id,
+            amount: ent.amount,
+          },
+        });
+        console.log(`   └─ ✅ Entitlement: ${ent.code} (${ent.amount})`);
+      } else {
+        console.warn(`   └─ ⚠️ Definition not found: ${ent.code}`);
+      }
+    }
   }
 
   // --- 2. Users ---
   // Admin
   const adminEmail = "admin@dubaiestatetest.com";
+  const hashedPassword = await bcrypt.hash("1122", 10);
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: {},
+    update: {
+      password: hashedPassword,
+    },
     create: {
       email: adminEmail,
       name: "Super Admin",
       username: "super_admin",
       roles: [Role.SUPER_ADMIN],
-      // In a real app, use hashed passwords. For seed/dev, we might leave password null if using NextAuth w/o credentials, or set a dummy.
-      // We'll set a dummy "password" if your auth system uses it, but usually standard is to rely on providers or a specific dev login flow.
-      password: "1122",
+      password: hashedPassword,
+      emailVerified: new Date(),
     },
   });
   console.log(`✅ Admin User: ${admin.email}`);
 
   // Agent
   const agentEmail = "agent@dubaiestatetest.com";
+  const hashedAgentPassword = await bcrypt.hash("password123", 10);
   const agent = await prisma.user.upsert({
     where: { email: agentEmail },
-    update: {},
+    update: {
+      password: hashedAgentPassword,
+    },
     create: {
       email: agentEmail,
       name: "John Agent",
       username: "john_agent",
       roles: [Role.USER],
-      password: "password123",
+      password: hashedAgentPassword,
+      emailVerified: new Date(),
       pricingPlan: {
         connect: { slug: "gold" },
       },
