@@ -172,17 +172,29 @@ async function main() {
 
   // --- 2. Users ---
   // Admin
-  const adminEmail = "admin@dubaiestatetest.com";
+  const adminEmail = "admin@test.com";
+  const adminUsername = "super_admin";
   const hashedPassword = await bcrypt.hash("1122", 10);
+
+  // Remove any user with the same username but different email to avoid unique constraint errors
+  await prisma.user.deleteMany({
+    where: {
+      username: adminUsername,
+      NOT: { email: adminEmail },
+    },
+  });
+
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
     update: {
       password: hashedPassword,
+      username: adminUsername,
+      emailVerified: new Date(),
     },
     create: {
       email: adminEmail,
       name: "Super Admin",
-      username: "super_admin",
+      username: adminUsername,
       roles: [Role.SUPER_ADMIN],
       password: hashedPassword,
       emailVerified: new Date(),
@@ -191,17 +203,29 @@ async function main() {
   console.log(`✅ Admin User: ${admin.email}`);
 
   // Agent
-  const agentEmail = "agent@dubaiestatetest.com";
-  const hashedAgentPassword = await bcrypt.hash("password123", 10);
+  const agentEmail = "agent@test.com";
+  const agentUsername = "john_agent";
+  const hashedAgentPassword = await bcrypt.hash("1122", 10);
+
+  // Remove any user with the same username but different email to avoid unique constraint errors
+  await prisma.user.deleteMany({
+    where: {
+      username: agentUsername,
+      NOT: { email: agentEmail },
+    },
+  });
+
   const agent = await prisma.user.upsert({
     where: { email: agentEmail },
     update: {
       password: hashedAgentPassword,
+      username: agentUsername,
+      emailVerified: new Date(),
     },
     create: {
       email: agentEmail,
       name: "John Agent",
-      username: "john_agent",
+      username: agentUsername,
       roles: [Role.USER],
       password: hashedAgentPassword,
       emailVerified: new Date(),

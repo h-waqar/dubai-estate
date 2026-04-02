@@ -39,7 +39,7 @@ services:
       WATCHPACK_POLLING: "true" # Forces Next.js to check for file changes (Reliable Hot Reloading)
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       NEXT_PUBLIC_APP_URL: http://localhost:3000
-      NEXT_PUBLIC_API_BASE: http://localhot:3000/api
+      NEXT_PUBLIC_API_BASE: http://localhost:3000/api
       API_INTERNAL_BASE: http://localhost:3000/api
 
       # --- 3. Secrets & Keys (Read from your .env file) ---

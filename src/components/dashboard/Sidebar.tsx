@@ -97,7 +97,6 @@ export const adminLinks: SidebarItem[] = [
       { href: "/admin/approvals", label: "Approvals", icon: BadgeCheck },
       { href: "/admin/properties", label: "All Properties", icon: Building },
       { href: "/admin/property-types", label: "Property Types", icon: Key },
-      { href: "/admin/categories", label: "Categories", icon: Tags },
       { href: "/admin/features", label: "Features", icon: Star },
       { href: "/admin/developers", label: "Developers", icon: Construction },
     ],

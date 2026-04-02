@@ -31,7 +31,7 @@ export default async function BlogsPage() {
     redirect("/login");
   }
 
-  if (!session.user.roles.some((role: string) => ["ADMIN", "EDITOR", "WRITER"].includes(role))) {
+  if (!session.user.roles.some((role: string) => ["SUPER_ADMIN", "ADMIN", "EDITOR", "WRITER"].includes(role))) {
     redirect("/unauthorized");
   }
 

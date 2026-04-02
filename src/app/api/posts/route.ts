@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     if (!token)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!token.roles.some(role => ["ADMIN", "EDITOR", "WRITER"].includes(role))) {
+    if (!token.roles.some(role => ["SUPER_ADMIN", "ADMIN", "EDITOR", "WRITER"].includes(role))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -118,7 +118,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!token.roles.some(role => ["ADMIN", "EDITOR", "WRITER"].includes(role))) {
+    if (!token.roles.some(role => ["SUPER_ADMIN", "ADMIN", "EDITOR", "WRITER"].includes(role))) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

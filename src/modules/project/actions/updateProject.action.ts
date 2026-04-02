@@ -47,7 +47,7 @@ export async function updateProjectAction(formData: FormData) {
             return { success: false, error: "Project not found" };
         }
 
-        if (existingProject.createdById !== user.id && !session.user.roles.includes("ADMIN")) {
+        if (existingProject.createdById !== user.id && (!session.user.roles.includes("ADMIN") && !session.user.roles.includes("SUPER_ADMIN"))) {
             return { success: false, error: "Unauthorized" };
         }
 

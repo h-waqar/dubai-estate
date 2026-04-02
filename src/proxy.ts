@@ -10,7 +10,7 @@ export default withAuth(
         if (!token) return;
 
         const roles = token.roles as string[] || [];
-        if (req.nextUrl.pathname.startsWith("/admin") && !roles.some(role => ["SUPER_ADMIN", "ADMIN"].includes(role))) {
+        if (req.nextUrl.pathname.startsWith("/admin") && !roles.some(role => ["SUPER_ADMIN", "ADMIN", "EDITOR", "WRITER", "MANAGER"].includes(role))) {
             return NextResponse.redirect(new URL("/unauthorized", req.url));
         }
     },
