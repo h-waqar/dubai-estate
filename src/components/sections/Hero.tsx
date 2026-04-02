@@ -23,10 +23,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface PropertyType {
   id: number;
@@ -92,33 +89,33 @@ export default function Hero({ propertyTypes }: HeroProps) {
     }
 
     if (location.trim()) params.set("location", location.trim());
-    if (propertyType && propertyType !== "all") params.set("type", propertyType);
+    if (propertyType && propertyType !== "all")
+      params.set("type", propertyType);
     if (bedrooms && bedrooms !== "all") params.set("bedrooms", bedrooms);
     if (priceRange && priceRange !== "all") params.set("price", priceRange);
 
     router.push(`${baseUrl}?${params.toString()}`);
   };
 
-
-
   return (
-    <section className="relative min-h-[500px] h-[70vh] flex items-center justify-center">
-      {/* Background GIF/Video */}
+    <section className="relative min-h-125 h-[70vh] flex items-center justify-center">
+      {/* Background Video */}
       <div className="absolute inset-0 overflow-hidden">
-        <Image
-          src="/assets/videos/home-page-hero-section.gif"
-          alt="Dubai Estate Hero"
-          fill
-          className="object-cover"
-          priority
-          unoptimized
-        />
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/assets/videos/home-page-hero-section.webm" type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 w-full">
         <div className="flex flex-col items-center justify-center max-w-4xl mx-auto">
-
           {/* Hero Text */}
           <div className="text-center mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg tracking-tight">
@@ -131,18 +128,34 @@ export default function Hero({ propertyTypes }: HeroProps) {
 
           {/* Search Widget Container */}
           <div className="w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 ring-1 ring-white/20 border border-white/20 max-w-3xl">
-
             {/* Top Section: Toggle Group */}
             <div className="border-b border-gray-200/50 dark:border-gray-700/50 p-3 md:p-4 bg-white/40 dark:bg-gray-800/40 rounded-tl-lg rounded-tr-lg">
               <ToggleGroup
                 type="single"
                 value={purpose}
-                onValueChange={(value) => { if (value) setPurpose(value); }}
+                onValueChange={(value) => {
+                  if (value) setPurpose(value);
+                }}
                 className="justify-start w-full"
               >
-                <ToggleGroupItem value="buy" className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300">Buy</ToggleGroupItem>
-                <ToggleGroupItem value="rent" className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300">Rent</ToggleGroupItem>
-                <ToggleGroupItem value="off_plan" className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300">Off Plan</ToggleGroupItem>
+                <ToggleGroupItem
+                  value="buy"
+                  className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300"
+                >
+                  Buy
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="rent"
+                  className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300"
+                >
+                  Rent
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="off_plan"
+                  className="flex-1 h-10 data-[state=on]:bg-yellow-500 data-[state=on]:text-white data-[state=on]:shadow-md data-[state=on]:font-bold text-gray-600 dark:text-gray-300 font-medium transition-all duration-300"
+                >
+                  Off Plan
+                </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
@@ -158,8 +171,8 @@ export default function Hero({ propertyTypes }: HeroProps) {
                       transition-all duration-200
                       hover:border-yellow-400/50 hover:bg-white/80
                       focus-within:ring-1 focus-within:ring-yellow-500 focus-within:border-yellow-500 focus-within:bg-white
-                      [&_[data-slot=command-input-wrapper]]:h-full 
-                      [&_[data-slot=command-input-wrapper]]:border-none 
+                      [&_[data-slot=command-input-wrapper]]:h-full
+                      [&_[data-slot=command-input-wrapper]]:border-none
                       [&_[data-slot=command-input-wrapper]]:px-0
                       [&_[data-slot=command-input-wrapper]_svg]:hidden"
                   >
@@ -168,17 +181,9 @@ export default function Hero({ propertyTypes }: HeroProps) {
                       onClick={(e) => {
                         setOpen(true);
                         // Programmatically focus the input if the container is clicked
-                        e.currentTarget.querySelector('input')?.focus();
+                        e.currentTarget.querySelector("input")?.focus();
                       }}
                     >
-                      {/* Remove manual icon, we'll try to use the CommandInput's icon, OR hiding CommandInput's icon and using ours. 
-                            The user complained about "two search icons". default CommandInput has one.
-                            Let's hide the Wrapper's border and icon, and use ours for custom styling, 
-                            OR let CommandInput handle it completely but remove the border.
-                            
-                            Let's try to HIDE the default SearchIcon from CommandInput using CSS child selector.
-                            And hide border-b from wrapper.
-                        */}
                       <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
                       <CommandInput
                         placeholder="Enter location (e.g. Dubai Marina)..."
@@ -192,14 +197,9 @@ export default function Hero({ propertyTypes }: HeroProps) {
                         onBlur={() => {
                           setTimeout(() => setOpen(false), 200);
                         }}
-                        // Override Shadcn defaults
                         className="h-12 border-none focus:ring-0 text-base bg-transparent p-0 placeholder:text-gray-500"
-                      // This class targets the input itself.
-                      // To target the wrapper, we need to use parent selectors on the Command component OR
-                      // just hack it here with some adjacent selectors if possible? No.
                       />
                     </div>
-
 
                     {open && (
                       <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
@@ -221,7 +221,9 @@ export default function Hero({ propertyTypes }: HeroProps) {
                                 <Check
                                   className={cn(
                                     "ml-auto h-4 w-4",
-                                    location === suggestion ? "opacity-100" : "opacity-0"
+                                    location === suggestion
+                                      ? "opacity-100"
+                                      : "opacity-0",
                                   )}
                                 />
                               </CommandItem>
@@ -308,7 +310,6 @@ export default function Hero({ propertyTypes }: HeroProps) {
                 </Button>
               </div>
             </div>
-
           </div>
         </div>
       </div>
