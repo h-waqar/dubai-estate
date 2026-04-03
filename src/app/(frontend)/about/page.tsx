@@ -43,31 +43,31 @@ export default function AboutPage() {
 
   const principles = [
     {
-      img: "/about-us/aim.png",
+      img: "/assets/dummy/dubai_marina_penthouse_1766238797898.png",
       title: "Assertive",
       description:
         "Dubai Estate says it like it is. No surprises, only expectations met.",
     },
     {
-      img: "/about-us/reimagine.png",
+      img: "/assets/dummy/dubai_luxury_villa_exterior_1766238766655.png",
       title: "Upbeat",
       description:
         "The optimistic brand fulfills experiences in a positive and confident manner.",
     },
     {
-      img: "/about-us/stays.png",
+      img: "/assets/images/property-1.jpg",
       title: "Youthful",
       description:
         "Be it a new restaurant, club or local attraction, Dubai Estate stays on top of the game by offering the latest trends in the city.",
     },
     {
-      img: "/about-us/aboutBanner.jpeg",
+      img: "/assets/images/dubai-hero.jpg",
       title: "Honest",
       description:
         "With hospitality comes great responsibility. Dubai Estate is transparent about their services, limitations and capabilities.",
     },
     {
-      img: "/about-us/quote.png",
+      img: "/assets/dummy/dubai_downtown_apartment_view_1766238781802.png",
       title: "Empathetic",
       description:
         "There's no one-size-fits-all when it comes to guests. Dubai Estate understands and aims to solve grievances in a meaningful manner.",
@@ -87,7 +87,7 @@ export default function AboutPage() {
         {/* Hero Section */}
         <section className="relative h-[60vh] md:h-[80vh] text-white">
           <Image
-            src="/about-us/aboutBanner.jpeg"
+            src="/assets/images/dubai-hero.jpg"
             alt="Modern apartment interior with sea view"
             fill
             className="object-cover"
@@ -167,7 +167,7 @@ export default function AboutPage() {
               </div>
               <div className="relative order-1 md:order-2 h-80 md:h-[450px]">
                 <Image
-                  src="/about-us/stays.png"
+                  src="/assets/images/property-1.jpg"
                   alt="Balcony view from a Dubai Estate apartment"
                   fill
                   className="rounded-xl shadow-lg object-cover w-full h-full"

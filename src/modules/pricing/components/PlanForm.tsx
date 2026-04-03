@@ -197,11 +197,46 @@ export function PlanForm({ initialData, definitions = [], isEditing = false }: P
                 </FormItem>
               )}
             />
-            {definitions.map((def, idx) => {
-              // Ensure the field exists in the form state array
-              // If not mapped, we find its index or append it (for robustness, we trust the defaultValues mapping above).
+          </div>
+        )}
+
+        {planType === "ONE_TIME" && (
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="priceOneTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>One-Time Fee (AED)</FormLabel>
+                  <FormControl>
+                    <Input 
+                        type="number" 
+                        {...field} 
+                        value={field.value ?? ""}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          field.onChange(isNaN(val) ? 0 : val);
+                        }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+
+        {definitions.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 border-t pt-8">
+            <div className="col-span-2">
+              <h3 className="text-lg font-medium">Entitlements</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Configure the limits for this plan.
+              </p>
+            </div>
+            {definitions.map((def) => {
               const fieldIndex = form.watch("entitlements")?.findIndex(e => e.definitionId === def.id) ?? -1;
-              if (fieldIndex === -1) return null; // Fallback if missing
+              if (fieldIndex === -1) return null;
 
               return (
                 <FormField
@@ -229,30 +264,6 @@ export function PlanForm({ initialData, definitions = [], isEditing = false }: P
               );
             })}
           </div>
-        )}
-
-        {planType === "ONE_TIME" && (
-          <FormField
-            control={form.control}
-            name="priceOneTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>One-Time Fee (AED)</FormLabel>
-                <FormControl>
-                  <Input 
-                      type="number" 
-                      {...field} 
-                      value={field.value ?? ""}
-                      onChange={e => {
-                        const val = parseFloat(e.target.value);
-                        field.onChange(isNaN(val) ? 0 : val);
-                      }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         )}
 
         <div className="grid grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/20">
