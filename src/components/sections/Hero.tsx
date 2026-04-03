@@ -103,16 +103,25 @@ export default function Hero({ propertyTypes }: HeroProps) {
 
   return (
     <section className="relative min-h-[500px] h-[70vh] flex items-center justify-center">
-      {/* Background GIF/Video */}
+      {/* Background Video */}
       <div className="absolute inset-0 overflow-hidden">
-        <Image
-          src="/assets/videos/home-page-hero-section.gif"
-          alt="Dubai Estate Hero"
-          fill
-          className="object-cover"
-          priority
-          unoptimized
-        />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/assets/videos/hero-section-bg.webm" type="video/webm" />
+          {/* Fallback image if video is not supported or fails to load */}
+          <Image
+            src="/assets/images/dubai-hero.jpg"
+            alt="Dubai Estate Hero"
+            fill
+            className="object-cover"
+            priority
+          />
+        </video>
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
@@ -168,15 +177,15 @@ export default function Hero({ propertyTypes }: HeroProps) {
                       onClick={(e) => {
                         setOpen(true);
                         // Programmatically focus the input if the container is clicked
-                        e.currentTarget.querySelector('input')?.focus();
+                        e.currentTarget.querySelector("input")?.focus();
                       }}
                     >
-                      {/* Remove manual icon, we'll try to use the CommandInput's icon, OR hiding CommandInput's icon and using ours. 
+                      {/* Remove manual icon, we will try to use the CommandInputs icon, OR hiding CommandInputs icon and using ours. 
                             The user complained about "two search icons". default CommandInput has one.
-                            Let's hide the Wrapper's border and icon, and use ours for custom styling, 
+                            Lets hide the Wrappers border and icon, and use ours for custom styling, 
                             OR let CommandInput handle it completely but remove the border.
                             
-                            Let's try to HIDE the default SearchIcon from CommandInput using CSS child selector.
+                            Lets try to HIDE the default SearchIcon from CommandInput using CSS child selector.
                             And hide border-b from wrapper.
                         */}
                       <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
