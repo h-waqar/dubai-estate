@@ -47,7 +47,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 WORKDIR /app
 
 ENV NODE_ENV=production
-RUN pnpm add -g prisma
+RUN pnpm add -g prisma@7.5.0
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
