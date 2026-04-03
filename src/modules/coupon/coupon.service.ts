@@ -8,6 +8,7 @@ export class CouponService {
     if (!prisma.coupon) throw new Error("Prisma Coupon model is undefined. Please restart the server.");
     return await prisma.coupon.create({
       data: {
+        name: data.name,
         code: data.code,
         type: data.type,
         value: data.value,

@@ -33,6 +33,7 @@ export function CouponFormModal({ coupon, plans, open, onOpenChange }: CouponFor
     const form = useForm<z.infer<typeof createCouponSchema>>({
         resolver: zodResolver(createCouponSchema),
         defaultValues: {
+            name: "",
             code: "",
             type: "PERCENTAGE",
             value: 0,
@@ -59,7 +60,8 @@ export function CouponFormModal({ coupon, plans, open, onOpenChange }: CouponFor
              if (!open) {
                  // Reset when closed if not editing
                  form.reset({
-                    code: "",
+                    name: "",
+            code: "",
                     type: "PERCENTAGE",
                     value: 0,
                     maxUsage: null,
@@ -125,6 +127,19 @@ export function CouponFormModal({ coupon, plans, open, onOpenChange }: CouponFor
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="code"
