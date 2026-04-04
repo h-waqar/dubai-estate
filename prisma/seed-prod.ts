@@ -14,10 +14,10 @@ async function main() {
 
     // --- 1. Entitlement Definitions ---
     const entitlementDefs = [
-        { code: "PROPERTY_SLOT", description: "Allows creating one property listing" },
-        { code: "PROJECT_SLOT", description: "Allows creating one project listing" },
-        { code: "PROPERTY_FEATURE_SLOT", description: "Allows featuring a property listing" },
-        { code: "PROJECT_FEATURE_SLOT", description: "Allows featuring a project listing" }
+        { code: "PROPERTY_SLOT", name: "Property Slot", description: "Allows creating one property listing" },
+        { code: "PROJECT_SLOT", name: "Project Slot", description: "Allows creating one project listing" },
+        { code: "PROPERTY_FEATURE_SLOT", name: "Property Feature Slot", description: "Allows featuring a property listing" },
+        { code: "PROJECT_FEATURE_SLOT", name: "Project Feature Slot", description: "Allows featuring a project listing" }
     ];
 
     for (const def of entitlementDefs) {
