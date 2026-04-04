@@ -5,12 +5,13 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut, Settings, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/modules/user/hooks/useAuth";
 import { UserProfileDropdown } from "@/components/common/UserProfileDropdown";
+import { signOut } from "next-auth/react";
 
 interface NavItem {
   title: string;
@@ -56,12 +57,20 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userRoles } = useAuth();
+
+  const isAdmin =
+    userRoles?.includes("ADMIN") || userRoles?.includes("SUPER_ADMIN");
 
   const isActive = (href: string) => pathname === href;
 
   const toggleDropdown = (title: string) => {
     setOpenDropdown(openDropdown === title ? null : title);
+  };
+
+  const handleLogout = async () => {
+    setIsOpen(false);
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
@@ -212,19 +221,57 @@ export default function Header() {
                   ))}
 
                   <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                    <Link href="/login" onClick={() => setIsOpen(false)}>
-                      <Button
-                        variant="outline"
-                        className="w-full border-gray-300 dark:border-gray-600"
-                      >
-                        Sign In
-                      </Button>
-                    </Link>
-                    <Link href="/register" onClick={() => setIsOpen(false)}>
-                      <Button className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white">
-                        Get Started
-                      </Button>
-                    </Link>
+                    {isAuthenticated ? (
+                      <>
+                        <Link href="/account" onClick={() => setIsOpen(false)}>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start text-gray-700 dark:text-gray-300"
+                          >
+                            <UserIcon className="mr-2 h-4 w-4" />
+                            My Account
+                          </Button>
+                        </Link>
+                        {isAdmin && (
+                          <Link
+                            href="/admin/dashboard"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            <Button
+                              variant="ghost"
+                              className="w-full justify-start text-gray-700 dark:text-gray-300"
+                            >
+                              <Settings className="mr-2 h-4 w-4" />
+                              Admin Panel
+                            </Button>
+                          </Link>
+                        )}
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                          onClick={handleLogout}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Logout
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login" onClick={() => setIsOpen(false)}>
+                          <Button
+                            variant="outline"
+                            className="w-full border-gray-300 dark:border-gray-600"
+                          >
+                            Sign In
+                          </Button>
+                        </Link>
+                        <Link href="/register" onClick={() => setIsOpen(false)}>
+                          <Button className="w-full bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white">
+                            Get Started
+                          </Button>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </nav>
               </SheetContent>
