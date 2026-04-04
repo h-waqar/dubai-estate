@@ -27,18 +27,22 @@ async function main() {
   // --- 0. Entitlement Definitions ---
   const entitlementDefs = [
     {
+      name: "Property Slot",
       code: "PROPERTY_SLOT",
       description: "Allows creating one property listing",
     },
     {
+      name: "Project Slot",
       code: "PROJECT_SLOT",
       description: "Allows creating one project listing",
     },
     {
+      name: "Property Feature Slot",
       code: "PROPERTY_FEATURE_SLOT",
       description: "Allows featuring a property listing",
     },
     {
+      name: "Project Feature Slot",
       code: "PROJECT_FEATURE_SLOT",
       description: "Allows featuring a project listing",
     },
@@ -98,8 +102,10 @@ async function main() {
       priceOneTime: "0",
       isActive: true,
       entitlements: [
-        { code: "PROPERTY_SLOT", amount: 10 },
-        { code: "PROPERTY_FEATURE_SLOT", amount: 1 },
+        { name: "Property Slot",
+      code: "PROPERTY_SLOT", amount: 10 },
+        { name: "Property Feature Slot",
+      code: "PROPERTY_FEATURE_SLOT", amount: 1 },
       ],
     },
     {
@@ -112,8 +118,10 @@ async function main() {
       priceOneTime: "0",
       isActive: true,
       entitlements: [
-        { code: "PROPERTY_SLOT", amount: 50 },
-        { code: "PROPERTY_FEATURE_SLOT", amount: 5 },
+        { name: "Property Slot",
+      code: "PROPERTY_SLOT", amount: 50 },
+        { name: "Property Feature Slot",
+      code: "PROPERTY_FEATURE_SLOT", amount: 5 },
       ],
     },
     {
@@ -126,8 +134,10 @@ async function main() {
       priceOneTime: "100",
       isActive: true,
       entitlements: [
-        { code: "PROJECT_SLOT", amount: 1 },
-        { code: "PROJECT_FEATURE_SLOT", amount: 1 },
+        { name: "Project Slot",
+      code: "PROJECT_SLOT", amount: 1 },
+        { name: "Project Feature Slot",
+      code: "PROJECT_FEATURE_SLOT", amount: 1 },
       ],
     },
   ];

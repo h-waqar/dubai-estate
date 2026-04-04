@@ -25,6 +25,7 @@ export class EntitlementService {
 
     return await tx.entitlementGrant.create({
       data: {
+        name: definition.name,
         userId,
         definitionId: definition.id,
         amount,
@@ -48,7 +49,7 @@ export class EntitlementService {
   /**
    * Aggregates all ACTIVE grants for the user and code and returns true if capacity > used.
    */
-    static async checkCapacity(userId: number, code: string, tx: PrismaClientType = prisma): Promise<boolean> {
+  static async checkCapacity(userId: number, code: string, tx: PrismaClientType = prisma): Promise<boolean> {
     const { totalCapacity, totalUsed } = await this.getQuotaStatus(userId, code, tx);
     return totalCapacity > totalUsed;
   }

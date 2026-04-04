@@ -10,7 +10,8 @@ function parseCouponFormData(formData: FormData) {
   const rawData = Object.fromEntries(formData.entries());
   
   const payload: any = {
-      code: rawData.code,
+      name: String(rawData.name),
+      code: String(rawData.code),
       type: rawData.type,
       value: rawData.value ? Number(rawData.value) : undefined,
       maxUsage: rawData.maxUsage ? Number(rawData.maxUsage) : null,
@@ -22,11 +23,7 @@ function parseCouponFormData(formData: FormData) {
   };
 
   const planIds = formData.getAll('planIds').map(id => Number(id));
-  if (planIds.length > 0) {
-      payload.planIds = planIds;
-  } else if (payload.appliesToAllPlans === false) {
-      payload.planIds = [];
-  }
+  payload.planIds = planIds;
 
   return payload;
 }

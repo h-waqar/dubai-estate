@@ -81,6 +81,7 @@ model Subscription {
 
 model Coupon {
   id                String         @id @default(cuid())
+  name              String
   code              String         @unique
   type              CouponType
   value             Decimal        @db.Decimal(10, 2)
@@ -712,6 +713,7 @@ enum GrantStatus {
 
 model EntitlementDefinition {
   id               String               @id @default(cuid())
+  name              String
   code             String               @unique // e.g., 'PROPERTY_SLOT'
   description      String?
   grants           EntitlementGrant[]
@@ -720,6 +722,7 @@ model EntitlementDefinition {
 
 model EntitlementGrant {
   id           String                @id @default(cuid())
+  name              String
   userId       Int
   definitionId String
   amount       Int // Capacity (e.g., 5 slots)

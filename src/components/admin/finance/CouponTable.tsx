@@ -57,6 +57,7 @@ export function CouponTable({ coupons, plans }: CouponTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Name</TableHead>
               <TableHead>Code</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Value</TableHead>
@@ -69,7 +70,8 @@ export function CouponTable({ coupons, plans }: CouponTableProps) {
           <TableBody>
             {filteredCoupons.map((coupon) => (
               <TableRow key={coupon.id}>
-                <TableCell className="font-medium">{coupon.code}</TableCell>
+                <TableCell className="font-medium">{coupon.name}</TableCell>
+                <TableCell>{coupon.code}</TableCell>
                 <TableCell>{coupon.type}</TableCell>
                 <TableCell>
                   {coupon.type === 'PERCENTAGE' ? `${coupon.value}%` : `$${coupon.value}`}
