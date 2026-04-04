@@ -13,7 +13,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "db": "npx prisma studio",
+    "db": "pnpm prisma studio",
     "lint": "eslint",
     "seed": "tsx prisma/seed.ts",
     "seed:prod": "tsx prisma/seed-prod.ts",

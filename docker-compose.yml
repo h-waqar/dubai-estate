@@ -86,7 +86,7 @@ services:
       db:
         condition: service_healthy
     # Sync dependencies -> Generate Prisma Client -> Push DB Schema -> Seed -> Start Dev Server
-    command: sh -c "./node_modules/.bin/prisma generate && ./node_modules/.bin/prisma db push --accept-data-loss && pnpm run seed && pnpm dev"
+    command: sh -c "pnpm prisma generate && pnpm prisma db push --accept-data-loss && pnpm run seed && pnpm dev"
 
   # Service 3: Adminer (Database Viewer)
   # A lightweight GUI to view/edit your database tables.
@@ -115,7 +115,7 @@ services:
       - .:/app
       - /app/node_modules
     # We use 0.0.0.0 so it's accessible from outside the container
-    command: sh -c "./node_modules/.bin/prisma studio --port 5555 --browser none"
+    command: sh -c "pnpm prisma studio --port 5555 --browser none"
     depends_on:
       db:
         condition: service_healthy
