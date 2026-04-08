@@ -6,11 +6,13 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Edit2, Eye, MapPin } from "lucide-react";
+import { Edit2, Eye, MapPin, Megaphone } from "lucide-react";
+import { AdvertiseModal } from "@/components/dashboard/AdvertiseModal";
 
 export default async function MyPropertiesPage() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return null;
+    const userRole = (session.user as any).roles?.[0] || "USER";
 
     const { data: properties } = await listProperties({
         userId: session.user.id as number,
@@ -133,6 +135,7 @@ export default async function MyPropertiesPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                <AdvertiseModal property={property} userRole={userRole} />
                                                 <Link href={`/properties/${property.slug}`} target="_blank">
                                                     <Button variant="ghost" size="icon" title="View Public Listing">
                                                         <Eye className="w-4 h-4" />
