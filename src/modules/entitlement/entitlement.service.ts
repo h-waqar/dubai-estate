@@ -82,10 +82,21 @@ export class EntitlementService {
         status: GrantStatus.ACTIVE,
         definition: { code },
       },
-      orderBy: { validFrom: 'asc' }, // Consume from oldest grants first
+      orderBy: [
+        { validTo: "asc" },
+        { validFrom: "asc" }
+      ],
     });
 
-    for (const grant of grants) {
+    // Sort to ensure null validTo (infinite) comes last
+    const sortedGrants = [...grants].sort((a, b) => {
+      if (a.validTo === null && b.validTo === null) return 0;
+      if (a.validTo === null) return 1;
+      if (b.validTo === null) return -1;
+      return a.validTo.getTime() - b.validTo.getTime();
+    });
+
+    for (const grant of sortedGrants) {
       if (grant.amount > grant.used) {
         return await tx.entitlementGrant.update({
           where: { id: grant.id },
@@ -108,7 +119,7 @@ export class EntitlementService {
         definition: { code },
         used: { gt: 0 }
       },
-      orderBy: { validFrom: 'desc' }, // Release from newest grants first
+      orderBy: { validFrom: "desc" }, // Release from newest grants first
     });
 
     if (grants.length === 0) {

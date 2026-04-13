@@ -2,28 +2,55 @@ import { prisma } from "@/lib/prisma";
 import { CreatePricingInput } from "../validators/createPricing.validator";
 import { UpdatePricingInput } from "../validators/updatePricing.validator";
 import { PlanType } from "@prisma/client";
-import { createPayPalProduct, createPayPalPlan, deactivatePayPalPlan } from "@/lib/paypal-api";
+import { createPayPalProduct, createPayPalPlan, deactivatePayPalPlan, getPayPalPlanDetails } from "@/lib/paypal-api";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export class PricingService {
   static async listPlans() {
     return prisma.pricingPlan.findMany({
-      orderBy: { priceMonthly: "asc" },
+      orderBy: { rank: "asc" },
       include: {
-        _count: {
-          select: { users: true }
-        }
+        entitlements: { include: { definition: true } },
+        _count: { select: { users: true } }
       }
     });
+  }
+
+  static async syncPlanStatus(id: number) {
+    const plan = await prisma.pricingPlan.findUnique({ where: { id } });
+    if (!plan || !plan.paypalPlanId) {
+      return { success: false, error: "Plan or PayPal ID not found" };
+    }
+
+    try {
+      const paypalPlan = await getPayPalPlanDetails(plan.paypalPlanId);
+      const isActive = paypalPlan.status === "ACTIVE";
+      
+      // Sync price from PayPal
+      const paypalPrice = paypalPlan.billing_cycles?.[0]?.pricing_scheme?.fixed_price?.value;
+      
+      await prisma.pricingPlan.update({
+        where: { id },
+        data: { 
+          isActive,
+          ...(paypalPrice && { priceMonthly: paypalPrice })
+        }
+      });
+
+      return { success: true, status: paypalPlan.status, priceSynced: !!paypalPrice };
+    } catch (error: any) {
+      console.error(`[PricingService.syncPlanStatus] Error for plan ${id}:`, error);
+      const message = error.response?.data?.message || error.message;
+      return { success: false, error: `PayPal Sync Failed: ${message}` };
+    }
   }
 
   static async getPlan(id: number) {
     return prisma.pricingPlan.findUnique({
       where: { id },
       include: {
-        entitlements: true,
-        _count: {
-          select: { users: true }
-        }
+        entitlements: { include: { definition: true } },
+        _count: { select: { users: true } }
       }
     });
   }
@@ -31,6 +58,9 @@ export class PricingService {
   static async getPlanBySlug(slug: string) {
     return prisma.pricingPlan.findUnique({
       where: { slug },
+      include: {
+        entitlements: { include: { definition: true } }
+      }
     });
   }
 
@@ -38,34 +68,22 @@ export class PricingService {
     let paypalProductId = data.paypalProductId;
     let paypalPlanId = data.paypalPlanId;
 
-    // Automatically create PayPal resources if it's a subscription and IDs are missing
     if (data.type === "SUBSCRIPTION" && !paypalPlanId && data.priceMonthly) {
       try {
-        // 1. Create Product if needed
         if (!paypalProductId) {
           const product = await createPayPalProduct(data.name, data.description || "Subscription Plan");
           paypalProductId = product.id;
         }
-
-        // 2. Create Plan
         if (paypalProductId) {
-            const plan = await createPayPalPlan(
-                paypalProductId,
-                data.name,
-                data.description || "Monthly Subscription",
-                data.priceMonthly.toString()
-            );
+            const plan = await createPayPalPlan(paypalProductId, data.name, data.description || "Monthly Subscription", data.priceMonthly.toString());
             paypalPlanId = plan.id;
         }
       } catch (error) {
-        console.error("Auto-creation of PayPal resources failed:", error);
-        // We continue creating the local plan, but maybe log a warning or could verify if we should throw.
-        // For now, let's allow partial creation so the admin isn't blocked, but IDs will be null.
+        console.error("PayPal Error:", error);
       }
     }
 
     const { entitlements, ...restData } = data;
-
     return prisma.pricingPlan.create({
       data: {
         ...restData,
@@ -73,26 +91,19 @@ export class PricingService {
         priceMonthly: data.priceMonthly?.toString(),
         priceYearly: data.priceYearly?.toString(),
         priceOneTime: data.priceOneTime?.toString(),
-        paypalPlanId: paypalPlanId,
-        paypalProductId: paypalProductId,
+        paypalPlanId,
+        paypalProductId,
         ...(entitlements && entitlements.length > 0 && {
           entitlements: {
-            create: entitlements.map(e => ({
-              definitionId: e.definitionId,
-              amount: e.amount
-            }))
+            create: entitlements.map(e => ({ definitionId: e.definitionId, amount: e.amount }))
           }
         })
-      },
-    }).then(plan => {
-        console.log("Prisma create result:", plan);
-        return plan;
+      }
     });
   }
 
   static async updatePlan(id: number, data: UpdatePricingInput) {
     const { entitlements, ...restData } = data;
-    
     return prisma.pricingPlan.update({
       where: { id },
       data: {
@@ -105,80 +116,33 @@ export class PricingService {
         paypalProductId: data.paypalProductId,
         ...(entitlements && {
           entitlements: {
-            deleteMany: {}, // replace all existing entitlements
-            create: entitlements.map(e => ({
-              definitionId: e.definitionId,
-              amount: e.amount
-            }))
+            deleteMany: {},
+            create: entitlements.map(e => ({ definitionId: e.definitionId, amount: e.amount }))
           }
         })
-      },
+      }
     });
   }
 
   static async deletePlan(id: number) {
     const plan = await prisma.pricingPlan.findUnique({ where: { id } });
     if (!plan) return { success: false, error: "Plan not found" };
-
-    // 1. Check for existing subscriptions
     const subCount = await prisma.subscription.count({ where: { planId: id } });
-    if (subCount > 0) {
-        return { success: false, error: `Cannot delete plan with ${subCount} associated subscriptions. Please archive (deactivate) it instead.` };
+    if (subCount > 0) return { success: false, error: `Cannot delete plan with ${subCount} subscriptions.` };
+    if (plan.paypalPlanId) {
+        try { await deactivatePayPalPlan(plan.paypalPlanId); } catch (e) { console.error(e); }
     }
-
-    // 2. Determine PayPal Plan ID (DB or Legacy Env)
-    let paypalIdToDeactivate: string | null | undefined = plan.paypalPlanId;
-    if (!paypalIdToDeactivate) {
-        if (plan.slug === "silver") paypalIdToDeactivate = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER;
-        else if (plan.slug === "gold") paypalIdToDeactivate = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD;
-    }
-    
-    // 3. Deactivate on PayPal
-    if (paypalIdToDeactivate) {
-        try {
-            await deactivatePayPalPlan(paypalIdToDeactivate);
-            console.log(`Deactivated PayPal Plan: ${paypalIdToDeactivate}`);
-        } catch (error) {
-            console.error(`Failed to deactivate PayPal plan ${paypalIdToDeactivate}`, error);
-            // Continue with local deletion even if remote fails (it might already be inactive or invalid)
-        }
-    }
-
-    // 4. Delete from DB
-    try {
-        await prisma.pricingPlan.delete({
-            where: { id },
-        });
-        return { success: true };
-    } catch (error) {
-        console.error("Delete Plan Error:", error);
-        return { success: false, error: "Database error while deleting plan." };
-    }
+    await prisma.pricingPlan.delete({ where: { id } });
+    return { success: true };
   }
 
   static async getSubscribers() {
     return prisma.subscription.findMany({
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          }
-        },
-        plan: {
-            select: {
-                name: true,
-                priceMonthly: true,
-                priceYearly: true,
-                type: true,
-                priceOneTime: true
-            }
-        }
+        user: { select: { id: true, name: true, email: true } },
+        plan: { select: { name: true, priceMonthly: true, priceYearly: true, type: true, priceOneTime: true } }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: { createdAt: 'desc' }
     });
   }
 }

@@ -3,18 +3,41 @@ import { listPlans } from "@/modules/pricing/actions/listPlans";
 import PricingList from "@/modules/pricing/components/PricingList";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AddonStore from "@/modules/pricing/components/AddonStore";
+import { prisma } from "@/lib/prisma";
+import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export const metadata = {
   title: "Pricing Plans - Dubai Estate",
   description: "Choose a subscription plan to start listing your properties.",
 };
 
-export default async function PricingPage() {
+export default async function PricingPage(props: { searchParams: Promise<{ tab?: string }> }) {
+  const searchParams = await props.searchParams;
   const plans = await listPlans();
   const session = await getServerSession(authOptions);
   
+  const activeTab = searchParams.tab || "plans";
+
   // Filter for active subscription plans
   const subscriptionPlans = plans.filter(p => p.isActive && p.type === "SUBSCRIPTION");
+  const addonPlans = plans.filter(p => p.isActive && (p.type === "ADDON" || p.type === "ONE_TIME"));
+
+  // Fetch current user's active subscription for upgrade logic
+  const user = session?.user?.id ? await prisma.user.findUnique({
+    where: { id: Number(session.user.id) },
+    include: {
+      subscriptions: {
+        where: { status: "ACTIVE" },
+        include: { plan: true },
+        orderBy: { createdAt: "desc" },
+        take: 1
+      }
+    }
+  }) : null;
+
+  const activeSubscription = serializeDecimals(user?.subscriptions[0] || null);
 
   return (
     <>
@@ -29,10 +52,28 @@ export default async function PricingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
-            {/* Using PricingList to handle PayPal Context globally for the list */}
-            <PricingList plans={subscriptionPlans} userId={session?.user?.id} />
-          </div>
+          <Tabs defaultValue={activeTab} className="w-full">
+            <div className="flex justify-center mb-8">
+              <TabsList className="grid w-full max-w-md grid-cols-2">
+                <TabsTrigger value="plans">Monthly Plans</TabsTrigger>
+                <TabsTrigger value="addons">Addons & Credits</TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="plans" className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+                <PricingList 
+                  plans={subscriptionPlans} 
+                  userId={session?.user?.id} 
+                  activeSubscription={activeSubscription}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="addons">
+              <AddonStore addonPlans={addonPlans} userId={session?.user?.id} />
+            </TabsContent>
+          </Tabs>
 
         </div>
       </main>

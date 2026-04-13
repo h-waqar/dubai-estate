@@ -24,6 +24,7 @@ export const accountLinks: SidebarItem[] = [
     label: "Billing",
     icon: CreditCard,
     subItems: [
+      { href: "/account/billing", label: "Billing & Addons", icon: CreditCard },
       { href: "/account/subscriptions", label: "Subscriptions", icon: CreditCard },
       { href: "/account/subscriptions/history", label: "Payment History", icon: History },
     ],

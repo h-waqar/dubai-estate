@@ -77,6 +77,39 @@ export async function deletePlanAction(id: number) {
   }
 }
 
+export async function syncPlanAction(id: number) {
+  try {
+    const result = await PricingService.syncPlanStatus(id);
+    revalidatePath("/admin/pricing");
+    if (result.success) {
+      return { success: true, isActive: result.status === "ACTIVE", message: `Synced: Status is ${result.status}${result.priceSynced ? " (Price updated)" : ""}` };
+    }
+    return result;
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function syncAllPlansAction() {
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const plans = await prisma.pricingPlan.findMany({
+      where: { type: "SUBSCRIPTION", paypalPlanId: { not: null } }
+    });
+
+    let successCount = 0;
+    for (const plan of plans) {
+      const result = await PricingService.syncPlanStatus(plan.id);
+      if (result.success) successCount++;
+    }
+
+    revalidatePath("/admin/pricing");
+    return { success: true, message: `Successfully synced ${successCount} out of ${plans.length} plans.` };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getEntitlementDefinitionsAction() {
   try {
     const { prisma } = await import("@/lib/prisma");

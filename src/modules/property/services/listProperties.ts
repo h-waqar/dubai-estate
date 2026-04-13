@@ -171,6 +171,7 @@ export async function listProperties(filters: PropertyFilters = {}) {
       skip,
       take: limit,
       include: {
+        promotions: { where: { status: "ACTIVE", expiresAt: { gt: new Date() } } },
         propertyType: true,
         images: true,
         createdBy: true,
@@ -195,7 +196,7 @@ export async function listProperties(filters: PropertyFilters = {}) {
   // Attach media usages to properties
   const result = properties.map((p) => ({
     ...p,
-    mediaUsages: mediaUsages.filter((mu) => mu.entityId === p.id),
+    isFeatured: (p.promotions || []).length > 0, mediaUsages: mediaUsages.filter((mu) => mu.entityId === p.id),
   }));
 
   return {

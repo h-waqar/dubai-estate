@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/paypal-api";
 import { ledgerService } from "@/modules/finance/ledger.service";
+import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 import { SubscriptionService } from "@/modules/user/services/subscription.service";
 import { prisma } from "@/lib/prisma";
 import { TransactionStatus, TransactionType, Prisma } from "@prisma/client";
@@ -31,6 +32,74 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (eventType) {
+      case "PAYMENT.CAPTURE.COMPLETED": {
+        const customId = resource.custom_id;
+        if (!customId) break;
+
+        let metadata;
+        try {
+          metadata = JSON.parse(customId);
+        } catch (e) {
+          console.error("Failed to parse customId in PAYMENT.CAPTURE.COMPLETED", customId);
+          break;
+        }
+
+        const { userId, addonType, amountCredits } = metadata;
+        if (!userId || !addonType) break;
+
+        // Verify user exists to avoid P2003 Foreign Key violation (e.g. after DB prune)
+        const userExists = await prisma.user.findUnique({ 
+          where: { id: Number(userId) },
+          select: { id: true } 
+        });
+        if (!userExists) {
+          console.error(`[Webhook:PAYMENT.CAPTURE.COMPLETED] User ${userId} not found in database. Skipping transaction.`);
+          break;
+        }
+
+        await prisma.$transaction(async (tx) => {
+          const existingTransaction = await tx.ledgerTransaction.findUnique({
+            where: { providerTxId: resource.id },
+          });
+
+          if (existingTransaction) {
+            console.log(`Transaction ${resource.id} already processed. Skipping.`);
+            return;
+          }
+
+          await ledgerService.recordTransaction(tx, {
+            userId: Number(userId),
+            type: TransactionType.PAYMENT,
+            status: TransactionStatus.COMPLETED,
+            amount: new Prisma.Decimal(resource.amount.value),
+            currency: resource.amount.currency_code,
+            provider: "PAYPAL",
+            providerTxId: resource.id,
+            occurredAt: new Date(resource.create_time),
+            metadata: body,
+          });
+
+          const addonToCode: Record<string, string> = {
+            featured: "FEATURED_CREDIT",
+            spotlight: "SPOTLIGHT_CREDIT",
+            bump_up: "BUMP_UP_CREDIT",
+          };
+          const code = addonToCode[addonType.toLowerCase()];
+
+          if (code) {
+            await EntitlementService.grant(
+              Number(userId),
+              code,
+              amountCredits || 1,
+              resource.id,
+              "ADDON",
+              tx
+            );
+          }
+        });
+        break;
+      }
+
       case "PAYMENT.SALE.COMPLETED": {
         // Recurring payment or initial payment completed
         const subscriptionId = resource.billing_agreement_id;

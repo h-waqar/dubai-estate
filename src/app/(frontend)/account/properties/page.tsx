@@ -1,6 +1,7 @@
 import { listProperties } from "@/modules/property/services/listProperties";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
+import { PromotionService } from "@/modules/promotions/services/promotion.service";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,8 @@ import { AdvertiseModal } from "@/components/dashboard/AdvertiseModal";
 
 export default async function MyPropertiesPage() {
     const session = await getServerSession(authOptions);
+    const userId = session?.user?.id ? Number(session.user.id) : null;
+    if (userId) await PromotionService.syncPromotionStatuses(userId);
     if (!session?.user?.id) return null;
     const userRole = (session.user as any).roles?.[0] || "USER";
 
@@ -109,7 +112,7 @@ export default async function MyPropertiesPage() {
                                                         })()}
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{property.title}</div>
+                                                        <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{property.title} {property.isFeatured && ( <Badge className="ml-2 bg-amber-500 text-white border-none text-[10px] h-4">Premium</Badge> )}</div>
                                                         <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
                                                             <MapPin className="w-3 h-3" />
                                                             {property.location}

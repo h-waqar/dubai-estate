@@ -20,7 +20,7 @@
  * - Fallback IDs in `PayPalSubscriptionModal` are used if the DB field is empty.
  */
 
-import { PricingPlan } from "@prisma/client";
+import { PricingPlan, Subscription } from "@prisma/client";
 import PricingCard from "./PricingCard";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useState } from "react";
@@ -31,9 +31,10 @@ import { PricingPlanWithEntitlements } from "./PricingCard";
 interface PricingListProps {
   plans: PricingPlanWithEntitlements[];
   userId?: number | string | null;
+  activeSubscription?: (Subscription & { plan: PricingPlan }) | null;
 }
 
-export default function PricingList({ plans, userId }: PricingListProps) {
+export default function PricingList({ plans, userId, activeSubscription }: PricingListProps) {
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -64,6 +65,7 @@ export default function PricingList({ plans, userId }: PricingListProps) {
                 plan={plan} 
                 userId={userId} 
                 onSubscribe={handleSubscribe} 
+                activeSubscription={activeSubscription}
             />
             ))}
         </div>

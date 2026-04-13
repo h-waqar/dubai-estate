@@ -53,6 +53,7 @@ model User {
   properties           Property[]
   sessions             Session[]
   subscriptions        Subscription[]
+  promotions           Promotion[]
   pricingPlan          PricingPlan?      @relation(fields: [pricingPlanId], references: [id])
 }
 
@@ -84,6 +85,7 @@ model Coupon {
   name              String
   code              String         @unique
   type              CouponType
+  targetType        CouponTarget   @default(ALL)
   value             Decimal        @db.Decimal(10, 2)
   maxUsage          Int?
   perUserLimit      Int?
@@ -199,6 +201,7 @@ model PricingPlan {
   slug                String         @unique
   description         String?
   type                PlanType       @default(SUBSCRIPTION)
+  rank                Int            @default(0)
   priceMonthly        Decimal?       @db.Decimal(10, 2)
   priceYearly         Decimal?       @db.Decimal(10, 2)
   priceOneTime        Decimal?       @db.Decimal(10, 2)
@@ -269,6 +272,7 @@ model Property {
   features              PropertyFeature[]
   images                PropertyImage[]
   videos                PropertyVideo[]
+  promotions            Promotion[]
 
   @@index([slug])
   @@index([price])
@@ -433,6 +437,7 @@ model Project {
   floorplans            ProjectFloorplan[]
   progressTimeline      ProjectProgress[]
   amenities             ProjectAmenity[]   @relation("ProjectToProjectAmenity")
+  promotions            Promotion[]
 
   @@index([slug])
   @@index([projectType])
@@ -661,6 +666,7 @@ enum UnitType {
 enum PlanType {
   SUBSCRIPTION
   ONE_TIME
+  ADDON
 }
 
 enum DeveloperStatus {
@@ -673,6 +679,46 @@ enum CouponType {
   PERCENTAGE
   FIXED
   TRIAL
+}
+
+enum CouponTarget {
+  SUBSCRIPTION
+  ADDON
+  ALL
+}
+
+enum PromotionType {
+  SPOTLIGHT
+  FEATURED
+  BUMP_UP
+}
+
+enum PromotionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model Promotion {
+  id         String          @id @default(cuid())
+  propertyId Int?
+  projectId  Int?
+  userId     Int
+  type       PromotionType
+  startDate  DateTime        @default(now())
+  expiresAt  DateTime?
+  paymentId  String?
+  status     PromotionStatus @default(ACTIVE)
+  createdAt  DateTime        @default(now())
+
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  project  Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
 }
 
 model LedgerTransaction {
@@ -714,7 +760,7 @@ enum GrantStatus {
 model EntitlementDefinition {
   id               String               @id @default(cuid())
   name              String
-  code             String               @unique // e.g., 'PROPERTY_SLOT'
+  code             String               @unique // e.g., "PROPERTY_SLOT"
   description      String?
   grants           EntitlementGrant[]
   planEntitlements PlanEntitlement[]

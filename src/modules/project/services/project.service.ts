@@ -131,6 +131,7 @@ export class ProjectService {
             },
             include: {
                 developer: true,
+                promotions: { where: { status: "ACTIVE", expiresAt: { gt: new Date() } } },
                 floorplans: true,
                 amenities: true,
                 paymentPlan: true,
@@ -189,6 +190,7 @@ export class ProjectService {
             where: { id },
             include: {
                 developer: true,
+                promotions: { where: { status: "ACTIVE", expiresAt: { gt: new Date() } } },
                 floorplans: { orderBy: { featured: "desc" } },
                 amenities: true,
                 features: { orderBy: { order: "asc" } },
@@ -211,6 +213,7 @@ export class ProjectService {
             where: { slug },
             include: {
                 developer: true,
+                promotions: { where: { status: "ACTIVE", expiresAt: { gt: new Date() } } },
                 floorplans: { orderBy: { featured: "desc" } },
                 amenities: true,
                 features: { orderBy: { order: "asc" } },
@@ -273,6 +276,7 @@ export class ProjectService {
             where,
             include: {
                 developer: true,
+                promotions: { where: { status: "ACTIVE", expiresAt: { gt: new Date() } } },
                 _count: {
                     select: {
                         floorplans: true,
@@ -299,7 +303,7 @@ export class ProjectService {
 
         // Attach media to projects
         return projects.map(project => ({
-            ...project,
+            ...project, isFeatured: (project.promotions || []).length > 0,
             mediaUsages: mediaUsages.filter(mu => mu.entityId === project.id),
         }));
     }
@@ -312,6 +316,7 @@ export class ProjectService {
             where: { status: "PENDING_REVIEW" },
             include: {
                 developer: true,
+                promotions: { where: { status: "ACTIVE", expiresAt: { gt: new Date() } } },
                 createdBy: { select: { id: true, name: true, email: true } },
             },
             orderBy: { createdAt: "desc" },

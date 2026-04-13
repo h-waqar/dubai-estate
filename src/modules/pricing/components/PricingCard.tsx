@@ -1,6 +1,6 @@
 "use client";
 
-import { PricingPlan, PlanEntitlement, EntitlementDefinition } from "@prisma/client";
+import { PricingPlan, PlanEntitlement, EntitlementDefinition, Subscription } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -13,16 +13,20 @@ interface PricingCardProps {
   plan: PricingPlanWithEntitlements;
   userId?: number | string | null;
   onSubscribe: (plan: PricingPlan) => void;
+  activeSubscription?: (Subscription & { plan: PricingPlan }) | null;
 }
 
-export default function PricingCard({ plan, userId, onSubscribe }: PricingCardProps) {
+export default function PricingCard({ plan, userId, onSubscribe, activeSubscription }: PricingCardProps) {
   const router = useRouter();
 
-  const propertySlotEntitlement = plan.entitlements?.find(e => e.definition.code === 'PROPERTY_SLOT');
-  const maxListings = propertySlotEntitlement ? propertySlotEntitlement.amount : (plan as any).maxListings || 0;
-  
-  const featuredSlotEntitlement = plan.entitlements?.find(e => e.definition.code === 'FEATURED_PROPERTY');
-  const maxFeaturedListings = featuredSlotEntitlement ? featuredSlotEntitlement.amount : (plan as any).maxFeaturedListings || 0;
+  const visibleEntitlements = plan.entitlements?.filter(e => e.amount > 0) || [];
+
+  const isCurrentPlan = activeSubscription?.planId === plan.id;
+  const isUpgrade = activeSubscription && plan.rank > activeSubscription.plan.rank;
+
+  let buttonText = "Subscribe";
+  if (isCurrentPlan) buttonText = "Current Plan";
+  else if (isUpgrade) buttonText = `Upgrade to ${plan.name}`;
 
   return (
     <div className="flex flex-col p-6 bg-card border rounded-xl shadow-xs hover:shadow-md transition-shadow relative overflow-hidden h-full">
@@ -45,21 +49,15 @@ export default function PricingCard({ plan, userId, onSubscribe }: PricingCardPr
       </div>
 
       <ul className="space-y-3 mb-8 flex-1">
-        <li className="flex items-center gap-2 text-sm">
-          <Check className="w-4 h-4 text-green-500" />
-          <span>{maxListings} Listings Quota</span>
-        </li>
-        <li className="flex items-center gap-2 text-sm">
-          <Check className="w-4 h-4 text-green-500" />
-          <span>{maxFeaturedListings} Featured Credits</span>
-        </li>
+        {visibleEntitlements.map((ent) => (
+          <li key={ent.id} className="flex items-center gap-2 text-sm">
+            <Check className="w-4 h-4 text-green-500" />
+            <span>{ent.amount} {ent.definition.name}</span>
+          </li>
+        ))}
         <li className="flex items-center gap-2 text-sm">
             <Check className="w-4 h-4 text-green-500" />
             <span>Priority Support</span>
-        </li>
-        <li className="flex items-center gap-2 text-sm">
-            <Check className="w-4 h-4 text-green-500" />
-            <span>Analytics Dashboard</span>
         </li>
       </ul>
 
@@ -74,10 +72,11 @@ export default function PricingCard({ plan, userId, onSubscribe }: PricingCardPr
         ) : (
           <Button 
             className="w-full" 
-            onClick={() => onSubscribe(plan)}
-            variant={plan.slug === "gold" ? "default" : "outline"}
+            onClick={() => !isCurrentPlan && onSubscribe(plan)}
+            variant={isCurrentPlan ? "secondary" : (plan.slug === "gold" ? "default" : "outline")}
+            disabled={isCurrentPlan}
           >
-            Subscribe
+            {buttonText}
           </Button>
         )}
       </div>

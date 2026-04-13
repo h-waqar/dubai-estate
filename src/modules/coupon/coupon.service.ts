@@ -57,7 +57,7 @@ export class CouponService {
     });
   }
 
-  async validateCoupon(code: string, userId: number, planId?: number) {
+  async validateCoupon(code: string, userId: number, planId?: number, intent?: "SUBSCRIPTION" | "ADDON") {
     const coupon = await this.getCouponByCode(code);
     
     if (!coupon) {
@@ -84,6 +84,13 @@ export class CouponService {
     if (!coupon.appliesToAllPlans && planId) {
         if (!coupon.planIds.includes(planId)) {
             throw new Error("Coupon not applicable to this plan");
+        }
+    }
+
+    // Target Type Check
+    if (intent) {
+        if (coupon.targetType !== "ALL" && coupon.targetType !== intent) {
+            throw new Error(`This coupon is only valid for ${coupon.targetType.toLowerCase()}s`);
         }
     }
 
