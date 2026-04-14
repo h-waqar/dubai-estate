@@ -36,7 +36,7 @@ export default async function BillingPage() {
 
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <main className="min-h-screen bg-muted/30 py-10 px-4">
         <div className="max-w-5xl mx-auto space-y-12">
           

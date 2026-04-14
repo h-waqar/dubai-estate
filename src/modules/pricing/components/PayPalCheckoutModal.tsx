@@ -54,7 +54,9 @@ export function PayPalCheckoutModal({
             value: {
                 ...options,
                 intent: mode === "SUBSCRIPTION" ? "subscription" : "capture",
-                vault: mode === "SUBSCRIPTION" ? true : false,
+                // Force vault: true even for capture to ensure branded card button (popup)
+                // instead of inline Advanced Card Fields (ACDC).
+                vault: true,
             },
         });
     }

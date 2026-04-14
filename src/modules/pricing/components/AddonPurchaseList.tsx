@@ -23,6 +23,9 @@ export function AddonPurchaseList({ plans, userId }: AddonPurchaseListProps) {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
     currency: "USD",
     intent: "capture",
+    // Force vault: true to ensure branded card button (popup)
+    // instead of inline Advanced Card Fields (ACDC).
+    vault: true,
   };
 
   const getIcon = (slug: string) => {
