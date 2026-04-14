@@ -6,7 +6,7 @@
  * Architecture:
  * - `PricingList` acts as the container for pricing cards and subscription modals.
  * - `PricingCard` is purely presentational regarding the subscription action, firing an `onSubscribe` event.
- * - `PayPalSubscriptionModal` handles the specific PayPal Button rendering and subscription creation logic.
+ * - `PayPalCheckoutModal` handles the specific PayPal Button rendering and subscription creation logic.
  * - This component depends on a `PayPalScriptProvider` being present higher in the tree (usually in `PricingPage`).
  * 
  * Environment Variables Required:
@@ -18,13 +18,13 @@
  * Setup:
  * - The PayPal SDK is loaded asynchronously via `@paypal/react-paypal-js`.
  * - Plan IDs should ideally be stored in the database (`PricingPlan.paypalPlanId`).
- * - Fallback IDs in `PayPalSubscriptionModal` are used if the DB field is empty.
+ * - Fallback IDs in `PayPalCheckoutModal` are used if the DB field is empty.
  */
 
 import { PricingPlan, Subscription } from "@prisma/client";
 import PricingCard from "./PricingCard";
 import { useState } from "react";
-import { PayPalSubscriptionModal } from "./PayPalSubscriptionModal";
+import { PayPalCheckoutModal } from "./PayPalCheckoutModal";
 
 import { PricingPlanWithEntitlements } from "./PricingCard";
 
@@ -61,11 +61,12 @@ export default function PricingList({ plans, userId, activeSubscription }: Prici
           ))}
       </div>
 
-      <PayPalSubscriptionModal 
+      <PayPalCheckoutModal 
         plan={selectedPlan} 
         isOpen={isModalOpen} 
         onClose={handleCloseModal}
         userId={userId}
+        mode="SUBSCRIPTION"
       />
     </>
   );

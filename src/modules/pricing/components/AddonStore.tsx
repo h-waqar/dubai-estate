@@ -5,11 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PayPalButtons } from "@paypal/react-paypal-js";
-import { createAddonOrderAction, captureAddonOrderAction } from "@/actions/promotions.actions";
-import { toast } from "sonner";
 import { useState } from "react";
-import { Loader2, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import { PayPalCheckoutModal } from "./PayPalCheckoutModal";
 
 interface AddonPack {
   qty: number;
@@ -32,7 +30,7 @@ const DEFAULT_PACKS = [
 
 export default function AddonStore({ addonPlans, userId, packs }: AddonStoreProps) {
   const [selectedPack, setSelectedPack] = useState<{ plan: PricingPlan, pack: AddonPack } | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const displayPacks = packs.length > 0 ? packs : DEFAULT_PACKS;
 
@@ -41,21 +39,9 @@ export default function AddonStore({ addonPlans, userId, packs }: AddonStoreProp
     return subtotal * (1 - Number(discount));
   };
 
-  const handleCaptureSuccess = async (details: any) => {
-    setIsProcessing(true);
-    try {
-      const res = await captureAddonOrderAction(details.id);
-      if (res.success) {
-        toast.success("Purchase successful! Your credits have been added.");
-        setSelectedPack(null);
-      } else {
-        toast.error(res.error || "Failed to capture order");
-      }
-    } catch (error) {
-      toast.error("An error occurred during purchase");
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleSelectPack = (plan: PricingPlan, pack: AddonPack) => {
+    setSelectedPack({ plan, pack });
+    setIsModalOpen(true);
   };
 
   return (
@@ -106,11 +92,11 @@ export default function AddonStore({ addonPlans, userId, packs }: AddonStoreProp
                         <TableCell className="text-right">
                           <Button 
                             size="sm" 
-                            variant={isSelected ? "default" : "outline"}
-                            onClick={() => setSelectedPack({ plan, pack })}
+                            variant="outline"
+                            onClick={() => handleSelectPack(plan, pack)}
                             disabled={!userId}
                           >
-                            {isSelected ? "Selected" : "Select"}
+                            Select
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -124,53 +110,19 @@ export default function AddonStore({ addonPlans, userId, packs }: AddonStoreProp
       </div>
 
       {selectedPack && (
-        <Card className="border-primary bg-primary/5 max-w-2xl mx-auto">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <div>
-              <CardTitle className="text-lg">Checkout: {selectedPack.pack.qty}x {selectedPack.plan.name}</CardTitle>
-              <CardDescription>Secure payment via PayPal</CardDescription>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">
-                ${calculatePrice(Number(selectedPack.plan.priceOneTime), selectedPack.pack.qty, selectedPack.pack.discount).toFixed(2)}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {!userId ? (
-              <Button className="w-full" disabled>Login to Purchase</Button>
-            ) : isProcessing ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <PayPalButtons
-                style={{ layout: "vertical", shape: "rect", label: "buynow" }}
-                createOrder={async () => {
-                  const amount = calculatePrice(
-                    Number(selectedPack.plan.priceOneTime), 
-                    selectedPack.pack.qty, 
-                    selectedPack.pack.discount
-                  ).toFixed(2);
-                  
-                  const res = await createAddonOrderAction(selectedPack.plan.slug, amount, selectedPack.pack.qty);
-                  if (res.success && res.orderId) {
-                    return res.orderId;
-                  } else {
-                    toast.error(res.error || "Failed to create order");
-                    throw new Error(res.error);
-                  }
-                }}
-                onApprove={async (data) => {
-                  await handleCaptureSuccess(data);
-                }}
-              />
-            )}
-            <Button variant="ghost" className="w-full" onClick={() => setSelectedPack(null)}>
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
+        <PayPalCheckoutModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          plan={selectedPack.plan}
+          qty={selectedPack.pack.qty}
+          userId={userId}
+          mode="ADDON"
+          priceOverride={calculatePrice(
+            Number(selectedPack.plan.priceOneTime),
+            selectedPack.pack.qty,
+            selectedPack.pack.discount
+          )}
+        />
       )}
 
       {!userId && (

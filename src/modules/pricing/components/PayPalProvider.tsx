@@ -8,11 +8,12 @@ interface PayPalProviderProps {
 }
 
 export default function PayPalProvider({ children }: PayPalProviderProps) {
-  const initialPayPalOptions = {
+  const initialPayPalOptions: any = {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
     currency: "USD",
     intent: "subscription",
     vault: true,
+    "disable-funding": "venmo",
     debug: process.env.NEXT_PUBLIC_PAYPAL_SANDBOX === "true",
   };
 
