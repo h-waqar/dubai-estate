@@ -4,9 +4,10 @@
  * PayPal Subscription Integration Documentation
  * 
  * Architecture:
- * - `PricingList` acts as the container and context provider (`PayPalScriptProvider`).
+ * - `PricingList` acts as the container for pricing cards and subscription modals.
  * - `PricingCard` is purely presentational regarding the subscription action, firing an `onSubscribe` event.
  * - `PayPalSubscriptionModal` handles the specific PayPal Button rendering and subscription creation logic.
+ * - This component depends on a `PayPalScriptProvider` being present higher in the tree (usually in `PricingPage`).
  * 
  * Environment Variables Required:
  * - `NEXT_PUBLIC_PAYPAL_CLIENT_ID`: Your PayPal Client ID.
@@ -22,7 +23,6 @@
 
 import { PricingPlan, Subscription } from "@prisma/client";
 import PricingCard from "./PricingCard";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useState } from "react";
 import { PayPalSubscriptionModal } from "./PayPalSubscriptionModal";
 
@@ -38,14 +38,6 @@ export default function PricingList({ plans, userId, activeSubscription }: Prici
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const initialPayPalOptions = {
-    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test",
-    currency: "USD",
-    intent: "subscription",
-    vault: true,
-    debug: process.env.NEXT_PUBLIC_PAYPAL_SANDBOX === "true",
-  };
-
   const handleSubscribe = (plan: PricingPlan) => {
     setSelectedPlan(plan);
     setIsModalOpen(true);
@@ -56,27 +48,25 @@ export default function PricingList({ plans, userId, activeSubscription }: Prici
   };
 
   return (
-    <PayPalScriptProvider options={initialPayPalOptions}>
-      <>
-        <div className="contents">
-            {plans.map((plan) => (
-            <PricingCard 
-                key={plan.id} 
-                plan={plan} 
-                userId={userId} 
-                onSubscribe={handleSubscribe} 
-                activeSubscription={activeSubscription}
-            />
-            ))}
-        </div>
+    <>
+      <div className="contents">
+          {plans.map((plan) => (
+          <PricingCard 
+              key={plan.id} 
+              plan={plan} 
+              userId={userId} 
+              onSubscribe={handleSubscribe} 
+              activeSubscription={activeSubscription}
+          />
+          ))}
+      </div>
 
-        <PayPalSubscriptionModal 
-          plan={selectedPlan} 
-          isOpen={isModalOpen} 
-          onClose={handleCloseModal}
-          userId={userId}
-        />
-      </>
-    </PayPalScriptProvider>
+      <PayPalSubscriptionModal 
+        plan={selectedPlan} 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal}
+        userId={userId}
+      />
+    </>
   );
 }

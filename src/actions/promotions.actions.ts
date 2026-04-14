@@ -6,6 +6,7 @@ import { PromotionService } from "@/modules/promotions/services/promotion.servic
 import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 import { revalidatePath } from "next/cache";
 import { createAddonOrder, captureAddonOrder } from "@/lib/paypal-api";
+import { prisma } from "@/lib/prisma";
 
 export async function activatePromotionAction(propertyId: number, type: "SPOTLIGHT" | "FEATURED") {
   const session = await getServerSession(authOptions);
@@ -85,7 +86,25 @@ export async function createAddonOrderAction(addonType: string, amount: string, 
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
   try {
     const userId = Number(session.user.id);
-    const order = await createAddonOrder(amount, "USD", { userId, addonType, qty });
+
+    // Security: Verify amount against DB configuration
+    const plan = await prisma.pricingPlan.findUnique({ where: { slug: addonType } });
+    if (!plan || !plan.priceOneTime) throw new Error("Invalid addon plan");
+
+    const packs = await prisma.addonPack.findMany({ where: { isActive: true } });
+    const pack = packs.find(p => p.qty === qty);
+    const discount = pack ? Number(pack.discount) : 0;
+    
+    const basePrice = Number(plan.priceOneTime);
+    const expectedAmount = (basePrice * qty * (1 - discount)).toFixed(2);
+
+    // Use the server-calculated amount for security
+    const order = await createAddonOrder(expectedAmount, "USD", { 
+      userId, 
+      addonType, 
+      qty,
+      amountCredits: qty 
+    });
     return { success: true, orderId: order.id };
   } catch (error: any) {
     return { success: false, error: error.message };

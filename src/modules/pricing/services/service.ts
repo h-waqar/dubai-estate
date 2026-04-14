@@ -3,7 +3,6 @@ import { CreatePricingInput } from "../validators/createPricing.validator";
 import { UpdatePricingInput } from "../validators/updatePricing.validator";
 import { PlanType } from "@prisma/client";
 import { createPayPalProduct, createPayPalPlan, deactivatePayPalPlan, getPayPalPlanDetails } from "@/lib/paypal-api";
-import { Decimal } from "@prisma/client/runtime/library";
 
 export class PricingService {
   static async listPlans() {

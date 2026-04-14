@@ -1,0 +1,43 @@
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+
+export class AddonPackService {
+  static async listPacks() {
+    return prisma.addonPack.findMany({
+      orderBy: { order: "asc" },
+    });
+  }
+
+  static async getPack(id: number) {
+    return prisma.addonPack.findUnique({
+      where: { id },
+    });
+  }
+
+  static async createPack(data: { qty: number; label: string; discount: number; order?: number }) {
+    return prisma.addonPack.create({
+      data: {
+        qty: data.qty,
+        label: data.label,
+        discount: new Prisma.Decimal(data.discount),
+        order: data.order || 0,
+      },
+    });
+  }
+
+  static async updatePack(id: number, data: { qty?: number; label?: string; discount?: number; order?: number; isActive?: boolean }) {
+    return prisma.addonPack.update({
+      where: { id },
+      data: {
+        ...data,
+        ...(data.discount !== undefined && { discount: new Prisma.Decimal(data.discount) }),
+      },
+    });
+  }
+
+  static async deletePack(id: number) {
+    return prisma.addonPack.delete({
+      where: { id },
+    });
+  }
+}

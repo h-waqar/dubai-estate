@@ -81,8 +81,11 @@ export async function POST(req: NextRequest) {
 
           const addonToCode: Record<string, string> = {
             featured: "FEATURED_CREDIT",
+            "featured-addon": "FEATURED_CREDIT",
             spotlight: "SPOTLIGHT_CREDIT",
+            "spotlight-addon": "SPOTLIGHT_CREDIT",
             bump_up: "BUMP_UP_CREDIT",
+            "bump-up-addon": "BUMP_UP_CREDIT",
           };
           const code = addonToCode[addonType.toLowerCase()];
 

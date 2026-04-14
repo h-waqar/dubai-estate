@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import { listPlans } from "@/modules/pricing/actions/listPlans";
+import { listAddonPacksAction } from "@/modules/pricing/actions/addonPacks";
 import PricingList from "@/modules/pricing/components/PricingList";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
@@ -7,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AddonStore from "@/modules/pricing/components/AddonStore";
 import { prisma } from "@/lib/prisma";
 import { serializeDecimals } from "@/lib/serializeDecimal";
+import PayPalProvider from "@/modules/pricing/components/PayPalProvider";
 
 export const metadata = {
   title: "Pricing Plans - Dubai Estate",
@@ -23,6 +25,9 @@ export default async function PricingPage(props: { searchParams: Promise<{ tab?:
   // Filter for active subscription plans
   const subscriptionPlans = plans.filter(p => p.isActive && p.type === "SUBSCRIPTION");
   const addonPlans = plans.filter(p => p.isActive && (p.type === "ADDON" || p.type === "ONE_TIME"));
+
+  const packsRes = await listAddonPacksAction();
+  const addonPacks = packsRes.success ? packsRes.packs : [];
 
   // Fetch current user's active subscription for upgrade logic
   const user = session?.user?.id ? await prisma.user.findUnique({
@@ -52,28 +57,34 @@ export default async function PricingPage(props: { searchParams: Promise<{ tab?:
             </p>
           </div>
 
-          <Tabs defaultValue={activeTab} className="w-full">
-            <div className="flex justify-center mb-8">
-              <TabsList className="grid w-full max-w-md grid-cols-2">
-                <TabsTrigger value="plans">Monthly Plans</TabsTrigger>
-                <TabsTrigger value="addons">Addons & Credits</TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value="plans" className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
-                <PricingList 
-                  plans={subscriptionPlans} 
-                  userId={session?.user?.id} 
-                  activeSubscription={activeSubscription}
-                />
+          <PayPalProvider>
+            <Tabs defaultValue={activeTab} className="w-full">
+              <div className="flex justify-center mb-8">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="plans">Monthly Plans</TabsTrigger>
+                  <TabsTrigger value="addons">Addons & Credits</TabsTrigger>
+                </TabsList>
               </div>
-            </TabsContent>
 
-            <TabsContent value="addons">
-              <AddonStore addonPlans={addonPlans} userId={session?.user?.id} />
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="plans" className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+                  <PricingList 
+                    plans={subscriptionPlans} 
+                    userId={session?.user?.id} 
+                    activeSubscription={activeSubscription}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="addons">
+                <AddonStore 
+                  addonPlans={addonPlans} 
+                  userId={session?.user?.id} 
+                  packs={addonPacks}
+                />
+              </TabsContent>
+            </Tabs>
+          </PayPalProvider>
 
         </div>
       </main>

@@ -783,3 +783,14 @@ model EntitlementGrant {
 
   @@index([userId, status])
 }
+
+model AddonPack {
+  id          Int      @id @default(autoincrement())
+  qty         Int
+  label       String
+  discount    Decimal  @db.Decimal(5, 2) @default(0) // e.g. 0.10 for 10%
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -11,25 +11,34 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Loader2, ShoppingCart } from "lucide-react";
 
+interface AddonPack {
+  qty: number;
+  label: string;
+  discount: string | number;
+}
+
 interface AddonStoreProps {
   addonPlans: PricingPlan[];
   userId?: number | string | null;
+  packs: AddonPack[];
 }
 
-const PACKS = [
+const DEFAULT_PACKS = [
   { qty: 1, label: "Single", discount: 0 },
   { qty: 4, label: "Starter Pack", discount: 0.1 },
   { qty: 12, label: "Pro Pack", discount: 0.2 },
   { qty: 24, label: "Business Pack", discount: 0.3 },
 ];
 
-export default function AddonStore({ addonPlans, userId }: AddonStoreProps) {
-  const [selectedPack, setSelectedPack] = useState<{ plan: PricingPlan, pack: typeof PACKS[0] } | null>(null);
+export default function AddonStore({ addonPlans, userId, packs }: AddonStoreProps) {
+  const [selectedPack, setSelectedPack] = useState<{ plan: PricingPlan, pack: AddonPack } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const calculatePrice = (basePrice: number, qty: number, discount: number) => {
+  const displayPacks = packs.length > 0 ? packs : DEFAULT_PACKS;
+
+  const calculatePrice = (basePrice: number, qty: number, discount: number | string) => {
     const subtotal = basePrice * qty;
-    return subtotal * (1 - discount);
+    return subtotal * (1 - Number(discount));
   };
 
   const handleCaptureSuccess = async (details: any) => {
@@ -72,23 +81,23 @@ export default function AddonStore({ addonPlans, userId }: AddonStoreProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {PACKS.map((pack) => {
+                  {displayPacks.map((pack) => {
                     const price = calculatePrice(Number(plan.priceOneTime), pack.qty, pack.discount);
                     const isSelected = selectedPack?.plan.id === plan.id && selectedPack?.pack.qty === pack.qty;
                     
                     return (
                       <TableRow key={pack.qty} className={isSelected ? "bg-primary/5" : ""}>
                         <TableCell>
-                          <div className="font-medium">{pack.qty} Credits</div>
-                          {pack.discount > 0 && (
+                          <div className="font-medium">{pack.qty} {pack.label}</div>
+                          {Number(pack.discount) > 0 && (
                             <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-green-100 text-green-700 hover:bg-green-100">
-                              SAVE {(pack.discount * 100).toFixed(0)}%
+                              SAVE {(Number(pack.discount) * 100).toFixed(0)}%
                             </Badge>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="font-bold">${price.toFixed(2)}</div>
-                          {pack.discount > 0 && (
+                          {Number(pack.discount) > 0 && (
                             <div className="text-[10px] text-muted-foreground line-through">
                               ${(Number(plan.priceOneTime) * pack.qty).toFixed(2)}
                             </div>
