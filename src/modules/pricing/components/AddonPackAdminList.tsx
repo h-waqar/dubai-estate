@@ -4,11 +4,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Loader2, Save } from "lucide-react";
-import { useState } from "react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createAddonPackAction, updateAddonPackAction, deleteAddonPackAction } from "../actions/addonPacks";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AddonPack {
     id: number;
@@ -17,26 +25,37 @@ interface AddonPack {
     discount: string | number;
     isActive: boolean;
     order: number;
+    planId: number | null;
 }
 
 interface AddonPackAdminListProps {
     initialPacks: AddonPack[];
+    addonPlans: { id: number, name: string }[];
 }
 
-export default function AddonPackAdminList({ initialPacks }: AddonPackAdminListProps) {
+export default function AddonPackAdminList({ initialPacks, addonPlans }: AddonPackAdminListProps) {
+    const router = useRouter();
     const [packs, setPacks] = useState(initialPacks);
+    const [selectedPlanId, setSelectedPlanId] = useState<string>("global");
     const [isAdding, setIsAdding] = useState(false);
     const [newPack, setNewPack] = useState({ qty: 1, label: "", discount: 0, order: 0 });
     const [loadingId, setLoadingId] = useState<number | null>(null);
+
+    // Sync local state when server data refreshes via router.refresh()
+    useEffect(() => {
+        setPacks(initialPacks);
+    }, [initialPacks]);
 
     const handleAdd = async () => {
         if (!newPack.label) return toast.error("Label is required");
         setIsAdding(true);
         try {
-            const res = await createAddonPackAction(newPack);
+            const planId = selectedPlanId === "global" ? null : parseInt(selectedPlanId);
+            const res = await createAddonPackAction({ ...newPack, planId });
             if (res.success) {
                 toast.success("Pack added successfully");
-                window.location.reload();
+                setNewPack({ qty: 1, label: "", discount: 0, order: 0 });
+                router.refresh();
             } else {
                 toast.error(res.error);
             }
@@ -81,11 +100,34 @@ export default function AddonPackAdminList({ initialPacks }: AddonPackAdminListP
         }
     };
 
+    const filteredPacks = packs.filter(p => {
+        if (selectedPlanId === "global") return !p.planId;
+        return p.planId === parseInt(selectedPlanId);
+    });
+
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Addon Multi-Purchase Packs</CardTitle>
-                <Badge variant="outline">Dynamic Configuration</Badge>
+                <div>
+                    <CardTitle>Addon Multi-Purchase Packs</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">Configure bulk purchase discounts for specific addon types.</p>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="w-[200px]">
+                        <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Plan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="global">Global Fallback</SelectItem>
+                                {addonPlans.map(plan => (
+                                    <SelectItem key={plan.id} value={plan.id.toString()}>{plan.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Badge variant="outline">Dynamic Configuration</Badge>
+                </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="rounded-md border overflow-hidden">
@@ -100,7 +142,7 @@ export default function AddonPackAdminList({ initialPacks }: AddonPackAdminListP
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {packs.map((pack) => (
+                            {filteredPacks.map((pack) => (
                                 <TableRow key={pack.id}>
                                     <TableCell>
                                         <Input 
@@ -121,7 +163,7 @@ export default function AddonPackAdminList({ initialPacks }: AddonPackAdminListP
                                         <div className="flex items-center gap-2">
                                             <Input 
                                                 type="number" 
-                                                defaultValue={Number(pack.discount) * 100} 
+                                                defaultValue={(Number(pack.discount) * 100).toFixed(0)} 
                                                 className="h-8 w-20"
                                                 onBlur={(e) => handleUpdate(pack.id, { discount: parseFloat(e.target.value) / 100 })}
                                             />
@@ -186,6 +228,7 @@ export default function AddonPackAdminList({ initialPacks }: AddonPackAdminListP
                                 <TableCell className="text-right">
                                     <Button 
                                         size="sm" 
+                                        type="button"
                                         onClick={handleAdd}
                                         disabled={isAdding}
                                     >
@@ -198,7 +241,8 @@ export default function AddonPackAdminList({ initialPacks }: AddonPackAdminListP
                     </Table>
                 </div>
                 <p className="text-[10px] text-muted-foreground">
-                    * Changes to existing packs are saved automatically when you click outside the input field.
+                    * Showing packs for: <strong>{selectedPlanId === "global" ? "Global Fallback" : addonPlans.find(p => p.id === parseInt(selectedPlanId))?.name}</strong>.
+                    Changes are saved automatically when you click away.
                 </p>
             </CardContent>
         </Card>

@@ -33,19 +33,29 @@ export async function POST(req: NextRequest) {
   try {
     switch (eventType) {
       case "PAYMENT.CAPTURE.COMPLETED": {
+        console.log(`[Webhook:PAYMENT.CAPTURE.COMPLETED] Processing resource: ${resource.id}`);
         const customId = resource.custom_id;
-        if (!customId) break;
+        if (!customId) {
+          console.warn(`[Webhook:PAYMENT.CAPTURE.COMPLETED] No custom_id found in resource ${resource.id}`);
+          break;
+        }
 
         let metadata;
         try {
           metadata = JSON.parse(customId);
+          console.log(`[Webhook:PAYMENT.CAPTURE.COMPLETED] Parsed metadata:`, metadata);
         } catch (e) {
           console.error("Failed to parse customId in PAYMENT.CAPTURE.COMPLETED", customId);
           break;
         }
 
         const { userId, addonType, amountCredits } = metadata;
-        if (!userId || !addonType) break;
+        if (!userId || !addonType) {
+          console.error(`[Webhook:PAYMENT.CAPTURE.COMPLETED] Missing userId (${userId}) or addonType (${addonType})`);
+          break;
+        }
+
+        const description = `${addonType.charAt(0).toUpperCase() + addonType.slice(1)} Addon Purchase (${amountCredits || 1} credits)`;
 
         // Verify user exists to avoid P2003 Foreign Key violation (e.g. after DB prune)
         const userExists = await prisma.user.findUnique({ 
@@ -67,12 +77,14 @@ export async function POST(req: NextRequest) {
             return;
           }
 
+          console.log(`[Webhook:PAYMENT.CAPTURE.COMPLETED] Recording transaction for user ${userId}...`);
           await ledgerService.recordTransaction(tx, {
             userId: Number(userId),
             type: TransactionType.PAYMENT,
             status: TransactionStatus.COMPLETED,
             amount: new Prisma.Decimal(resource.amount.value),
             currency: resource.amount.currency_code,
+            description,
             provider: "PAYPAL",
             providerTxId: resource.id,
             occurredAt: new Date(resource.create_time),
@@ -90,6 +102,7 @@ export async function POST(req: NextRequest) {
           const code = addonToCode[addonType.toLowerCase()];
 
           if (code) {
+            console.log(`[Webhook:PAYMENT.CAPTURE.COMPLETED] Granting ${amountCredits || 1} credits of type ${code} to user ${userId}...`);
             await EntitlementService.grant(
               Number(userId),
               code,
@@ -98,8 +111,11 @@ export async function POST(req: NextRequest) {
               "ADDON",
               tx
             );
+          } else {
+            console.warn(`[Webhook:PAYMENT.CAPTURE.COMPLETED] No entitlement code found for addonType: ${addonType}`);
           }
         });
+        console.log(`[Webhook:PAYMENT.CAPTURE.COMPLETED] Successfully processed resource ${resource.id}`);
         break;
       }
 
@@ -113,6 +129,7 @@ export async function POST(req: NextRequest) {
           // Find the subscription to get the userId
           const sub = await tx.subscription.findUnique({
             where: { paypalSubscriptionId: subscriptionId },
+            include: { plan: true },
           });
 
           if (!sub) {
@@ -126,6 +143,7 @@ export async function POST(req: NextRequest) {
             status: TransactionStatus.COMPLETED,
             amount: new Prisma.Decimal(resource.amount.total),
             currency: resource.amount.currency,
+            description: `${sub.plan?.name || "Plan"} Subscription Renewal`,
             provider: "PAYPAL",
             providerTxId: resource.id, // Sale/Capture ID
             occurredAt: new Date(resource.create_time),

@@ -6,6 +6,7 @@ interface RecordTransactionParams {
   status: TransactionStatus;
   amount: Prisma.Decimal;
   currency: string;
+  description?: string | null;
   provider: string;
   providerTxId: string;
   occurredAt: Date;
@@ -31,6 +32,7 @@ export const ledgerService = {
       status,
       amount,
       currency,
+      description,
       provider,
       providerTxId,
       occurredAt,
@@ -61,6 +63,7 @@ export const ledgerService = {
           status,
           amount,
           currency,
+          description,
           provider,
           providerTxId,
           occurredAt,

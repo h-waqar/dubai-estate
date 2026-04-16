@@ -45,7 +45,7 @@ export default function UserTransactionList({ userId }: UserTransactionListProps
         <TableHeader>
           <TableRow>
             <TableHead>Date</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead>Description</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Amount</TableHead>
           </TableRow>
@@ -61,7 +61,7 @@ export default function UserTransactionList({ userId }: UserTransactionListProps
             transactions.map((tx) => (
               <TableRow key={tx.id}>
                 <TableCell>{format(new Date(tx.occurredAt), "MMM d, yyyy")}</TableCell>
-                <TableCell className="capitalize">{tx.type.toLowerCase()}</TableCell>
+                <TableCell className="font-medium">{tx.description || tx.type.toLowerCase()}</TableCell>
                 <TableCell>
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                     tx.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :

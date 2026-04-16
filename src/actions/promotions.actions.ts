@@ -7,6 +7,8 @@ import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 import { revalidatePath } from "next/cache";
 import { createAddonOrder, captureAddonOrder } from "@/lib/paypal-api";
 import { prisma } from "@/lib/prisma";
+import { Prisma, TransactionType, TransactionStatus } from "@prisma/client";
+import { ledgerService } from "@/modules/finance/ledger.service";
 
 export async function activatePromotionAction(propertyId: number, type: "SPOTLIGHT" | "FEATURED") {
   const session = await getServerSession(authOptions);
@@ -114,10 +116,121 @@ export async function createAddonOrderAction(addonType: string, amount: string, 
 export async function captureAddonOrderAction(orderId: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+  const userId = Number(session.user.id);
+
   try {
     const result = await captureAddonOrder(orderId);
+    
+    // 1. Success Check
+    if (result.status !== "COMPLETED") {
+        return { success: false, error: `Payment status: ${result.status}` };
+    }
+
+    // 2. Extract Metadata (propagated from createOrder)
+    const purchaseUnit = result.purchase_units?.[0];
+    const capture = purchaseUnit?.payments?.captures?.[0];
+    
+    // Check multiple possible locations for custom_id
+    const customId = purchaseUnit?.custom_id || capture?.custom_id;
+    
+    let metadata: any = {};
+    try {
+        if (customId) {
+            metadata = JSON.parse(customId);
+            console.log("[captureAddonOrderAction] Parsed metadata:", metadata);
+        } else {
+            console.warn("[captureAddonOrderAction] No custom_id found in PayPal response");
+        }
+    } catch (e) {
+        console.warn("Failed to parse customId in captureAddonOrderAction", customId);
+    }
+
+    const addonType = metadata.addonType || "unknown";
+    const amountCredits = metadata.amountCredits || metadata.qty || 1;
+    const captureId = capture?.id || orderId;
+
+    // 3. Local fulfillment (Ledger + Entitlements)
+    await prisma.$transaction(async (tx) => {
+        // Fetch plan first to get a good name for the ledger
+        const plan = await tx.pricingPlan.findUnique({
+            where: { slug: addonType },
+            include: { entitlements: { include: { definition: true } } }
+        });
+
+        const displayName = plan?.name || (addonType !== "unknown" 
+            ? addonType.split(/[-_]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+            : "Addon");
+        
+        const description = `${displayName} Purchase (${amountCredits} credits)`;
+        
+        const existingTx = await tx.ledgerTransaction.findUnique({
+            where: { providerTxId: captureId }
+        });
+
+        if (!existingTx) {
+            console.log(`[captureAddonOrderAction] Recording transaction: ${description} for user ${userId}`);
+            await ledgerService.recordTransaction(tx, {
+                userId,
+                type: TransactionType.PAYMENT,
+                status: TransactionStatus.COMPLETED,
+                amount: new Prisma.Decimal(capture?.amount?.value || purchaseUnit?.amount?.value || "0"),
+                currency: capture?.amount?.currency_code || purchaseUnit?.amount?.currency_code || "USD",
+                description,
+                provider: "PAYPAL",
+                providerTxId: captureId,
+                occurredAt: new Date(capture?.create_time || result.update_time || new Date()),
+                metadata: result,
+            });
+
+            // Grant Entitlements
+            if (plan && plan.entitlements.length > 0) {
+                console.log(`[captureAddonOrderAction] Found plan ${plan.name}, granting ${plan.entitlements.length} types of entitlements`);
+                for (const ent of plan.entitlements) {
+                    await EntitlementService.grant(
+                        userId,
+                        ent.definition.code,
+                        ent.amount * amountCredits,
+                        captureId,
+                        "ADDON",
+                        tx
+                    );
+                }
+            } else {
+                // Fallback to manual mapping if plan not found or has no entitlements
+                const addonToCode: Record<string, string> = {
+                    featured: "FEATURED_CREDIT",
+                    "featured-addon": "FEATURED_CREDIT",
+                    spotlight: "SPOTLIGHT_CREDIT",
+                    "spotlight-addon": "SPOTLIGHT_CREDIT",
+                    bump_up: "BUMP_UP_CREDIT",
+                    "bump-up-addon": "BUMP_UP_CREDIT",
+                    "bumpup": "BUMP_UP_CREDIT",
+                    "project-listing": "PROJECT_SLOT",
+                    "project_listing": "PROJECT_SLOT",
+                };
+                const code = addonToCode[addonType.toLowerCase()];
+
+                if (code) {
+                    console.log(`[captureAddonOrderAction] Fallback grant: ${amountCredits} of ${code}`);
+                    await EntitlementService.grant(
+                        userId,
+                        code,
+                        amountCredits,
+                        captureId,
+                        "ADDON",
+                        tx
+                    );
+                } else {
+                    console.warn(`[captureAddonOrderAction] No plan or mapping found for addonType: ${addonType}`);
+                }
+            }
+        }
+    });
+
+    revalidatePath("/account");
     return { success: true, result };
   } catch (error: any) {
+    console.error("Capture Addon Error:", error);
     return { success: false, error: error.message };
   }
 }

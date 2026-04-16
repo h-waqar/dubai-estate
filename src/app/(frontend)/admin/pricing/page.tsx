@@ -7,11 +7,12 @@ export default async function PricingAdminPage() {
     const plans = await listPlans();
     const packsRes = await listAddonPacksAction();
     const packs = packsRes.success ? packsRes.packs : [];
+    const addonPlans = plans.filter(p => p.type === "ADDON" || p.type === "ONE_TIME");
 
     return (
         <div className="space-y-10">
             <PricingAdminList initialPlans={plans} />
-            <AddonPackAdminList initialPacks={packs} />
+            <AddonPackAdminList initialPacks={packs} addonPlans={addonPlans} />
         </div>
     );
 }

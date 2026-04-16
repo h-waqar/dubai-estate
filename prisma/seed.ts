@@ -46,6 +46,21 @@ async function main() {
       code: "PROJECT_FEATURE_SLOT",
       description: "Allows featuring a project listing",
     },
+    { 
+      name: "Featured Credit", 
+      code: "FEATURED_CREDIT", 
+      description: "1 credit for Featured promotion" 
+    },
+    { 
+      name: "Spotlight Credit", 
+      code: "SPOTLIGHT_CREDIT", 
+      description: "1 credit for Spotlight promotion" 
+    },
+    { 
+      name: "Bump Up Credit", 
+      code: "BUMP_UP_CREDIT", 
+      description: "1 credit for Bump Up action" 
+    },
   ];
 
   for (const def of entitlementDefs) {
@@ -63,6 +78,9 @@ async function main() {
     "Silver Package": "silver",
     "Gold Package": "gold",
     "Project Listing": "project-listing",
+    "Featured Addon": "featured-addon",
+    "Spotlight Addon": "spotlight-addon",
+    "Bump Up Addon": "bump-up-addon",
   };
 
   for (const [name, targetSlug] of Object.entries(slugMappings)) {
@@ -71,23 +89,10 @@ async function main() {
       console.log(
         `⚠️ Renaming slug for "${name}" from "${existing.slug}" to "${targetSlug}"`,
       );
-      // Update slug to match target, but check if target slug exists first (unlikely but safe)
-      const targetExists = await prisma.pricingPlan.findUnique({
-        where: { slug: targetSlug },
+      await prisma.pricingPlan.update({
+        where: { id: existing.id },
+        data: { slug: targetSlug },
       });
-      if (targetExists) {
-        // If target exists but name is different, we have a problem.
-        // But usually we just want to align this one record.
-        // If target exists and name IS "Silver Package", we wouldn't be here (since slugs would match or name check handles it).
-        // Just delete the target if it's not the one we want? No, risky.
-        // For now, assume single record per name.
-        // If target slug is taken by ANOTHER record, we fail.
-      } else {
-        await prisma.pricingPlan.update({
-          where: { id: existing.id },
-          data: { slug: targetSlug },
-        });
-      }
     }
   }
 
@@ -102,11 +107,10 @@ async function main() {
       priceYearly: "100",
       priceOneTime: "0",
       isActive: true,
+      paypalPlanId: process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER,
       entitlements: [
-        { name: "Property Slot",
-      code: "PROPERTY_SLOT", amount: 10 },
-        { name: "Property Feature Slot",
-      code: "PROPERTY_FEATURE_SLOT", amount: 1 },
+        { code: "PROPERTY_SLOT", amount: 10 },
+        { code: "PROPERTY_FEATURE_SLOT", amount: 1 },
       ],
     },
     {
@@ -119,11 +123,10 @@ async function main() {
       priceYearly: "250",
       priceOneTime: "0",
       isActive: true,
+      paypalPlanId: process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD,
       entitlements: [
-        { name: "Property Slot",
-      code: "PROPERTY_SLOT", amount: 50 },
-        { name: "Property Feature Slot",
-      code: "PROPERTY_FEATURE_SLOT", amount: 5 },
+        { code: "PROPERTY_SLOT", amount: 50 },
+        { code: "PROPERTY_FEATURE_SLOT", amount: 5 },
       ],
     },
     {
@@ -137,11 +140,36 @@ async function main() {
       priceOneTime: "100",
       isActive: true,
       entitlements: [
-        { name: "Project Slot",
-      code: "PROJECT_SLOT", amount: 1 },
-        { name: "Project Feature Slot",
-      code: "PROJECT_FEATURE_SLOT", amount: 1 },
+        { code: "PROJECT_SLOT", amount: 1 },
+        { code: "PROJECT_FEATURE_SLOT", amount: 1 },
       ],
+    },
+    {
+      name: "Featured Addon",
+      slug: "featured-addon",
+      description: "Buy Featured credits",
+      type: PlanType.ADDON,
+      priceOneTime: "50",
+      isActive: true,
+      entitlements: [{ code: "FEATURED_CREDIT", amount: 1 }],
+    },
+    {
+      name: "Spotlight Addon",
+      slug: "spotlight-addon",
+      description: "Buy Spotlight credits",
+      type: PlanType.ADDON,
+      priceOneTime: "100",
+      isActive: true,
+      entitlements: [{ code: "SPOTLIGHT_CREDIT", amount: 1 }],
+    },
+    {
+      name: "Bump Up Addon",
+      slug: "bump-up-addon",
+      description: "Buy Bump Up credits",
+      type: PlanType.ADDON,
+      priceOneTime: "10",
+      isActive: true,
+      entitlements: [{ code: "BUMP_UP_CREDIT", amount: 1 }],
     },
   ];
 

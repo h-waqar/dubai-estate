@@ -213,6 +213,7 @@ model PricingPlan {
   subscriptions       Subscription[]
   users               User[]
   entitlements        PlanEntitlement[]
+  addonPacks          AddonPack[]
 }
 
 model PlanEntitlement {
@@ -728,6 +729,7 @@ model LedgerTransaction {
   status       TransactionStatus
   amount       Decimal           @db.Decimal(10, 2)
   currency     String            @default("USD")
+  description  String?
   provider     String
   providerTxId String            @unique
   metadata     Json?
@@ -786,6 +788,7 @@ model EntitlementGrant {
 
 model AddonPack {
   id          Int      @id @default(autoincrement())
+  planId      Int?     // Optional: Link to a specific PricingPlan (e.g. "Bump Up Addon")
   qty         Int
   label       String
   discount    Decimal  @db.Decimal(5, 2) @default(0) // e.g. 0.10 for 10%
@@ -793,4 +796,6 @@ model AddonPack {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  plan        PricingPlan? @relation(fields: [planId], references: [id], onDelete: Cascade)
 }

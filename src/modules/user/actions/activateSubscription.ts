@@ -134,6 +134,7 @@ export async function activateSubscription(paypalSubscriptionId: string) {
             status: TransactionStatus.COMPLETED,
             amount: new Prisma.Decimal(amountValue),
             currency: currencyCode,
+            description: `${dbPlan.name} Subscription`,
             provider: "PAYPAL",
             providerTxId: providerTxId,
             occurredAt: paymentTime,

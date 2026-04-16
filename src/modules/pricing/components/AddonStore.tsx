@@ -13,6 +13,7 @@ interface AddonPack {
   qty: number;
   label: string;
   discount: string | number;
+  planId?: number | null;
 }
 
 interface AddonStoreProps {
@@ -32,11 +33,20 @@ export default function AddonStore({ addonPlans, userId, packs }: AddonStoreProp
   const [selectedPack, setSelectedPack] = useState<{ plan: PricingPlan, pack: AddonPack } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const displayPacks = packs.length > 0 ? packs : DEFAULT_PACKS;
-
   const calculatePrice = (basePrice: number, qty: number, discount: number | string) => {
     const subtotal = basePrice * qty;
     return subtotal * (1 - Number(discount));
+  };
+
+  const getPacksForPlan = (planId: number) => {
+    // 1. Check for plan-specific packs first
+    const planPacks = packs.filter(p => p.planId === planId);
+    if (planPacks.length > 0) return planPacks;
+    
+    // 2. No plan-specific packs, we default to a SINGLE purchase option
+    // This allows addons with no packs to just have a single credit purchase
+    // and avoids the global fallback that the user wants to remove.
+    return [{ qty: 1, label: "Single", discount: 0 }];
   };
 
   const handleSelectPack = (plan: PricingPlan, pack: AddonPack) => {
@@ -47,66 +57,70 @@ export default function AddonStore({ addonPlans, userId, packs }: AddonStoreProp
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {addonPlans.map((plan) => (
-          <Card key={plan.id} className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 flex-1">
-              <div className="text-2xl font-bold">
-                ${Number(plan.priceOneTime).toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/ credit</span>
-              </div>
-              
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Pack</TableHead>
-                    <TableHead className="text-right">Price</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {displayPacks.map((pack) => {
-                    const price = calculatePrice(Number(plan.priceOneTime), pack.qty, pack.discount);
-                    const isSelected = selectedPack?.plan.id === plan.id && selectedPack?.pack.qty === pack.qty;
-                    
-                    return (
-                      <TableRow key={pack.qty} className={isSelected ? "bg-primary/5" : ""}>
-                        <TableCell>
-                          <div className="font-medium">{pack.qty} {pack.label}</div>
-                          {Number(pack.discount) > 0 && (
-                            <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-green-100 text-green-700 hover:bg-green-100">
-                              SAVE {(Number(pack.discount) * 100).toFixed(0)}%
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="font-bold">${price.toFixed(2)}</div>
-                          {Number(pack.discount) > 0 && (
-                            <div className="text-[10px] text-muted-foreground line-through">
-                              ${(Number(plan.priceOneTime) * pack.qty).toFixed(2)}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleSelectPack(plan, pack)}
-                            disabled={!userId}
-                          >
-                            Select
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        ))}
+        {addonPlans.map((plan) => {
+          const displayPacks = getPacksForPlan(plan.id);
+          
+          return (
+            <Card key={plan.id} className="flex flex-col">
+              <CardHeader>
+                <CardTitle>{plan.name}</CardTitle>
+                <CardDescription>{plan.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 flex-1">
+                <div className="text-2xl font-bold">
+                  AED {Number(plan.priceOneTime).toFixed(2)} <span className="text-sm font-normal text-muted-foreground">/ credit</span>
+                </div>
+                
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Pack</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayPacks.map((pack) => {
+                      const price = calculatePrice(Number(plan.priceOneTime), pack.qty, pack.discount);
+                      const isSelected = selectedPack?.plan.id === plan.id && selectedPack?.pack.qty === pack.qty;
+                      
+                      return (
+                        <TableRow key={pack.qty} className={isSelected ? "bg-primary/5" : ""}>
+                          <TableCell>
+                            <div className="font-medium">{pack.qty} {pack.label}</div>
+                            {Number(pack.discount) > 0 && (
+                              <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-green-100 text-green-700 hover:bg-green-100">
+                                SAVE {(Number(pack.discount) * 100).toFixed(0)}%
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="font-bold">AED {price.toFixed(2)}</div>
+                            {Number(pack.discount) > 0 && (
+                              <div className="text-[10px] text-muted-foreground line-through">
+                                AED {(Number(plan.priceOneTime) * pack.qty).toFixed(2)}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleSelectPack(plan, pack)}
+                              disabled={!userId}
+                            >
+                              Select
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {selectedPack && (
