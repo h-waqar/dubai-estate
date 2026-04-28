@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Search, MapPin, Check } from "lucide-react";
-import { searchLocations } from "@/actions/location";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -14,19 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group";
+import { GlobalFuzzyFinder } from "@/modules/search/components/global-fuzzy-finder";
+import { SearchPurpose } from "@/modules/search/types/search.types";
 
 interface PropertyType {
   id: number;
@@ -48,32 +40,6 @@ export default function Hero({ propertyTypes }: HeroProps) {
   const [bedrooms, setBedrooms] = useState("");
   const [priceRange, setPriceRange] = useState("");
 
-  // Combobox State
-  const [open, setOpen] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [query, setQuery] = useState("");
-
-  // Fetch suggestions when query changes OR when opened (with empty query)
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      // Fetch even if empty (for initial suggestions)
-      try {
-        const results = await searchLocations(query, purpose); // Pass purpose filter
-        setSuggestions(results);
-      } catch (error) {
-        console.error("Failed to fetch location suggestions", error);
-      }
-    };
-
-    const timeoutId = setTimeout(fetchSuggestions, 300); // Debounce
-    return () => clearTimeout(timeoutId);
-  }, [query, open, purpose]); // Re-fetch when purpose changes
-
-  const handleLocationSelect = (loc: string) => {
-    setLocation(loc);
-    setOpen(false);
-  };
-
   const handleSearch = () => {
     const params = new URLSearchParams();
 
@@ -82,7 +48,7 @@ export default function Hero({ propertyTypes }: HeroProps) {
 
     if (purpose === "buy") {
       baseUrl = "/for-sale";
-      params.set("status", "buy"); // Although the page forces it, keeping it in params can be explicit/safe
+      params.set("status", "buy");
     } else if (purpose === "rent") {
       baseUrl = "/for-rent";
       params.set("status", "rent");
@@ -99,8 +65,6 @@ export default function Hero({ propertyTypes }: HeroProps) {
     router.push(`${baseUrl}?${params.toString()}`);
   };
 
-
-
   return (
     <section className="relative min-h-[500px] h-[70vh] flex items-center justify-center">
       {/* Background Video */}
@@ -113,7 +77,6 @@ export default function Hero({ propertyTypes }: HeroProps) {
           className="absolute inset-0 w-full h-full object-cover"
         >
           <source src="/assets/videos/hero-section-bg.webm" type="video/webm" />
-          {/* Fallback image if video is not supported or fails to load */}
           <Image
             src="/assets/images/dubai-hero.jpg"
             alt="Dubai Estate Hero"
@@ -158,88 +121,22 @@ export default function Hero({ propertyTypes }: HeroProps) {
             <div className="p-5 md:p-6 space-y-4">
               {/* Middle Section: Search & Button */}
               <div className="flex flex-col md:flex-row gap-3">
-                {/* Location Input (Combobox) */}
-                {/* Location Input (Command) */}
-                <div className="flex-grow relative z-50">
-                  <Command
-                    shouldFilter={false}
-                    className="rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-white/60 dark:bg-gray-800/60 shadow-sm overflow-visible
-                      transition-all duration-200
-                      hover:border-yellow-400/50 hover:bg-white/80
-                      focus-within:ring-1 focus-within:ring-yellow-500 focus-within:border-yellow-500 focus-within:bg-white
-                      [&_[data-slot=command-input-wrapper]]:h-full 
-                      [&_[data-slot=command-input-wrapper]]:border-none 
-                      [&_[data-slot=command-input-wrapper]]:px-0
-                      [&_[data-slot=command-input-wrapper]_svg]:hidden"
-                  >
-                    <div
-                      className="flex items-center px-4 cursor-text"
-                      onClick={(e) => {
-                        setOpen(true);
-                        // Programmatically focus the input if the container is clicked
-                        e.currentTarget.querySelector("input")?.focus();
-                      }}
-                    >
-                      {/* Remove manual icon, we will try to use the CommandInputs icon, OR hiding CommandInputs icon and using ours. 
-                            The user complained about "two search icons". default CommandInput has one.
-                            Lets hide the Wrappers border and icon, and use ours for custom styling, 
-                            OR let CommandInput handle it completely but remove the border.
-                            
-                            Lets try to HIDE the default SearchIcon from CommandInput using CSS child selector.
-                            And hide border-b from wrapper.
-                        */}
-                      <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                      <CommandInput
-                        placeholder="Enter location (e.g. Dubai Marina)..."
-                        value={query}
-                        onValueChange={(val) => {
-                          setQuery(val);
-                          setOpen(true);
-                          setLocation(val);
-                        }}
-                        onFocus={() => setOpen(true)}
-                        onBlur={() => {
-                          setTimeout(() => setOpen(false), 200);
-                        }}
-                        // Override Shadcn defaults
-                        className="h-12 border-none focus:ring-0 text-base bg-transparent p-0 placeholder:text-gray-500"
-                      // This class targets the input itself.
-                      // To target the wrapper, we need to use parent selectors on the Command component OR
-                      // just hack it here with some adjacent selectors if possible? No.
-                      />
-                    </div>
-
-
-                    {open && (
-                      <div className="absolute top-[calc(100%+8px)] left-0 right-0 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
-                        <CommandList>
-                          <CommandEmpty>No location found.</CommandEmpty>
-                          <CommandGroup>
-                            {suggestions.map((suggestion) => (
-                              <CommandItem
-                                key={suggestion}
-                                value={suggestion}
-                                onSelect={(currentValue) => {
-                                  handleLocationSelect(suggestion);
-                                  setQuery(suggestion);
-                                }}
-                                className="cursor-pointer px-4 py-3 text-base"
-                              >
-                                <MapPin className="mr-2 h-4 w-4 text-yellow-500" />
-                                {suggestion}
-                                <Check
-                                  className={cn(
-                                    "ml-auto h-4 w-4",
-                                    location === suggestion ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
+                {/* Global Search Trigger */}
+                <div className="flex-grow relative">
+                  <GlobalFuzzyFinder
+                    purpose={purpose as SearchPurpose}
+                    trigger={
+                      <div className="flex items-center px-4 h-12 rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-white/60 dark:bg-gray-800/60 shadow-sm cursor-text hover:border-yellow-400/50 hover:bg-white/80 transition-all duration-200 group">
+                        <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0 group-hover:text-yellow-500 transition-colors" />
+                        <span className="text-gray-500 text-sm md:text-base flex-grow">
+                          {location || "Search for locations, projects, properties..."}
+                        </span>
+                        <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                          <span className="text-xs">⌘</span>K
+                        </kbd>
                       </div>
-                    )}
-                  </Command>
+                    }
+                  />
                 </div>
 
                 {/* Search Button (Desktop) */}
