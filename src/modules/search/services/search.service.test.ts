@@ -127,3 +127,79 @@ describe('SearchService.search', () => {
      }));
   });
 });
+
+describe('SearchService.getSuggestions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should return rental suggestions when purpose is rent', async () => {
+    vi.mocked(prisma.property.findMany).mockResolvedValue([
+      { id: 1, title: 'Luxury Apt', location: 'Dubai Marina', slug: 'luxury-apt', images: [{ url: 'img1' }], listingType: 'RENT', bedrooms: 2 }
+    ] as any);
+
+    const suggestions = await SearchService.getSuggestions('rent');
+
+    expect(prisma.property.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        AND: expect.arrayContaining([
+          expect.objectContaining({ listingType: 'RENT' })
+        ])
+      }),
+      take: 3
+    }));
+
+    expect(suggestions).toHaveLength(1);
+    expect(suggestions[0]).toMatchObject({
+      id: 1,
+      type: SearchResultType.PROPERTY,
+      title: 'Luxury Apt',
+      badge: 'For Rent'
+    });
+  });
+
+  it('should return sale suggestions when purpose is buy', async () => {
+    vi.mocked(prisma.property.findMany).mockResolvedValue([
+      { id: 2, title: 'Villa Sale', location: 'Palm', slug: 'villa-sale', images: [], listingType: 'SALE' }
+    ] as any);
+
+    await SearchService.getSuggestions('buy');
+
+    expect(prisma.property.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        AND: expect.arrayContaining([
+          expect.objectContaining({ listingType: 'SALE' })
+        ])
+      })
+    }));
+  });
+
+  it('should return off-plan suggestions when purpose is off_plan', async () => {
+    vi.mocked(prisma.property.findMany).mockResolvedValue([]);
+
+    await SearchService.getSuggestions('off_plan');
+
+    expect(prisma.property.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        AND: expect.arrayContaining([
+          expect.objectContaining({ listingType: 'OFF_PLAN' })
+        ])
+      })
+    }));
+  });
+
+  it('should return top featured properties as default', async () => {
+    vi.mocked(prisma.property.findMany).mockResolvedValue([]);
+
+    await SearchService.getSuggestions();
+
+    expect(prisma.property.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        AND: expect.arrayContaining([
+          expect.objectContaining({ isFeatured: true })
+        ])
+      }),
+      take: 3
+    }));
+  });
+});

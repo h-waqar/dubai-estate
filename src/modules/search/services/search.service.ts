@@ -143,4 +143,38 @@ export class SearchService {
 
     return results;
   }
+
+  static async getSuggestions(purpose?: string): Promise<SearchResult[]> {
+    const publicFilter = GovernanceService.getPublicFilter();
+
+    const properties = await prisma.property.findMany({
+      where: {
+        AND: [
+          publicFilter,
+          purpose === "off_plan" ? { listingType: ListingType.OFF_PLAN } :
+          purpose === "buy" ? { listingType: ListingType.SALE } :
+          purpose === "rent" ? { listingType: ListingType.RENT } : 
+          { isFeatured: true },
+        ],
+      },
+      include: {
+        images: {
+          where: { isPrimary: true },
+          take: 1,
+        },
+      },
+      take: 3,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return properties.map(p => ({
+      id: p.id,
+      type: SearchResultType.PROPERTY,
+      title: p.title,
+      subtitle: `${p.bedrooms ? p.bedrooms + ' BR ' : ''}${p.location}`,
+      image: p.images?.[0]?.url,
+      link: `/properties/${p.slug}`,
+      badge: p.listingType === ListingType.SALE ? "For Sale" : p.listingType === ListingType.RENT ? "For Rent" : "Off-Plan",
+    }));
+  }
 }
