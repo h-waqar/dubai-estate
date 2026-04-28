@@ -59,7 +59,8 @@ export class PromotionService {
       await EntitlementService.consume(userId, code, tx);
 
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
+      const durationDays = type === PromotionType.SPOTLIGHT ? 7 : 30;
+      expiresAt.setDate(expiresAt.getDate() + durationDays);
 
       await tx.promotion.create({
         data: {

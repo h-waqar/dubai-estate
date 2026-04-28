@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Plus, Edit2, Eye, MapPin, Building2, LayoutTemplate } from "lucide-react";
+import { Plus, Edit2, Eye, MapPin, Building2, LayoutTemplate, Zap, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { listProperties } from "@/modules/property/services/listProperties";
 import { ProjectService } from "@/modules/project/services/project.service";
@@ -15,9 +15,18 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getUserEntitlementsAction, getActivePromotionsAction } from "@/modules/promotions/actions/promotions.actions";
+import { QuotasPreview } from "./QuotasPreview";
+import { AdvertiseModal } from "@/components/dashboard/AdvertiseModal";
 
 export async function AgentDashboard({ session }: { session: any }) {
     if (!session?.user?.id) return null;
+
+    const entitlementsRes = await getUserEntitlementsAction();
+    const promotionsRes = await getActivePromotionsAction();
+
+    const entitlements = entitlementsRes.success ? entitlementsRes.entitlements : {};
+    const promotions = (promotionsRes.success ? promotionsRes.promotions : []) || [];
 
     // Fetch properties for the current user
     const { data: properties } = await listProperties({
@@ -116,6 +125,9 @@ export async function AgentDashboard({ session }: { session: any }) {
                 </div>
             </div>
 
+            {/* Quotas & Promotions */}
+            <QuotasPreview entitlements={entitlements as any} promotions={promotions} />
+
             {/* Content Tabs */}
             <Tabs defaultValue="properties" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
@@ -149,70 +161,97 @@ export async function AgentDashboard({ session }: { session: any }) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {properties.map((property: any) => (
-                                            <tr key={property.id} className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="relative w-24 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                                                            {(() => {
-                                                                const coverImage = property.mediaUsages?.find((mu: any) => mu.role === "COVER")?.media || property.mediaUsages?.[0]?.media || property.images?.[0];
-                                                                return coverImage?.url ? (
-                                                                    <Image
-                                                                        src={coverImage.url}
-                                                                        alt={property.title}
-                                                                        fill
-                                                                        sizes="96px"
-                                                                        className="object-fill"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                                        <Eye className="w-6 h-6" />
-                                                                    </div>
-                                                                );
-                                                            })()}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{property.title}</div>
-                                                            <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
-                                                                <MapPin className="w-3 h-3" />
-                                                                {property.location}
+                                        {properties.map((property: any) => {
+                                            const activePromos = promotions.filter((p: any) => p.propertyId === property.id);
+                                            const isSpotlight = activePromos.some((p: any) => p.type === "SPOTLIGHT");
+                                            const isFeatured = activePromos.some((p: any) => p.type === "FEATURED");
+
+                                            return (
+                                                <tr key={property.id} className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="relative w-24 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                                                                {(() => {
+                                                                    const coverImage = property.mediaUsages?.find((mu: any) => mu.role === "COVER")?.media || property.mediaUsages?.[0]?.media || property.images?.[0];
+                                                                    return coverImage?.url ? (
+                                                                        <Image
+                                                                            src={coverImage.url}
+                                                                            alt={property.title}
+                                                                            fill
+                                                                            sizes="96px"
+                                                                            className="object-fill"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                                            <Eye className="w-6 h-6" />
+                                                                        </div>
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                                                    <span className="line-clamp-1">{property.title}</span>
+                                                                    {isSpotlight && (
+                                                                        <span title="Spotlight Active">
+                                                                            <Zap className="w-3.5 h-3.5 text-amber-500" />
+                                                                        </span>
+                                                                    )}
+                                                                    {isFeatured && (
+                                                                        <span title="Featured Active">
+                                                                            <Crown className="w-3.5 h-3.5 text-purple-500" />
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
+                                                                    <MapPin className="w-3 h-3" />
+                                                                    {property.location}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 font-medium">
-                                                    {formatPrice(property.price)}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <Badge variant="secondary" className={`font-normal ${getStatusColor(property.status)}`}>
-                                                        {property.status.replace("_", " ")}
-                                                    </Badge>
-                                                    {property.status === "DECLINED" && property.declinedReason && (
-                                                        <div className="text-xs text-red-500 mt-1 max-w-[200px] truncate" title={property.declinedReason}>
-                                                            Reason: {property.declinedReason}
+                                                    </td>
+                                                    <td className="px-6 py-4 font-medium">
+                                                        {formatPrice(property.price)}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Badge variant="secondary" className={`font-normal ${getStatusColor(property.status)}`}>
+                                                            {property.status.replace("_", " ")}
+                                                        </Badge>
+                                                        {property.status === "DECLINED" && property.declinedReason && (
+                                                            <div className="text-xs text-red-500 mt-1 max-w-[200px] truncate" title={property.declinedReason}>
+                                                                Reason: {property.declinedReason}
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-muted-foreground">
+                                                        {new Date(property.createdAt).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <AdvertiseModal 
+                                                                listing={{
+                                                                    id: property.id,
+                                                                    title: property.title,
+                                                                    isFeatured: property.isFeatured,
+                                                                    type: "PROPERTY"
+                                                                }}
+                                                                userRole={session.user.role}
+                                                            />
+                                                            <Link href={`/properties/${property.slug}`} target="_blank">
+                                                                <Button variant="ghost" size="icon" title="View Public Listing">
+                                                                    <Eye className="w-4 h-4" />
+                                                                </Button>
+                                                            </Link>
+                                                            <Link href={`/account/properties/${property.id}/edit`}>
+                                                                <Button variant="outline" size="sm" className="h-8 gap-2">
+                                                                    <Edit2 className="w-3.5 h-3.5" />
+                                                                    Edit
+                                                                </Button>
+                                                            </Link>
                                                         </div>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-muted-foreground">
-                                                    {new Date(property.createdAt).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Link href={`/properties/${property.slug}`} target="_blank">
-                                                            <Button variant="ghost" size="icon" title="View Public Listing">
-                                                                <Eye className="w-4 h-4" />
-                                                            </Button>
-                                                        </Link>
-                                                        <Link href={`/account/properties/${property.id}/edit`}>
-                                                            <Button variant="outline" size="sm" className="h-8 gap-2">
-                                                                <Edit2 className="w-3.5 h-3.5" />
-                                                                Edit
-                                                            </Button>
-                                                        </Link>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
@@ -246,70 +285,97 @@ export async function AgentDashboard({ session }: { session: any }) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {projects.map((project: any) => (
-                                            <tr key={project.id} className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="relative w-24 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                                                            {(() => {
-                                                                const coverImage = project.mediaUsages?.find((mu: any) => mu.role === "COVER")?.media;
-                                                                return coverImage?.url ? (
-                                                                    <Image
-                                                                        src={coverImage.url}
-                                                                        alt={project.name}
-                                                                        fill
-                                                                        sizes="96px"
-                                                                        className="object-cover"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                                        <LayoutTemplate className="w-6 h-6" />
-                                                                    </div>
-                                                                );
-                                                            })()}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{project.name}</div>
-                                                            <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
-                                                                <MapPin className="w-3 h-3" />
-                                                                {project.location}
+                                        {projects.map((project: any) => {
+                                            const activePromos = promotions.filter((p: any) => p.projectId === project.id);
+                                            const isSpotlight = activePromos.some((p: any) => p.type === "SPOTLIGHT");
+                                            const isFeatured = activePromos.some((p: any) => p.type === "FEATURED");
+
+                                            return (
+                                                <tr key={project.id} className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="relative w-24 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                                                                {(() => {
+                                                                    const coverImage = project.mediaUsages?.find((mu: any) => mu.role === "COVER")?.media;
+                                                                    return coverImage?.url ? (
+                                                                        <Image
+                                                                            src={coverImage.url}
+                                                                            alt={project.name}
+                                                                            fill
+                                                                            sizes="96px"
+                                                                            className="object-cover"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                                            <LayoutTemplate className="w-6 h-6" />
+                                                                        </div>
+                                                                    );
+                                                                })()}
                                                             </div>
-                                                            {project.developer && (
-                                                                <div className="text-xs text-primary mt-1">
-                                                                    By {project.developer?.name || "Unknown"}
+                                                            <div>
+                                                                <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                                                    <span className="line-clamp-1">{project.name}</span>
+                                                                    {isSpotlight && (
+                                                                        <span title="Spotlight Active">
+                                                                            <Zap className="w-3.5 h-3.5 text-amber-500" />
+                                                                        </span>
+                                                                    )}
+                                                                    {isFeatured && (
+                                                                        <span title="Featured Active">
+                                                                            <Crown className="w-3.5 h-3.5 text-purple-500" />
+                                                                        </span>
+                                                                    )}
                                                                 </div>
-                                                            )}
+                                                                <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
+                                                                    <MapPin className="w-3 h-3" />
+                                                                    {project.location}
+                                                                </div>
+                                                                {project.developer && (
+                                                                    <div className="text-xs text-primary mt-1">
+                                                                        By {project.developer?.name || "Unknown"}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 font-medium">
-                                                    {formatPrice(project.priceFrom)}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <Badge variant="secondary" className={`font-normal ${getStatusColor(project.status)}`}>
-                                                        {project.status.replace("_", " ")}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-6 py-4 text-muted-foreground">
-                                                    {new Date(project.createdAt).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Link href={`/projects/${project.slug}`} target="_blank">
-                                                            <Button variant="ghost" size="icon" title="View Public Listing">
-                                                                <Eye className="w-4 h-4" />
-                                                            </Button>
-                                                        </Link>
-                                                        <Link href={`/advertise/projects/edit/${project.id}`}>
-                                                            <Button variant="outline" size="sm" className="h-8 gap-2">
-                                                                <Edit2 className="w-3.5 h-3.5" />
-                                                                Edit
-                                                            </Button>
-                                                        </Link>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+                                                    <td className="px-6 py-4 font-medium">
+                                                        {formatPrice(project.priceFrom)}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Badge variant="secondary" className={`font-normal ${getStatusColor(project.status)}`}>
+                                                            {project.status.replace("_", " ")}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-muted-foreground">
+                                                        {new Date(project.createdAt).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <AdvertiseModal 
+                                                                listing={{
+                                                                    id: project.id,
+                                                                    title: project.name,
+                                                                    isFeatured: project.isFeatured,
+                                                                    type: "PROJECT"
+                                                                }}
+                                                                userRole={session.user.role}
+                                                            />
+                                                            <Link href={`/projects/${project.slug}`} target="_blank">
+                                                                <Button variant="ghost" size="icon" title="View Public Listing">
+                                                                    <Eye className="w-4 h-4" />
+                                                                </Button>
+                                                            </Link>
+                                                            <Link href={`/advertise/projects/edit/${project.id}`}>
+                                                                <Button variant="outline" size="sm" className="h-8 gap-2">
+                                                                    <Edit2 className="w-3.5 h-3.5" />
+                                                                    Edit
+                                                                </Button>
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

@@ -32,6 +32,7 @@ import {
   ShoppingBag,
   DollarSign,
   TrendingUp,
+  MessageSquare,
   LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -76,6 +77,7 @@ export const adminLinks: SidebarItem[] = [
     subItems: [
       { href: "/admin/revenue", label: "Revenue", icon: TrendingUp },
       { href: "/admin/pricing", label: "Pricing Plans", icon: ShoppingBag },
+      { href: "/admin/entitlements", label: "Entitlements", icon: ClipboardCheck },
       { href: "/admin/subscribers", label: "Subscribers", icon: Users },
       { href: "/admin/coupons", label: "Coupons", icon: Tags },
     ],
@@ -88,6 +90,13 @@ export const adminLinks: SidebarItem[] = [
       { href: "/admin/blog", label: "Blog Posts", icon: PenTool },
       { href: "/admin/categories", label: "Blog Categories", icon: Hash },
       { href: "/admin/media", label: "Media Library", icon: ImageIcon },
+    ],
+  },
+  {
+    label: "Leads & Requests",
+    icon: MessageSquare,
+    subItems: [
+      { href: "/lead", label: "Callback Requests", icon: MessageSquare },
     ],
   },
   {

@@ -17,6 +17,7 @@
     "lint": "eslint",
     "seed": "tsx prisma/seed.ts",
     "seed:prod": "tsx prisma/seed-prod.ts",
+    "seed:shadow": "tsx src/scripts/seed-shadow-agent.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

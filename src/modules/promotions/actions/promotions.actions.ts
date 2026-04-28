@@ -7,16 +7,18 @@ import { EntitlementService } from "@/modules/entitlement/entitlement.service";
 import { revalidatePath } from "next/cache";
 import { createAddonOrder, captureAddonOrder } from "@/lib/paypal-api";
 import { prisma } from "@/lib/prisma";
-import { Prisma, TransactionType, TransactionStatus } from "@prisma/client";
+import { Prisma, TransactionType, TransactionStatus, PromotionStatus, GrantStatus } from "@prisma/client";
 import { ledgerService } from "@/modules/finance/ledger.service";
 
-export async function activatePromotionAction(propertyId: number, type: "SPOTLIGHT" | "FEATURED") {
+export async function activatePromotionAction(entityId: number, type: "SPOTLIGHT" | "FEATURED", entityType: "PROPERTY" | "PROJECT" = "PROPERTY") {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
   try {
     const userId = Number(session.user.id);
-    await PromotionService.activatePromotion(propertyId, type, "PROPERTY", userId);
+    await PromotionService.activatePromotion(entityId, type, entityType, userId);
     revalidatePath("/account/properties");
+    revalidatePath("/account/projects");
+    revalidatePath("/account");
     revalidatePath("/");
     return { success: true };
   } catch (error: any) {
@@ -24,26 +26,28 @@ export async function activatePromotionAction(propertyId: number, type: "SPOTLIG
   }
 }
 
-export async function bumpUpPropertyAction(propertyId: number) {
+export async function bumpUpPropertyAction(entityId: number, entityType: "PROPERTY" | "PROJECT" = "PROPERTY") {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
   try {
     const userId = Number(session.user.id);
-    await PromotionService.bumpUpProperty(propertyId, userId, "PROPERTY");
+    await PromotionService.bumpUpProperty(entityId, userId, entityType);
     revalidatePath("/account/properties");
+    revalidatePath("/account/projects");
     revalidatePath("/properties");
+    revalidatePath("/projects");
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || "Failed to bump up property" };
   }
 }
 
-export async function getCooldownStatusAction(propertyId: number) {
+export async function getCooldownStatusAction(entityId: number, entityType: "PROPERTY" | "PROJECT" = "PROPERTY") {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
   try {
     const userId = Number(session.user.id);
-    const status = await PromotionService.getCooldownStatus(propertyId, userId, "PROPERTY");
+    const status = await PromotionService.getCooldownStatus(entityId, userId, entityType);
     return { success: true, status };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -67,17 +71,67 @@ export async function getUserEntitlementsAction() {
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
   try {
     const userId = Number(session.user.id);
-    const featured = await EntitlementService.getQuotaStatus(userId, "FEATURED_CREDIT");
-    const spotlight = await EntitlementService.getQuotaStatus(userId, "SPOTLIGHT_CREDIT");
-    const bumpUp = await EntitlementService.getQuotaStatus(userId, "BUMP_UP_CREDIT");
+    
+    // Fetch all active grants to build a dynamic breakdown
+    const grants = await prisma.entitlementGrant.findMany({
+      where: {
+        userId,
+        status: GrantStatus.ACTIVE,
+      },
+      include: {
+        definition: true,
+      },
+    });
+
+    const breakdown: Record<string, { total: number; used: number; sources: Record<string, number> }> = {};
+
+    grants.forEach((grant) => {
+      const code = grant.definition.code;
+      if (!breakdown[code]) {
+        breakdown[code] = { total: 0, used: 0, sources: {} };
+      }
+      breakdown[code].total += grant.amount;
+      breakdown[code].used += grant.used;
+      
+      const source = grant.sourceType || "SUBSCRIPTION";
+      breakdown[code].sources[source] = (breakdown[code].sources[source] || 0) + (grant.amount - grant.used);
+    });
+
+    // Also include PROPERTY_SLOT and PROJECT_SLOT specifically if not present
+    const codes = ["FEATURED_CREDIT", "SPOTLIGHT_CREDIT", "BUMP_UP_CREDIT", "PROPERTY_SLOT", "PROJECT_SLOT"];
+    for (const code of codes) {
+        if (!breakdown[code]) {
+            breakdown[code] = { total: 0, used: 0, sources: {} };
+        }
+    }
+
     return { 
       success: true, 
-      entitlements: {
-        FEATURED: featured.totalCapacity - featured.totalUsed,
-        SPOTLIGHT: spotlight.totalCapacity - spotlight.totalUsed,
-        BUMP_UP: bumpUp.totalCapacity - bumpUp.totalUsed
-      }
+      entitlements: breakdown
     };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getActivePromotionsAction() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+  try {
+    const userId = Number(session.user.id);
+    const promotions = await prisma.promotion.findMany({
+      where: {
+        userId,
+        status: PromotionStatus.ACTIVE,
+      },
+      include: {
+        property: { select: { id: true, title: true } },
+        project: { select: { id: true, name: true } },
+      },
+      orderBy: { expiresAt: "asc" },
+    });
+
+    return { success: true, promotions };
   } catch (error: any) {
     return { success: false, error: error.message };
   }

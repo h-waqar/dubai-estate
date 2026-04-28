@@ -32,7 +32,7 @@ export const accountLinks: SidebarItem[] = [
   {
     label: "My Content",
     icon: Building,
-    roles: ["USER", "ADMIN", "SUPER_ADMIN"],
+    roles: ["USER", "AGENT", "ADMIN", "SUPER_ADMIN"],
     subItems: [
       { href: "/account/properties", label: "My Properties", icon: Building },
       { href: "/account/projects", label: "My Projects", icon: Briefcase },

@@ -138,7 +138,15 @@ export default async function MyPropertiesPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
-                                                <AdvertiseModal property={property} userRole={userRole} />
+                                                <AdvertiseModal 
+                                                    listing={{
+                                                        id: property.id,
+                                                        title: property.title,
+                                                        isFeatured: property.isFeatured,
+                                                        type: "PROPERTY"
+                                                    }} 
+                                                    userRole={userRole} 
+                                                />
                                                 <Link href={`/properties/${property.slug}`} target="_blank">
                                                     <Button variant="ghost" size="icon" title="View Public Listing">
                                                         <Eye className="w-4 h-4" />

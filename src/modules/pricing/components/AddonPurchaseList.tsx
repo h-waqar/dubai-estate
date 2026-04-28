@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Star, Zap, ArrowUp, Loader2 } from "lucide-react";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { createAddonOrderAction, captureAddonOrderAction } from "@/actions/promotions.actions";
+import { createAddonOrderAction, captureAddonOrderAction } from "@/modules/promotions/actions/promotions.actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -75,7 +75,7 @@ export function AddonPurchaseList({ plans, userId }: AddonPurchaseListProps) {
                       if (plan.slug.includes("spotlight")) type = "spotlight";
                       if (plan.slug.includes("bump")) type = "bump_up";
                       
-                      const res = await createAddonOrderAction(type, price.toString());
+                      const res = await createAddonOrderAction(type, price.toString(), 1);
                       if (res.success) return res.orderId;
                       toast.error(res.error || "Failed to create order");
                       throw new Error(res.error);

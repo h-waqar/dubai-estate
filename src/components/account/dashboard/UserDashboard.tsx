@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CreditCard, Home, Eye, Star, Zap, ArrowUp } from "lucide-react";
+import { CreditCard, Home, Eye } from "lucide-react";
+import { getUserEntitlementsAction, getActivePromotionsAction } from "@/modules/promotions/actions/promotions.actions";
+import { QuotasPreview } from "./QuotasPreview";
 
 export async function UserDashboard({ session }: { session: any }) {
   if (!session?.user?.id) return null;
@@ -10,37 +12,29 @@ export async function UserDashboard({ session }: { session: any }) {
     include: { 
       properties: { select: { id: true, views: true } },
       pricingPlan: true,
-      entitlementGrants: {
-        include: { definition: true },
-        where: { status: 'ACTIVE' }
-      }
     }
   });
 
   if (!user) return null;
 
+  const entitlementsRes = await getUserEntitlementsAction();
+  const promotionsRes = await getActivePromotionsAction();
+
+  const entitlements = entitlementsRes.success ? entitlementsRes.entitlements : {};
+  const promotions = (promotionsRes.success ? promotionsRes.promotions : []) || [];
+
   const activeListings = user.properties.length;
   const totalViews = user.properties.reduce((sum, p) => sum + (p.views || 0), 0);
   const planName = user.pricingPlan?.name || "No Plan";
   
-  const getGrantStats = (code: string) => {
-    const grants = user.entitlementGrants.filter(g => g.definition.code === code);
-    const total = grants.reduce((sum, g) => sum + g.amount, 0);
-    const used = grants.reduce((sum, g) => sum + g.used, 0);
-    return { total, used, available: total - used };
-  };
-
-  const propertySlots = getGrantStats('PROPERTY_SLOT');
-  const featuredCredits = getGrantStats('FEATURED_CREDIT');
-  const spotlightCredits = getGrantStats('SPOTLIGHT_CREDIT');
-  const bumpUpCredits = getGrantStats('BUMP_UP_CREDIT');
+  const propertyQuota = (entitlements as any)["PROPERTY_SLOT"] || { total: 0, used: 0 };
 
   const stats = [
     {
       title: "Current Plan",
       value: planName,
       icon: CreditCard,
-      description: `${propertySlots.used} / ${propertySlots.total} listings used`
+      description: `${propertyQuota.used} / ${propertyQuota.total} listings used`
     },
     {
       title: "Active Listings",
@@ -54,12 +48,6 @@ export async function UserDashboard({ session }: { session: any }) {
       icon: Eye,
       description: "Across all properties"
     }
-  ];
-
-  const creditStats = [
-    { title: "Featured", value: featuredCredits.available, icon: Star, color: "text-purple-500" },
-    { title: "Spotlight", value: spotlightCredits.available, icon: Zap, color: "text-amber-500" },
-    { title: "Bump Up", value: bumpUpCredits.available, icon: ArrowUp, color: "text-blue-500" }
   ];
 
   return (
@@ -84,23 +72,8 @@ export async function UserDashboard({ session }: { session: any }) {
         })}
       </div>
 
-      <h2 className="text-xl font-semibold mt-8">Available Credits</h2>
-      <div className="grid gap-4 md:grid-cols-3">
-        {creditStats.map((credit) => {
-          const Icon = credit.icon;
-          return (
-            <Card key={credit.title} className="border-l-4 border-l-primary/20">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{credit.title} Credits</CardTitle>
-                <Icon className={credit.color + " h-4 w-4"} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{credit.value}</div>
-                <p className="text-xs text-muted-foreground">Ready to use</p>
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="mt-8">
+        <QuotasPreview entitlements={entitlements as any} promotions={promotions} />
       </div>
     </div>
   );

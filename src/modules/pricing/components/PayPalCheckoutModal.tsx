@@ -2,9 +2,9 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PricingPlan } from "@prisma/client";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { usePayPalScriptReducer, PayPalButtons } from "@paypal/react-paypal-js";
 import { activateSubscription } from "@/modules/user/actions/activateSubscription";
-import { captureAddonOrderAction, createAddonOrderAction } from "@/actions/promotions.actions";
+import { captureAddonOrderAction, createAddonOrderAction } from "@/modules/promotions/actions/promotions.actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";

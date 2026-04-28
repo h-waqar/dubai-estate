@@ -5,22 +5,23 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Megaphone, Zap, ArrowUp, AlertTriangle, Crown, Loader2 } from "lucide-react";
-import { activatePromotionAction, bumpUpPropertyAction, getCooldownStatusAction, getUserEntitlementsAction, createAddonOrderAction, captureAddonOrderAction } from "@/actions/promotions.actions";
+import { activatePromotionAction, bumpUpPropertyAction, getCooldownStatusAction, getUserEntitlementsAction, createAddonOrderAction, captureAddonOrderAction } from "@/modules/promotions/actions/promotions.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 
 interface AdvertiseModalProps {
-  property: {
+  listing: {
     id: number;
     title: string;
     isFeatured: boolean;
+    type: "PROPERTY" | "PROJECT";
   };
   userRole: string;
   trigger?: React.ReactNode;
 }
 
-export function AdvertiseModal({ property, userRole, trigger }: AdvertiseModalProps) {
+export function AdvertiseModal({ listing, userRole, trigger }: AdvertiseModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState<any>(null);
@@ -31,23 +32,23 @@ export function AdvertiseModal({ property, userRole, trigger }: AdvertiseModalPr
 
   useEffect(() => {
     if (isOpen) {
-      getCooldownStatusAction(property.id).then(res => {
+      getCooldownStatusAction(listing.id, listing.type).then(res => {
         if (res.success) setCooldown(res.status);
       });
       getUserEntitlementsAction().then(res => {
         if (res.success) setEntitlements(res.entitlements);
       });
     }
-  }, [isOpen, property.id, refreshKey]);
+  }, [isOpen, listing.id, listing.type, refreshKey]);
 
   const handleAction = async (type: "SPOTLIGHT" | "FEATURED" | "BUMP_UP") => {
     setLoading(type);
     try {
       let result;
       if (type === "BUMP_UP") {
-        result = await bumpUpPropertyAction(property.id);
+        result = await bumpUpPropertyAction(listing.id, listing.type);
       } else {
-        result = await activatePromotionAction(property.id, type as any);
+        result = await activatePromotionAction(listing.id, type as any, listing.type);
       }
 
       if (result.success) {
@@ -84,7 +85,7 @@ export function AdvertiseModal({ property, userRole, trigger }: AdvertiseModalPr
       borderColor: "border-purple-200",
       bgColor: "bg-purple-50",
       price: "50",
-      disabled: isFree || property.isFeatured,
+      disabled: isFree || listing.isFeatured,
     },
     {
       id: "BUMP_UP",
@@ -113,9 +114,9 @@ export function AdvertiseModal({ property, userRole, trigger }: AdvertiseModalPr
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Advertise Property</DialogTitle>
+          <DialogTitle>Advertise {listing.type === "PROPERTY" ? "Property" : "Project"}</DialogTitle>
           <DialogDescription>
-            Boost visibility for {property.title} using your credits or buy a one-time boost.
+            Boost visibility for {listing.title} using your credits or buy a one-time boost.
           </DialogDescription>
         </DialogHeader>
 
@@ -125,7 +126,7 @@ export function AdvertiseModal({ property, userRole, trigger }: AdvertiseModalPr
             <div>
               <p className="text-sm font-medium text-amber-800">Pro Feature Only</p>
               <p className="text-xs text-amber-700 mt-1">
-                You are currently on the Free tier. Upgrade to a Pro plan to use property promotions.
+                You are currently on the Free tier. Upgrade to a Pro plan to use promotions.
               </p>
             </div>
           </div>
@@ -133,7 +134,8 @@ export function AdvertiseModal({ property, userRole, trigger }: AdvertiseModalPr
 
         <div className="grid gap-4 py-4">
           {options.map((option) => {
-            const credits = entitlements ? entitlements[option.id] : 0;
+            const creditsData = entitlements ? entitlements[option.id === "BUMP_UP" ? "BUMP_UP_CREDIT" : (option.id + "_CREDIT")] : null;
+            const credits = creditsData ? (creditsData.total - creditsData.used) : 0;
             const canApply = credits > 0;
 
             return (
@@ -183,7 +185,7 @@ export function AdvertiseModal({ property, userRole, trigger }: AdvertiseModalPr
                       <PayPalButtons
                         style={{ layout: "horizontal", height: 32, label: "pay", tagline: false }}
                         createOrder={async () => {
-                          const res = await createAddonOrderAction(option.id, option.price);
+                          const res = await createAddonOrderAction(option.id, option.price, 1);
                           if (res.success) return res.orderId;
                           throw new Error(res.error);
                         }}
