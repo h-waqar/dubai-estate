@@ -3,8 +3,9 @@
 import { AddonPackService } from "../services/addonPack.service";
 import { revalidatePath } from "next/cache";
 import { serializeDecimals } from "@/lib/serializeDecimal";
+import { AddonPack } from "@prisma/client";
 
-export async function listAddonPacksAction(planId?: number) {
+export async function listAddonPacksAction(planId?: number): Promise<{ success: true; packs: AddonPack[] } | { success: false; error: string }> {
   try {
     const packs = await AddonPackService.listPacks(planId);
     return { success: true, packs: serializeDecimals(packs) };

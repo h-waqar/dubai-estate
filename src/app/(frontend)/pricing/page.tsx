@@ -1,11 +1,11 @@
 import Header from "@/components/layout/Header";
 import { listPlans } from "@/modules/pricing/actions/listPlans";
 import { listAddonPacksAction } from "@/modules/pricing/actions/addonPacks";
-import PricingList from "@/modules/pricing/components/PricingList";
+import { PricingList } from "@/modules/pricing/components/PricingList";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/modules/user/routes/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AddonStore from "@/modules/pricing/components/AddonStore";
+import { AddonStore } from "@/modules/pricing/components/AddonStore";
 import { prisma } from "@/lib/prisma";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 import PayPalProvider from "@/modules/pricing/components/PayPalProvider";
@@ -67,13 +67,11 @@ export default async function PricingPage(props: { searchParams: Promise<{ tab?:
               </div>
 
               <TabsContent value="plans" className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
-                  <PricingList 
-                    plans={subscriptionPlans} 
-                    userId={session?.user?.id} 
-                    activeSubscription={activeSubscription}
-                  />
-                </div>
+                <PricingList 
+                  plans={subscriptionPlans} 
+                  currentPlanId={activeSubscription?.planId}
+                  userId={session?.user?.id}
+                />
               </TabsContent>
 
               <TabsContent value="addons">

@@ -1,73 +1,82 @@
 "use client";
 
-/**
- * PayPal Subscription Integration Documentation
- * 
- * Architecture:
- * - `PricingList` acts as the container for pricing cards and subscription modals.
- * - `PricingCard` is purely presentational regarding the subscription action, firing an `onSubscribe` event.
- * - `PayPalCheckoutModal` handles the specific PayPal Button rendering and subscription creation logic.
- * - This component depends on a `PayPalScriptProvider` being present higher in the tree (usually in `PricingPage`).
- * 
- * Environment Variables Required:
- * - `NEXT_PUBLIC_PAYPAL_CLIENT_ID`: Your PayPal Client ID.
- * - `NEXT_PUBLIC_PAYPAL_SANDBOX`: Set to "true" for sandbox mode.
- * - `NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD`: PayPal Plan ID for the 'Gold' plan (fallback if not in DB).
- * - `NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER`: PayPal Plan ID for the 'Silver' plan (fallback if not in DB).
- * 
- * Setup:
- * - The PayPal SDK is loaded asynchronously via `@paypal/react-paypal-js`.
- * - Plan IDs should ideally be stored in the database (`PricingPlan.paypalPlanId`).
- * - Fallback IDs in `PayPalCheckoutModal` are used if the DB field is empty.
- */
-
-import { PricingPlan, Subscription } from "@prisma/client";
-import PricingCard from "./PricingCard";
+import { PricingPlan } from "@prisma/client";
+import { Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { PayPalCheckoutModal } from "./PayPalCheckoutModal";
-
-import { PricingPlanWithEntitlements } from "./PricingCard";
+import PayPalCheckoutModal from "./PayPalCheckoutModal";
 
 interface PricingListProps {
-  plans: PricingPlanWithEntitlements[];
+  plans: (PricingPlan & {
+    entitlements: { amount: number; definition: { name: string; code: string } }[];
+  })[];
+  currentPlanId?: number | null;
   userId?: number | string | null;
-  activeSubscription?: (Subscription & { plan: PricingPlan }) | null;
 }
 
-export default function PricingList({ plans, userId, activeSubscription }: PricingListProps) {
+export function PricingList({ plans, currentPlanId, userId }: PricingListProps) {
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSubscribe = (plan: PricingPlan) => {
+  const handleSelectPlan = (plan: PricingPlan) => {
     setSelectedPlan(plan);
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
   return (
-    <>
-      <div className="contents">
-          {plans.map((plan) => (
-          <PricingCard 
-              key={plan.id} 
-              plan={plan} 
-              userId={userId} 
-              onSubscribe={handleSubscribe} 
-              activeSubscription={activeSubscription}
-          />
-          ))}
-      </div>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {plans.map((plan) => (
+        <Card 
+          key={plan.id} 
+          className={`relative flex flex-col ${plan.id === currentPlanId ? 'border-primary shadow-md' : ''}`}
+        >
+          {plan.id === currentPlanId && (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge className="bg-primary text-primary-foreground">Current Plan</Badge>
+            </div>
+          )}
+          <CardHeader>
+            <CardTitle>{plan.name}</CardTitle>
+            <CardDescription>{plan.description}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1">
+            <div className="mb-4">
+              <span className="text-4xl font-bold">${Number(plan.priceMonthly)}</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+            <ul className="space-y-2">
+              {plan.entitlements.map((entitlement) => (
+                <li key={entitlement.definition.code} className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span>
+                    {entitlement.amount} {entitlement.definition.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              className="w-full" 
+              variant={plan.id === currentPlanId ? "outline" : "default"}
+              disabled={plan.id === currentPlanId}
+              onClick={() => handleSelectPlan(plan)}
+            >
+              {plan.id === currentPlanId ? "Active" : "Select Plan"}
+            </Button>
+          </CardFooter>
+        </Card>
+      ))}
 
       <PayPalCheckoutModal 
-        plan={selectedPlan} 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        plan={selectedPlan}
         userId={userId}
         mode="SUBSCRIPTION"
       />
-    </>
+    </div>
   );
 }

@@ -10,6 +10,10 @@ const CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
 async function getAccessToken() {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error('Missing PayPal credentials in environment variables');
+  }
+
   const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
   const response = await fetch(`${BASE_URL}/v1/oauth2/token`, {
     method: 'POST',
@@ -41,13 +45,21 @@ async function main() {
         const silverId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER;
         const goldId = process.env.NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD;
         
-        console.log(`Checking Silver Plan: ${silverId}`);
-        const silverData = await checkPlan(token, silverId);
-        console.log(JSON.stringify(silverData, null, 2));
+        if (silverId) {
+            console.log(`Checking Silver Plan: ${silverId}`);
+            const silverData = await checkPlan(token, silverId);
+            console.log(JSON.stringify(silverData, null, 2));
+        } else {
+            console.warn('NEXT_PUBLIC_PAYPAL_PLAN_ID_SILVER is not defined');
+        }
         
-        console.log(`\nChecking Gold Plan: ${goldId}`);
-        const goldData = await checkPlan(token, goldId);
-        console.log(JSON.stringify(goldData, null, 2));
+        if (goldId) {
+            console.log(`\nChecking Gold Plan: ${goldId}`);
+            const goldData = await checkPlan(token, goldId);
+            console.log(JSON.stringify(goldData, null, 2));
+        } else {
+            console.warn('NEXT_PUBLIC_PAYPAL_PLAN_ID_GOLD is not defined');
+        }
     } catch (e) {
         console.error(e);
     }

@@ -38,7 +38,7 @@ export default function PricingAdminList({ initialPlans }: PricingAdminListProps
     const handleSync = async (id: number) => {
         setSyncingId(id);
         try {
-            const result = await syncPlanAction(id);
+            const result: any = await syncPlanAction(id);
             if (result.success) {
                 setPlans(plans.map(p => p.id === id ? { ...p, isActive: result.isActive } : p));
                 toast.success(result.message || "Plan synced successfully");
@@ -55,7 +55,7 @@ export default function PricingAdminList({ initialPlans }: PricingAdminListProps
     const handleSyncAll = async () => {
         setIsSyncingAll(true);
         try {
-            const result = await syncAllPlansAction();
+            const result: any = await syncAllPlansAction();
             if (result.success) {
                 toast.success(result.message || "All plans synced successfully");
                 window.location.reload();

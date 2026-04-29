@@ -1,8 +1,5 @@
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -22,7 +19,7 @@ interface AddonPack {
     id: number;
     qty: number;
     label: string;
-    discount: string | number;
+    discount: any; // Using any for Prisma.Decimal
     isActive: boolean;
     order: number;
     planId: number | null;
@@ -46,205 +43,120 @@ export default function AddonPackAdminList({ initialPacks, addonPlans }: AddonPa
         setPacks(initialPacks);
     }, [initialPacks]);
 
-    const handleAdd = async () => {
-        if (!newPack.label) return toast.error("Label is required");
+    const filteredPacks = selectedPlanId === "global" 
+        ? packs.filter(p => !p.planId)
+        : packs.filter(p => p.planId === Number(selectedPlanId));
+
+    const handleCreate = async () => {
+        if (!newPack.label) return;
         setIsAdding(true);
         try {
-            const planId = selectedPlanId === "global" ? null : parseInt(selectedPlanId);
+            const planId = selectedPlanId === "global" ? null : Number(selectedPlanId);
             const res = await createAddonPackAction({ ...newPack, planId });
             if (res.success) {
-                toast.success("Pack added successfully");
+                toast.success("Pack created");
                 setNewPack({ qty: 1, label: "", discount: 0, order: 0 });
                 router.refresh();
             } else {
-                toast.error(res.error);
+                toast.error(res.error || "Failed to create pack");
             }
-        } catch (error) {
-            toast.error("Failed to add pack");
         } finally {
             setIsAdding(false);
         }
     };
 
-    const handleUpdate = async (id: number, data: any) => {
-        setLoadingId(id);
-        try {
-            const res = await updateAddonPackAction(id, data);
-            if (res.success) {
-                toast.success("Pack updated");
-            } else {
-                toast.error(res.error);
-            }
-        } catch (error) {
-            toast.error("Failed to update");
-        } finally {
-            setLoadingId(null);
-        }
-    };
-
     const handleDelete = async (id: number) => {
-        if (!confirm("Are you sure?")) return;
         setLoadingId(id);
         try {
             const res = await deleteAddonPackAction(id);
             if (res.success) {
-                setPacks(packs.filter(p => p.id !== id));
                 toast.success("Pack deleted");
+                router.refresh();
             } else {
-                toast.error(res.error);
+                toast.error("Failed to delete pack");
             }
-        } catch (error) {
-            toast.error("Failed to delete");
         } finally {
             setLoadingId(null);
         }
     };
 
-    const filteredPacks = packs.filter(p => {
-        if (selectedPlanId === "global") return !p.planId;
-        return p.planId === parseInt(selectedPlanId);
-    });
-
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Addon Multi-Purchase Packs</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">Configure bulk purchase discounts for specific addon types.</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <div className="w-[200px]">
-                        <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Plan" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="global">Global Fallback</SelectItem>
-                                {addonPlans.map(plan => (
-                                    <SelectItem key={plan.id} value={plan.id.toString()}>{plan.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <Badge variant="outline">Dynamic Configuration</Badge>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="rounded-md border overflow-hidden">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">Qty</TableHead>
-                                <TableHead>Label</TableHead>
-                                <TableHead>Discount %</TableHead>
-                                <TableHead>Order</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredPacks.map((pack) => (
-                                <TableRow key={pack.id}>
-                                    <TableCell>
-                                        <Input 
-                                            type="number" 
-                                            defaultValue={pack.qty} 
-                                            className="h-8 w-20"
-                                            onBlur={(e) => handleUpdate(pack.id, { qty: parseInt(e.target.value) })}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Input 
-                                            defaultValue={pack.label} 
-                                            className="h-8"
-                                            onBlur={(e) => handleUpdate(pack.id, { label: e.target.value })}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Input 
-                                                type="number" 
-                                                defaultValue={(Number(pack.discount) * 100).toFixed(0)} 
-                                                className="h-8 w-20"
-                                                onBlur={(e) => handleUpdate(pack.id, { discount: parseFloat(e.target.value) / 100 })}
-                                            />
-                                            <span className="text-xs text-muted-foreground">%</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Input 
-                                            type="number" 
-                                            defaultValue={pack.order} 
-                                            className="h-8 w-16"
-                                            onBlur={(e) => handleUpdate(pack.id, { order: parseInt(e.target.value) })}
-                                        />
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button 
-                                            variant="ghost" size="icon" className="text-red-500 h-8 w-8"
-                                            onClick={() => handleDelete(pack.id)}
-                                            disabled={loadingId === pack.id}
-                                        >
-                                            {loadingId === pack.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            <TableRow className="bg-muted/50">
-                                <TableCell>
-                                    <Input 
-                                        type="number" 
-                                        value={newPack.qty} 
-                                        onChange={(e) => setNewPack({ ...newPack, qty: parseInt(e.target.value) })}
-                                        className="h-8 w-20 bg-background"
-                                    />
-                                </TableCell>
-                                <TableCell>
-                                    <Input 
-                                        placeholder="e.g. Starter Pack" 
-                                        value={newPack.label}
-                                        onChange={(e) => setNewPack({ ...newPack, label: e.target.value })}
-                                        className="h-8 bg-background"
-                                    />
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex items-center gap-2">
-                                        <Input 
-                                            type="number" 
-                                            value={newPack.discount * 100}
-                                            onChange={(e) => setNewPack({ ...newPack, discount: parseFloat(e.target.value) / 100 })}
-                                            className="h-8 w-20 bg-background"
-                                        />
-                                        <span className="text-xs text-muted-foreground">%</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Input 
-                                        type="number" 
-                                        value={newPack.order}
-                                        onChange={(e) => setNewPack({ ...newPack, order: parseInt(e.target.value) })}
-                                        className="h-8 w-16 bg-background"
-                                    />
-                                </TableCell>
-                                <TableCell className="text-right">
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <Select value={selectedPlanId} onValueChange={setSelectedPlanId}>
+                    <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select plan filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="global">Global Packs</SelectItem>
+                        {addonPlans.map(plan => (
+                            <SelectItem key={plan.id} value={plan.id.toString()}>{plan.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="border rounded-md">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="bg-muted/50 border-b">
+                            <th className="p-2 text-left">Label</th>
+                            <th className="p-2 text-left">Qty</th>
+                            <th className="p-2 text-left">Discount</th>
+                            <th className="p-2 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredPacks.map(pack => (
+                            <tr key={pack.id} className="border-b">
+                                <td className="p-2">{pack.label}</td>
+                                <td className="p-2">{pack.qty} credits</td>
+                                <td className="p-2">{Math.round(Number(pack.discount) * 100)}%</td>
+                                <td className="p-2 text-right">
                                     <Button 
-                                        size="sm" 
-                                        type="button"
-                                        onClick={handleAdd}
-                                        disabled={isAdding}
+                                        variant="ghost" size="icon" className="text-red-500"
+                                        onClick={() => handleDelete(pack.id)}
+                                        disabled={loadingId === pack.id}
                                     >
-                                        {isAdding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                                        Add Pack
+                                        {loadingId === pack.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                     </Button>
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </div>
-                <p className="text-[10px] text-muted-foreground">
-                    * Showing packs for: <strong>{selectedPlanId === "global" ? "Global Fallback" : addonPlans.find(p => p.id === parseInt(selectedPlanId))?.name}</strong>.
-                    Changes are saved automatically when you click away.
-                </p>
-            </CardContent>
-        </Card>
+                                </td>
+                            </tr>
+                        ))}
+                        <tr className="bg-muted/20">
+                            <td className="p-2"><Input placeholder="Label" value={newPack.label} onChange={e => setNewPack({ ...newPack, label: e.target.value })} /></td>
+                            <td className="p-2"><Input type="number" value={newPack.qty} onChange={e => setNewPack({ ...newPack, qty: Number(e.target.value) })} /></td>
+                            <td className="p-2"><Input type="number" step="0.01" value={newPack.discount} onChange={e => setNewPack({ ...newPack, discount: Number(e.target.value) })} /></td>
+                            <td className="p-2 text-right">
+                                <Button onClick={handleCreate} disabled={isAdding}>
+                                    {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                                </Button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+// Minimal Button component since it wasn't imported from UI
+function Button({ children, variant, size, className, ...props }: any) {
+    const base = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none disabled:opacity-50";
+    const variants: any = {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+    };
+    const sizes: any = {
+        default: "h-10 px-4 py-2",
+        icon: "h-9 w-9",
+    };
+    return (
+        <button 
+            className={`${base} ${variants[variant || 'default']} ${sizes[size || 'default']} ${className}`} 
+            {...props}
+        >
+            {children}
+        </button>
     );
 }

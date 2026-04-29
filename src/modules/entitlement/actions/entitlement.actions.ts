@@ -12,15 +12,15 @@ import { revalidatePath } from "next/cache";
 async function checkAdminSession() {
   const session = await getServerSession(authOptions);
   if (!session || !session.user) {
-    return { error: "Unauthorized", status: 401 };
+    return { success: false, error: "Unauthorized", status: 401 } as const;
   }
   
   const hasAccess = session.user.roles.includes("ADMIN") || session.user.roles.includes("SUPER_ADMIN");
   if (!hasAccess) {
-    return { error: "Forbidden", status: 403 };
+    return { success: false, error: "Forbidden", status: 403 } as const;
   }
   
-  return { session };
+  return { success: true, session } as const;
 }
 
 /**
@@ -28,16 +28,16 @@ async function checkAdminSession() {
  */
 export async function listEntitlementDefinitionsAction() {
   const auth = await checkAdminSession();
-  if ("error" in auth) return auth;
+  if (!auth.success) return auth;
 
   try {
     const definitions = await prisma.entitlementDefinition.findMany({
       orderBy: { name: "asc" },
     });
-    return { success: true, data: definitions };
+    return { success: true, data: definitions } as const;
   } catch (error: any) {
     console.error("List Entitlement Definitions Error:", error);
-    return { error: "Failed to list entitlement definitions" };
+    return { success: false, error: "Failed to list entitlement definitions" } as const;
   }
 }
 
@@ -46,11 +46,11 @@ export async function listEntitlementDefinitionsAction() {
  */
 export async function createEntitlementDefinitionAction(data: any) {
   const auth = await checkAdminSession();
-  if ("error" in auth) return auth;
+  if (!auth.success) return auth;
 
   const validation = entitlementDefinitionSchema.safeParse(data);
   if (!validation.success) {
-    return { error: validation.error.flatten().fieldErrors };
+    return { success: false, error: validation.error.flatten().fieldErrors } as const;
   }
 
   try {
@@ -58,13 +58,13 @@ export async function createEntitlementDefinitionAction(data: any) {
       data: validation.data,
     });
     revalidatePath("/admin/entitlements");
-    return { success: true, data: definition };
+    return { success: true, data: definition } as const;
   } catch (error: any) {
     if (error.code === 'P2002') {
-      return { error: "An entitlement with this code already exists." };
+      return { success: false, error: "An entitlement with this code already exists." } as const;
     }
     console.error("Create Entitlement Definition Error:", error);
-    return { error: "Failed to create entitlement definition" };
+    return { success: false, error: "Failed to create entitlement definition" } as const;
   }
 }
 
@@ -73,11 +73,11 @@ export async function createEntitlementDefinitionAction(data: any) {
  */
 export async function updateEntitlementDefinitionAction(id: string, data: any) {
   const auth = await checkAdminSession();
-  if ("error" in auth) return auth;
+  if (!auth.success) return auth;
 
   const validation = entitlementDefinitionSchema.safeParse(data);
   if (!validation.success) {
-    return { error: validation.error.flatten().fieldErrors };
+    return { success: false, error: validation.error.flatten().fieldErrors } as const;
   }
 
   try {
@@ -86,13 +86,13 @@ export async function updateEntitlementDefinitionAction(id: string, data: any) {
       data: validation.data,
     });
     revalidatePath("/admin/entitlements");
-    return { success: true, data: definition };
+    return { success: true, data: definition } as const;
   } catch (error: any) {
     if (error.code === 'P2002') {
-      return { error: "An entitlement with this code already exists." };
+      return { success: false, error: "An entitlement with this code already exists." } as const;
     }
     console.error("Update Entitlement Definition Error:", error);
-    return { error: "Failed to update entitlement definition" };
+    return { success: false, error: "Failed to update entitlement definition" } as const;
   }
 }
 
@@ -101,16 +101,16 @@ export async function updateEntitlementDefinitionAction(id: string, data: any) {
  */
 export async function deleteEntitlementDefinitionAction(id: string) {
   const auth = await checkAdminSession();
-  if ("error" in auth) return auth;
+  if (!auth.success) return auth;
 
   try {
     await prisma.entitlementDefinition.delete({
       where: { id },
     });
     revalidatePath("/admin/entitlements");
-    return { success: true };
+    return { success: true } as const;
   } catch (error: any) {
     console.error("Delete Entitlement Definition Error:", error);
-    return { error: "Failed to delete entitlement definition" };
+    return { success: false, error: "Failed to delete entitlement definition" } as const;
   }
 }

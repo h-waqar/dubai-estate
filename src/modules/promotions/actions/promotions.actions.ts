@@ -212,7 +212,7 @@ export async function captureAddonOrderAction(orderId: string) {
         });
 
         const displayName = plan?.name || (addonType !== "unknown" 
-            ? addonType.split(/[-_]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+            ? addonType.split(/[-_]/).map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
             : "Addon");
         
         const description = `${displayName} Purchase (${amountCredits} credits)`;

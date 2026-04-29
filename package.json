@@ -94,7 +94,8 @@
     "tsx": "^4.21.0",
     "typescript-eslint": "^8.46.2",
     "zod": "^4.1.12",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "@radix-ui/react-progress": "^1.1.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

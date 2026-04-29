@@ -118,7 +118,7 @@ export default function EntitlementAdminList({
           toast.success("Entitlement deleted successfully.");
           router.refresh();
         } else {
-          toast.error(result.error as string || "Failed to delete entitlement.");
+          toast.error((result as any).error as string || "Failed to delete entitlement.");
         }
       } catch (error) {
         toast.error("An error occurred while deleting the entitlement.");

@@ -26,7 +26,7 @@ export default async function EntitlementsAdminPage() {
 
   const result = await listEntitlementDefinitionsAction();
   
-  if ("error" in result) {
+  if (!result.success) {
     return (
       <div className="p-8 text-red-500 bg-red-50 border border-red-200 rounded-lg">
         <h1 className="text-xl font-bold">Error Loading Entitlements</h1>

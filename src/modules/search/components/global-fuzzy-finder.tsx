@@ -19,8 +19,10 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
-import { globalSearchAction } from "@/actions/search";
+import { globalSearchAction, getSearchSuggestionsAction } from "@/actions/search";
 import { SearchResult, SearchResultType, SearchPurpose } from "@/modules/search/types/search.types";
+import { SearchSuggestionCard } from "./search-suggestion-card";
+import Link from "next/link";
 
 interface GlobalFuzzyFinderProps {
   purpose?: SearchPurpose;
@@ -38,6 +40,7 @@ export function GlobalFuzzyFinder({
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<SearchResult[]>([]);
+  const [suggestions, setSuggestions] = React.useState<SearchResult[]>([]);
   const [loading, setLoading] = React.useState(false);
   const router = useRouter();
 
@@ -49,13 +52,13 @@ export function GlobalFuzzyFinder({
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setIsOpen((open) => !open);
+        setIsOpen(!isOpen);
       }
     };
 
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  }, [setIsOpen]);
+  }, [setIsOpen, isOpen]);
 
   React.useEffect(() => {
     if (!query) {
@@ -80,6 +83,23 @@ export function GlobalFuzzyFinder({
     const timer = setTimeout(fetchResults, 300);
     return () => clearTimeout(timer);
   }, [query, purpose]);
+
+  React.useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const response = await getSearchSuggestionsAction(purpose);
+        if (response.data) {
+          setSuggestions(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch suggestions:", error);
+      }
+    };
+
+    if (isOpen && (results.length === 0 || !query)) {
+      fetchSuggestions();
+    }
+  }, [isOpen, results.length, query, purpose]);
 
   const onSelect = (result: SearchResult) => {
     setIsOpen(false);
@@ -133,11 +153,49 @@ export function GlobalFuzzyFinder({
               <Loader2 className="h-6 w-6 animate-spin text-yellow-500" />
             </div>
           )}
+          
           {!loading && query && results.length === 0 && (
-            <CommandEmpty>No results found.</CommandEmpty>
+            <div className="p-6 text-center">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold">No results found</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  No results found matching your search. Here are some properties we think you&apos;ll love.
+                </p>
+              </div>
+
+              {suggestions.length > 0 && (
+                <div className="mt-8 text-left">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4 px-1">
+                    Our Suggestions
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {suggestions.slice(0, 3).map((suggestion) => (
+                      <SearchSuggestionCard
+                        key={`${suggestion.type}-${suggestion.id}`}
+                        suggestion={suggestion}
+                        onSelect={onSelect}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-8 pt-6 border-t text-sm">
+                <p className="text-muted-foreground">
+                  Can&apos;t find what you&apos;re looking for?{" "}
+                  <Link 
+                    href="/contact?subject=Missing Property" 
+                    className="text-yellow-600 hover:underline font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Report Missing Property
+                  </Link>
+                </p>
+              </div>
+            </div>
           )}
           
-          {!loading && Object.entries(categorizedResults).map(([type, items]) => {
+          {!loading && results.length > 0 && Object.entries(categorizedResults).map(([type, items]) => {
             if (items.length === 0) return null;
             
             const heading = type.charAt(0) + type.slice(1).toLowerCase() + "s";
