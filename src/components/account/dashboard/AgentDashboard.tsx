@@ -137,8 +137,14 @@ export async function AgentDashboard({ session }: { session: any }) {
 
                 <TabsContent value="properties" className="mt-6">
                     <div className="bg-white dark:bg-gray-900 rounded-xl border shadow-sm overflow-hidden">
-                        <div className="p-6 border-b">
+                        <div className="p-6 border-b flex items-center justify-between">
                             <h3 className="font-semibold text-lg">My Properties</h3>
+                            <Link href="/advertise/property">
+                                <Button size="sm" variant="outline" className="gap-2">
+                                    <Plus className="w-3.5 h-3.5" />
+                                    Add Property
+                                </Button>
+                            </Link>
                         </div>
 
                         {properties.length === 0 ? (
@@ -257,8 +263,14 @@ export async function AgentDashboard({ session }: { session: any }) {
 
                 <TabsContent value="projects" className="mt-6">
                     <div className="bg-white dark:bg-gray-900 rounded-xl border shadow-sm overflow-hidden">
-                        <div className="p-6 border-b">
+                        <div className="p-6 border-b flex items-center justify-between">
                             <h3 className="font-semibold text-lg">My Projects</h3>
+                            <Link href="/advertise/projects">
+                                <Button size="sm" variant="outline" className="gap-2">
+                                    <Plus className="w-3.5 h-3.5" />
+                                    Add Project
+                                </Button>
+                            </Link>
                         </div>
 
                         {projects.length === 0 ? (
