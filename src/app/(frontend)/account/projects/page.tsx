@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Edit2, Eye, LayoutTemplate, MapPin } from "lucide-react";
+import { Edit2, Eye, LayoutTemplate, MapPin, Plus } from "lucide-react";
 import { serializeDecimals } from "@/lib/serializeDecimal";
 
 export default async function MyProjectsPage() {
@@ -59,7 +59,15 @@ export default async function MyProjectsPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold">My Projects</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold">My Projects</h1>
+                <Link href="/advertise/projects">
+                    <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Add Project
+                    </Button>
+                </Link>
+            </div>
             
             <div className="bg-white dark:bg-gray-900 rounded-xl border shadow-sm overflow-hidden">
                 {projects.length === 0 ? (
