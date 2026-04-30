@@ -30,6 +30,7 @@ const navigation: NavItem[] = [
       // { name: "Luxury", href: "/properties" },
     ],
   },
+  { title: "Projects", href: "/projects" },
   {
     title: "Add Listing",
     items: [
