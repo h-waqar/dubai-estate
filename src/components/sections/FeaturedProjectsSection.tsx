@@ -4,15 +4,27 @@ import { serializeDecimals } from "@/lib/serializeDecimal";
 import { FeaturedProjectGrid } from "./FeaturedProjectGrid";
 
 export async function FeaturedProjectsSection() {
-    // 1. Fetch Projects
+    // 1. Fetch Projects (Prioritize Spotlight)
     const projects = await prisma.project.findMany({
         where: {
             ...GovernanceService.getPublicFilter(),
+            OR: [
+                { isFeatured: true },
+                {
+                    promotions: {
+                        some: {
+                            type: "SPOTLIGHT",
+                            status: "ACTIVE",
+                            expiresAt: { gt: new Date() }
+                        }
+                    }
+                }
+            ]
         },
         take: 15,
-        orderBy: {
-            createdAt: "desc",
-        },
+        orderBy: [
+            { createdAt: "desc" }
+        ],
         include: {
             developer: {
                 select: {
@@ -20,6 +32,12 @@ export async function FeaturedProjectsSection() {
                     logo: true,
                 }
             },
+            promotions: {
+                where: {
+                    status: "ACTIVE",
+                    expiresAt: { gt: new Date() }
+                }
+            }
         },
     });
 
@@ -40,13 +58,20 @@ export async function FeaturedProjectsSection() {
         }
     });
 
-    // 3. Attach media to projects
-    const serializedProjects = projects.map((project: any) => ({
-        ...project,
-        mediaUsages: mediaUsages.filter((mu: { entityId: number }) => mu.entityId === project.id),
-    }));
+    // 3. Attach media and promotion info to projects
+    const serializedProjects = projects.map((project: any) => {
+        const isSpotlight = project.promotions?.some((p: any) => p.type === "SPOTLIGHT");
+        return {
+            ...project,
+            isSpotlight,
+            mediaUsages: mediaUsages.filter((mu: { entityId: number }) => mu.entityId === project.id),
+        };
+    });
 
-    // 4. Serialize Decimals (for Client Component)
+    // 4. Sort Spotlight first
+    serializedProjects.sort((a, b) => (b.isSpotlight ? 1 : 0) - (a.isSpotlight ? 1 : 0));
+
+    // 5. Serialize Decimals (for Client Component)
     const plainProjects = serializeDecimals(serializedProjects);
 
     return <FeaturedProjectGrid projects={plainProjects} />;

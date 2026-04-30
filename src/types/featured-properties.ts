@@ -3,6 +3,7 @@ export interface Property {
   image: string;
   alt: string;
   featured: boolean;
+  promotionType?: "SPOTLIGHT" | "FEATURED" | "BUMP_UP";
   type: string;
   title: string;
   location: string;

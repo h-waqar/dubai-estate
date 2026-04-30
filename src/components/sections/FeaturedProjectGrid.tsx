@@ -8,6 +8,7 @@ import { FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import { ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Types matching the Prisma include we will use
 interface Project {
@@ -15,6 +16,7 @@ interface Project {
     name: string;
     slug: string;
     location: string;
+    isSpotlight?: boolean;
     mediaUsages: {
         role: string;
         media: {
@@ -65,7 +67,14 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
                         const coverImage = project.mediaUsages.find((m) => m.role === "COVER")?.media.url || "/placeholder-project.jpg";
 
                         return (
-                            <Link href={`/projects/${project.slug}`} key={project.id} className="group relative block w-full h-[400px] md:h-[500px] overflow-hidden rounded-2xl">
+                            <Link 
+                                href={`/projects/${project.slug}`} 
+                                key={project.id} 
+                                className={cn(
+                                    "group relative block w-full h-[400px] md:h-[500px] overflow-hidden rounded-2xl border-2 transition-all",
+                                    project.isSpotlight ? "border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.3)]" : "border-transparent"
+                                )}
+                            >
                                 {/* Background Image */}
                                 <Image
                                     src={coverImage}
@@ -114,7 +123,13 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
 
                                 return (
                                     <SwiperSlide key={project.id}>
-                                        <Link href={`/projects/${project.slug}`} className="group relative block w-full h-[300px] overflow-hidden rounded-2xl">
+                                        <Link 
+                                            href={`/projects/${project.slug}`} 
+                                            className={cn(
+                                                "group relative block w-full h-[300px] overflow-hidden rounded-2xl border-2 transition-all",
+                                                project.isSpotlight ? "border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.2)]" : "border-transparent"
+                                            )}
+                                        >
                                             {/* Background Image */}
                                             <Image
                                                 src={coverImage}

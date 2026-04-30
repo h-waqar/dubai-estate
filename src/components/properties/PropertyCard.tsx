@@ -8,14 +8,20 @@ import { MapPin, Bed, Bath, Square } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PropertyCardProps } from "@/types/sections";
+import { cn } from "@/lib/utils";
 
 const PropertyCard = ({ property, priority = false }: PropertyCardProps & { priority?: boolean }) => {
   if (!property) {
     return null;
   }
 
+  const isSpotlight = property.promotionType === "SPOTLIGHT";
+
   return (
-    <Card className="property-card overflow-hidden group">
+    <Card className={cn(
+      "property-card overflow-hidden group border-2 transition-all",
+      isSpotlight ? "border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.3)]" : "border-transparent"
+    )}>
       <div className="relative">
         <Link href={`/properties/${property.slug}`}>
           <div className="overflow-hidden">
@@ -32,8 +38,11 @@ const PropertyCard = ({ property, priority = false }: PropertyCardProps & { prio
           </div>
         </Link>
         {property.featured && (
-          <Badge className="absolute top-3 left-3 bg-golden-accent text-primary-foreground">
-            Featured
+          <Badge className={cn(
+            "absolute top-3 left-3 border-none",
+            isSpotlight ? "bg-amber-500 text-white" : "bg-blue-600 text-white"
+          )}>
+            {isSpotlight ? "Spotlight" : "Featured"}
           </Badge>
         )}
         <Badge

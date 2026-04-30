@@ -30,6 +30,9 @@ export function mapPropertyToCard(p: any): PropertyCardProps["property"] {
     area: `${p.builtUpArea || 0} ${p.areaUnit || "sqft"}`,
     type: p.propertyType?.name || "Unknown",
     featured: p.isFeatured,
+    promotionType: p.promotions?.some((promo: any) => promo.type === "SPOTLIGHT") 
+      ? "SPOTLIGHT" 
+      : (p.promotions?.some((promo: any) => promo.type === "FEATURED") ? "FEATURED" : undefined),
     ref: p.refNo || "",
     status: p.availability === "OFFPLAN" ? "Offplan" : "Ready",
   };

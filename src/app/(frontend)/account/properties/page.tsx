@@ -112,7 +112,18 @@ export default async function MyPropertiesPage() {
                                                         })()}
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{property.title} {property.isFeatured && ( <Badge className="ml-2 bg-amber-500 text-white border-none text-[10px] h-4">Premium</Badge> )}</div>
+                                                        <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1 flex items-center gap-2">
+                                                            {property.title}
+                                                            {(() => {
+                                                                const activePromos = property.promotions || [];
+                                                                const isSpotlight = activePromos.some((p: any) => p.type === "SPOTLIGHT");
+                                                                const isFeatured = activePromos.some((p: any) => p.type === "FEATURED");
+                                                                
+                                                                if (isSpotlight) return <Badge className="bg-amber-500 text-white border-none text-[10px] h-4">Spotlight</Badge>;
+                                                                if (isFeatured) return <Badge className="bg-blue-600 text-white border-none text-[10px] h-4">Featured</Badge>;
+                                                                return null;
+                                                            })()}
+                                                        </div>
                                                         <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
                                                             <MapPin className="w-3 h-3" />
                                                             {property.location}

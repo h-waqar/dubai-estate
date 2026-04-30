@@ -192,14 +192,10 @@ export async function AgentDashboard({ session }: { session: any }) {
                                                                 <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                                                     <span className="line-clamp-1">{property.title}</span>
                                                                     {isSpotlight && (
-                                                                        <span title="Spotlight Active">
-                                                                            <Zap className="w-3.5 h-3.5 text-amber-500" />
-                                                                        </span>
+                                                                        <Badge className="bg-amber-500 text-white border-none text-[10px] h-4">Spotlight</Badge>
                                                                     )}
-                                                                    {isFeatured && (
-                                                                        <span title="Featured Active">
-                                                                            <Crown className="w-3.5 h-3.5 text-purple-500" />
-                                                                        </span>
+                                                                    {isFeatured && !isSpotlight && (
+                                                                        <Badge className="bg-blue-600 text-white border-none text-[10px] h-4">Featured</Badge>
                                                                     )}
                                                                 </div>
                                                                 <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
@@ -316,14 +312,10 @@ export async function AgentDashboard({ session }: { session: any }) {
                                                                 <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                                                     <span className="line-clamp-1">{project.name}</span>
                                                                     {isSpotlight && (
-                                                                        <span title="Spotlight Active">
-                                                                            <Zap className="w-3.5 h-3.5 text-amber-500" />
-                                                                        </span>
+                                                                        <Badge className="bg-amber-500 text-white border-none text-[10px] h-4">Spotlight</Badge>
                                                                     )}
-                                                                    {isFeatured && (
-                                                                        <span title="Featured Active">
-                                                                            <Crown className="w-3.5 h-3.5 text-purple-500" />
-                                                                        </span>
+                                                                    {isFeatured && !isSpotlight && (
+                                                                        <Badge className="bg-blue-600 text-white border-none text-[10px] h-4">Featured</Badge>
                                                                     )}
                                                                 </div>
                                                                 <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">

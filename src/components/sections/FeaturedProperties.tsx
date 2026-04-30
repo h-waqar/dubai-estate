@@ -319,11 +319,19 @@ import {
   Bath,
   Square,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Property, PropertyCardProps } from "@/types/featured-properties";
 
 function PropertyCard({ property }: PropertyCardProps) {
+  const isSpotlight = property.promotionType === "SPOTLIGHT";
+
   return (
-    <Card className="h-full rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+    <Card className={cn(
+      "h-full rounded-lg overflow-hidden border transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-xl",
+      isSpotlight 
+        ? "border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.3)] bg-amber-50/10" 
+        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+    )}>
       <div className="relative h-48">
         <Image
           src={property.image}
@@ -332,8 +340,11 @@ function PropertyCard({ property }: PropertyCardProps) {
           className="object-cover"
         />
         {property.featured && (
-          <Badge className="absolute top-3 left-3 bg-yellow-500 text-white border-0 hover:bg-yellow-600">
-            Featured
+          <Badge className={cn(
+            "absolute top-3 left-3 border-0",
+            isSpotlight ? "bg-amber-500 text-white" : "bg-blue-600 text-white"
+          )}>
+            {isSpotlight ? "Spotlight" : "Featured"}
           </Badge>
         )}
         <div className="absolute top-3 right-3">

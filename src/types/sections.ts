@@ -31,6 +31,7 @@ export interface Property {
   area: string; // Standardized from 'size'
   type: string;
   featured: boolean;
+  promotionType?: "SPOTLIGHT" | "FEATURED" | "BUMP_UP";
   ref: string; // Added from PropertyCard.tsx
   status?: PropertyStatus; // Added from PropertyCard.tsx with the specific type
 }
