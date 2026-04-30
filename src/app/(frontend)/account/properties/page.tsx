@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Edit2, Eye, MapPin, Megaphone } from "lucide-react";
+import { Edit2, Eye, MapPin, Megaphone, Plus } from "lucide-react";
 import { AdvertiseModal } from "@/components/dashboard/AdvertiseModal";
 
 export default async function MyPropertiesPage() {
@@ -64,7 +64,15 @@ export default async function MyPropertiesPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold">My Properties</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold">My Properties</h1>
+                <Link href="/advertise/property">
+                    <Button className="gap-2">
+                        <Plus className="w-4 h-4" />
+                        Add Property
+                    </Button>
+                </Link>
+            </div>
             
             <div className="bg-white dark:bg-gray-900 rounded-xl border shadow-sm overflow-hidden">
                 {properties.length === 0 ? (
