@@ -98,7 +98,11 @@ export async function getUserEntitlementsAction() {
     });
 
     // Also include PROPERTY_SLOT and PROJECT_SLOT specifically if not present
-    const codes = ["FEATURED_CREDIT", "SPOTLIGHT_CREDIT", "BUMP_UP_CREDIT", "PROPERTY_SLOT", "PROJECT_SLOT"];
+    const codes = [
+      "FEATURED_CREDIT", "SPOTLIGHT_CREDIT", "BUMP_UP_CREDIT", 
+      "PROJECT_FEATURED_CREDIT", "PROJECT_SPOTLIGHT_CREDIT", "PROJECT_BUMP_UP_CREDIT",
+      "PROPERTY_SLOT", "PROJECT_SLOT"
+    ];
     for (const code of codes) {
         if (!breakdown[code]) {
             breakdown[code] = { total: 0, used: 0, sources: {} };

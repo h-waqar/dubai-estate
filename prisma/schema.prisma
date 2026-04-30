@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 model Admin {
@@ -20,41 +20,41 @@ model Profile {
 }
 
 model User {
-  id                   Int               @id @default(autoincrement())
+  id                   Int                 @id @default(autoincrement())
   name                 String?
   firstName            String?
   lastName             String?
-  username             String?           @unique
+  username             String?             @unique
   phoneNumber          String?
-  email                String            @unique
+  email                String              @unique
   emailVerified        DateTime?
   image                String?
   password             String?
-  roles                Role[]            @default([USER])
+  roles                Role[]              @default([USER])
   pricingPlanId        Int?
-  passwordResetToken   String?           @unique
+  passwordResetToken   String?             @unique
   passwordResetExpires DateTime?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
   subscriptionId       String?
   subscriptionStatus   String?
   accounts             Account[]
   admin                Admin?
-  leads                CallbackRequest[] @relation("AgentLeads")
+  leads                CallbackRequest[]   @relation("AgentLeads")
   createdDevelopers    Developer[]
-  Media                Media[]
-  ledgerTransactions   LedgerTransaction[]
   entitlementGrants    EntitlementGrant[]
+  ledgerTransactions   LedgerTransaction[]
+  Media                Media[]
   posts                Post[]
   profile              Profile?
-  approvedProjects     Project[]         @relation("ProjectApprovals")
+  approvedProjects     Project[]           @relation("ProjectApprovals")
   projects             Project[]
-  approvedProperties   Property[]        @relation("PropertyApprovals")
+  promotions           Promotion[]
+  approvedProperties   Property[]          @relation("PropertyApprovals")
   properties           Property[]
   sessions             Session[]
   subscriptions        Subscription[]
-  promotions           Promotion[]
-  pricingPlan          PricingPlan?      @relation(fields: [pricingPlanId], references: [id])
+  pricingPlan          PricingPlan?        @relation(fields: [pricingPlanId], references: [id])
 }
 
 model Subscription {
@@ -72,9 +72,9 @@ model Subscription {
   featuredCreditsUsed  Int                @default(0)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
+  coupon               Coupon?            @relation(fields: [couponId], references: [id])
   plan                 PricingPlan        @relation(fields: [planId], references: [id])
   user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  coupon               Coupon?            @relation(fields: [couponId], references: [id])
 
   @@index([userId])
   @@index([status])
@@ -99,8 +99,6 @@ model Coupon {
   updatedAt         DateTime       @updatedAt
   subscriptions     Subscription[]
 }
-
-
 
 model Account {
   id                Int     @id @default(autoincrement())
@@ -196,34 +194,33 @@ model CallbackRequest {
 }
 
 model PricingPlan {
-  id                  Int            @id @default(autoincrement())
-  name                String         @unique
-  slug                String         @unique
-  description         String?
-  type                PlanType       @default(SUBSCRIPTION)
-  rank                Int            @default(0)
-  priceMonthly        Decimal?       @db.Decimal(10, 2)
-  priceYearly         Decimal?       @db.Decimal(10, 2)
-  priceOneTime        Decimal?       @db.Decimal(10, 2)
-  isActive            Boolean        @default(true)
-  paypalPlanId        String?
-  paypalProductId     String?
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  subscriptions       Subscription[]
-  users               User[]
-  entitlements        PlanEntitlement[]
-  addonPacks          AddonPack[]
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  slug            String            @unique
+  description     String?
+  type            PlanType          @default(SUBSCRIPTION)
+  rank            Int               @default(0)
+  priceMonthly    Decimal?          @db.Decimal(10, 2)
+  priceYearly     Decimal?          @db.Decimal(10, 2)
+  priceOneTime    Decimal?          @db.Decimal(10, 2)
+  isActive        Boolean           @default(true)
+  paypalPlanId    String?
+  paypalProductId String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  addonPacks      AddonPack[]
+  entitlements    PlanEntitlement[]
+  subscriptions   Subscription[]
+  users           User[]
 }
 
 model PlanEntitlement {
   id           Int                   @id @default(autoincrement())
   planId       Int
-  definitionId String                // References EntitlementDefinition.id
-  amount       Int                   // How many of this entitlement the plan gives
-
-  plan         PricingPlan           @relation(fields: [planId], references: [id], onDelete: Cascade)
+  definitionId String
+  amount       Int
   definition   EntitlementDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  plan         PricingPlan           @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@unique([planId, definitionId])
 }
@@ -266,6 +263,7 @@ model Property {
   updatedAt             DateTime             @updatedAt
   leads                 CallbackRequest[]
   mediaUsages           MediaUsage[]
+  promotions            Promotion[]
   approvedBy            User?                @relation("PropertyApprovals", fields: [approvedById], references: [id])
   createdBy             User                 @relation(fields: [createdById], references: [id], onDelete: Cascade)
   developer             Developer?           @relation(fields: [developerId], references: [id])
@@ -273,7 +271,6 @@ model Property {
   features              PropertyFeature[]
   images                PropertyImage[]
   videos                PropertyVideo[]
-  promotions            Promotion[]
 
   @@index([slug])
   @@index([price])
@@ -437,8 +434,8 @@ model Project {
   features              ProjectFeature[]
   floorplans            ProjectFloorplan[]
   progressTimeline      ProjectProgress[]
-  amenities             ProjectAmenity[]   @relation("ProjectToProjectAmenity")
   promotions            Promotion[]
+  amenities             ProjectAmenity[]   @relation("ProjectToProjectAmenity")
 
   @@index([slug])
   @@index([projectType])
@@ -558,6 +555,84 @@ model NewsletterSubscriber {
   updatedAt DateTime @updatedAt
 }
 
+model Promotion {
+  id         String          @id @default(cuid())
+  propertyId Int?
+  projectId  Int?
+  userId     Int
+  type       PromotionType
+  startDate  DateTime        @default(now())
+  expiresAt  DateTime?
+  paymentId  String?
+  status     PromotionStatus @default(ACTIVE)
+  createdAt  DateTime        @default(now())
+  project    Project?        @relation(fields: [projectId], references: [id])
+  property   Property?       @relation(fields: [propertyId], references: [id])
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([status])
+}
+
+model LedgerTransaction {
+  id           String            @id @default(uuid())
+  userId       Int
+  type         TransactionType
+  status       TransactionStatus
+  amount       Decimal           @db.Decimal(10, 2)
+  currency     String            @default("USD")
+  description  String?
+  provider     String
+  providerTxId String            @unique
+  metadata     Json?
+  occurredAt   DateTime
+  createdAt    DateTime          @default(now())
+  user         User              @relation(fields: [userId], references: [id])
+}
+
+model EntitlementDefinition {
+  id               String             @id @default(cuid())
+  name             String
+  code             String             @unique
+  description      String?
+  applicableTo     EntityType         @default(PROPERTY)
+  grants           EntitlementGrant[]
+  planEntitlements PlanEntitlement[]
+}
+
+model EntitlementGrant {
+  id           String                @id @default(cuid())
+  name         String
+  userId       Int
+  definitionId String
+  amount       Int
+  used         Int                   @default(0)
+  sourceType   String
+  sourceId     String
+  validFrom    DateTime              @default(now())
+  validTo      DateTime?
+  status       GrantStatus           @default(ACTIVE)
+  definition   EntitlementDefinition @relation(fields: [definitionId], references: [id])
+  user         User                  @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+}
+
+model AddonPack {
+  id        Int          @id @default(autoincrement())
+  planId    Int?
+  qty       Int
+  label     String
+  discount  Decimal      @default(0) @db.Decimal(5, 2)
+  isActive  Boolean      @default(true)
+  order     Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  plan      PricingPlan? @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   SUPER_ADMIN
   ADMIN
@@ -601,8 +676,6 @@ enum SubscriptionStatus {
   EXPIRED
   PENDING
 }
-
-
 
 enum ContactMethod {
   Phone
@@ -700,43 +773,10 @@ enum PromotionStatus {
   CANCELLED
 }
 
-model Promotion {
-  id         String          @id @default(cuid())
-  propertyId Int?
-  projectId  Int?
-  userId     Int
-  type       PromotionType
-  startDate  DateTime        @default(now())
-  expiresAt  DateTime?
-  paymentId  String?
-  status     PromotionStatus @default(ACTIVE)
-  createdAt  DateTime        @default(now())
-
-  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  project  Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([propertyId])
-  @@index([projectId])
-  @@index([userId])
-  @@index([status])
-}
-
-model LedgerTransaction {
-  id           String            @id @default(uuid())
-  userId       Int
-  type         TransactionType
-  status       TransactionStatus
-  amount       Decimal           @db.Decimal(10, 2)
-  currency     String            @default("USD")
-  description  String?
-  provider     String
-  providerTxId String            @unique
-  metadata     Json?
-  occurredAt   DateTime
-  createdAt    DateTime          @default(now())
-
-  user         User              @relation(fields: [userId], references: [id])
+enum EntityType {
+  PROPERTY
+  PROJECT
+  ALL
 }
 
 enum TransactionType {
@@ -757,45 +797,4 @@ enum GrantStatus {
   ACTIVE
   EXPIRED
   REVOKED
-}
-
-model EntitlementDefinition {
-  id               String               @id @default(cuid())
-  name              String
-  code             String               @unique // e.g., "PROPERTY_SLOT"
-  description      String?
-  grants           EntitlementGrant[]
-  planEntitlements PlanEntitlement[]
-}
-
-model EntitlementGrant {
-  id           String                @id @default(cuid())
-  name              String
-  userId       Int
-  definitionId String
-  amount       Int // Capacity (e.g., 5 slots)
-  used         Int                   @default(0)
-  sourceType   String // "SUBSCRIPTION", "BONUS"
-  sourceId     String // Subscription.id
-  validFrom    DateTime              @default(now())
-  validTo      DateTime?
-  status       GrantStatus           @default(ACTIVE)
-  user         User                  @relation(fields: [userId], references: [id])
-  definition   EntitlementDefinition @relation(fields: [definitionId], references: [id])
-
-  @@index([userId, status])
-}
-
-model AddonPack {
-  id          Int      @id @default(autoincrement())
-  planId      Int?     // Optional: Link to a specific PricingPlan (e.g. "Bump Up Addon")
-  qty         Int
-  label       String
-  discount    Decimal  @db.Decimal(5, 2) @default(0) // e.g. 0.10 for 10%
-  isActive    Boolean  @default(true)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  plan        PricingPlan? @relation(fields: [planId], references: [id], onDelete: Cascade)
 }

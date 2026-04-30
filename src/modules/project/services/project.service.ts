@@ -301,11 +301,29 @@ export class ProjectService {
             },
         });
 
-        // Attach media to projects
-        return projects.map(project => ({
-            ...project, isFeatured: (project.promotions || []).length > 0,
-            mediaUsages: mediaUsages.filter(mu => mu.entityId === project.id),
-        }));
+        // Attach media and promotion status to projects
+        const results = projects.map(project => {
+            const isSpotlight = (project.promotions || []).some(p => p.type === "SPOTLIGHT");
+            const isFeatured = project.isFeatured || (project.promotions || []).some(p => p.type === "FEATURED");
+            
+            return {
+                ...project,
+                isSpotlight,
+                isFeatured,
+                mediaUsages: mediaUsages.filter(mu => mu.entityId === project.id),
+            };
+        });
+
+        // Sort by priority: Spotlight > Featured > Recently Created
+        return results.sort((a: any, b: any) => {
+            if (a.isSpotlight && !b.isSpotlight) return -1;
+            if (!a.isSpotlight && b.isSpotlight) return 1;
+            if (a.isFeatured && !b.isFeatured) return -1;
+            if (!a.isFeatured && b.isFeatured) return 1;
+            
+            // Fallback to createdAt (already ordered by desc in query, but good to preserve)
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
     }
 
     /**

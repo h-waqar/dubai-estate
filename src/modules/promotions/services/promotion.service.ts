@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { EntitlementService } from '@/modules/entitlement/entitlement.service';
-import { PromotionStatus, PromotionType, Role, SubscriptionStatus } from '@prisma/client';
+import { EntityType, PromotionStatus, PromotionType, Role, SubscriptionStatus } from '@prisma/client';
 
 const CONCURRENCY_LIMITS: Record<string, number> = {
   [Role.USER]: 1,
@@ -17,7 +17,9 @@ export class PromotionService {
    * Activates a promotion for a property or project.
    */
   static async activatePromotion(entityId: number, type: PromotionType, entityType: 'PROPERTY' | 'PROJECT', userId: number) {
-    const code = type === 'SPOTLIGHT' ? 'SPOTLIGHT_CREDIT' : 'FEATURED_CREDIT';
+    const code = entityType === 'PROJECT'
+      ? (type === PromotionType.SPOTLIGHT ? 'PROJECT_SPOTLIGHT_CREDIT' : 'PROJECT_FEATURED_CREDIT')
+      : (type === PromotionType.SPOTLIGHT ? 'SPOTLIGHT_CREDIT' : 'FEATURED_CREDIT');
     
     return await prisma.$transaction(async (tx) => {
       let entity;
@@ -56,7 +58,7 @@ export class PromotionService {
         throw new Error('Concurrency limit reached');
       }
 
-      await EntitlementService.consume(userId, code, tx);
+      await EntitlementService.consume(userId, code, entityType as EntityType, tx);
 
       const expiresAt = new Date();
       const durationDays = type === PromotionType.SPOTLIGHT ? 7 : 30;
@@ -94,6 +96,7 @@ export class PromotionService {
    */
   static async bumpUpProperty(entityId: number, userId: number, entityType: 'PROPERTY' | 'PROJECT' = 'PROPERTY') {
     const COOLDOWN_HOURS = 24;
+    const code = entityType === 'PROJECT' ? 'PROJECT_BUMP_UP_CREDIT' : 'BUMP_UP_CREDIT';
 
     return await prisma.$transaction(async (tx) => {
       let entity;
@@ -130,7 +133,7 @@ export class PromotionService {
         }
       }
 
-      await EntitlementService.consume(userId, 'BUMP_UP_CREDIT', tx);
+      await EntitlementService.consume(userId, code, entityType as EntityType, tx);
 
       if (entityType === 'PROPERTY') {
         await tx.property.update({

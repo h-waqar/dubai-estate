@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Edit2, Eye, LayoutTemplate, MapPin, Plus } from "lucide-react";
 import { serializeDecimals } from "@/lib/serializeDecimal";
+import { AdvertiseModal } from "@/components/dashboard/AdvertiseModal";
 
 export default async function MyProjectsPage() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return null;
+    const userRole = (session.user as any).roles?.[0] || "USER";
 
     const rawProjects = await ProjectService.listProjects({
         createdById: session.user.id as number,
@@ -115,7 +117,18 @@ export default async function MyProjectsPage() {
                                                         })()}
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1">{project.name}</div>
+                                                        <div className="font-medium text-gray-900 dark:text-gray-100 line-clamp-1 flex items-center gap-2">
+                                                            {project.name}
+                                                            {(() => {
+                                                                const activePromos = project.promotions || [];
+                                                                const isSpotlight = activePromos.some((p: any) => p.type === "SPOTLIGHT");
+                                                                const isFeatured = activePromos.some((p: any) => p.type === "FEATURED");
+                                                                
+                                                                if (isSpotlight) return <Badge className="bg-amber-500 text-white border-none text-[10px] h-4">Spotlight</Badge>;
+                                                                if (isFeatured) return <Badge className="bg-blue-600 text-white border-none text-[10px] h-4">Featured</Badge>;
+                                                                return null;
+                                                            })()}
+                                                        </div>
                                                         <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
                                                             <MapPin className="w-3 h-3" />
                                                             {project.location}
@@ -141,6 +154,15 @@ export default async function MyProjectsPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
+                                                <AdvertiseModal 
+                                                    listing={{
+                                                        id: project.id,
+                                                        title: project.name,
+                                                        isFeatured: project.isFeatured || false,
+                                                        type: "PROJECT"
+                                                    }} 
+                                                    userRole={userRole} 
+                                                />
                                                 <Link href={`/projects/${project.slug}`} target="_blank">
                                                     <Button variant="ghost" size="icon" title="View Public Listing">
                                                         <Eye className="w-4 h-4" />

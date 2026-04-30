@@ -17,6 +17,7 @@ interface Project {
     slug: string;
     location: string;
     isSpotlight?: boolean;
+    isFeatured?: boolean;
     mediaUsages: {
         role: string;
         media: {
@@ -86,6 +87,20 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
                                 {/* Dark Overlay */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 md:to-transparent opacity-90 transition-opacity" />
 
+                                {/* Promotional Badges */}
+                                <div className="absolute top-6 right-6 flex flex-col gap-2 items-end z-20">
+                                    {project.isSpotlight && (
+                                        <div className="bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
+                                            SPOTLIGHT
+                                        </div>
+                                    )}
+                                    {project.isFeatured && !project.isSpotlight && (
+                                        <div className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
+                                            FEATURED
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Developer Badge (Top Left) */}
                                 <div className="absolute top-6 left-6 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-4 py-2 rounded-md z-10">
                                     <span className="text-xs font-bold uppercase tracking-wider text-black dark:text-white">
@@ -141,6 +156,20 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
                                             {/* Overlay */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
 
+                                            {/* Promotional Badges */}
+                                            <div className="absolute top-4 right-4 flex flex-col gap-1 items-end z-20">
+                                                {project.isSpotlight && (
+                                                    <div className="bg-amber-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                        SPOTLIGHT
+                                                    </div>
+                                                )}
+                                                {project.isFeatured && !project.isSpotlight && (
+                                                    <div className="bg-blue-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                        FEATURED
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             {/* Developer Badge */}
                                             <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-sm px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-black dark:text-white z-10">
                                                 {project.developer?.name || "Unknown"}
@@ -162,3 +191,4 @@ export function FeaturedProjectGrid({ projects }: FeaturedProjectGridProps) {
         </section>
     );
 }
+

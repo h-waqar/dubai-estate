@@ -6,6 +6,7 @@ import Image from "next/image";
 import { MapPin } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { cn } from "@/lib/utils";
 
 export default async function ProjectsPage() {
     const projectsRaw = await ProjectService.listProjects({});
@@ -50,7 +51,10 @@ export default async function ProjectsPage() {
                         <Link
                             key={project.id}
                             href={`/projects/${project.slug}`}
-                            className="group block relative overflow-hidden"
+                            className={cn(
+                                "group block relative overflow-hidden transition-all duration-300",
+                                project.isSpotlight ? "border-y-4 border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.3)] z-10" : "border-y border-transparent"
+                            )}
                             style={{ height: '600px' }}
                         >
                             {/* Background Image */}
@@ -100,10 +104,15 @@ export default async function ProjectsPage() {
                             </div>
 
                             {/* Badge - Top Right */}
-                            <div className="absolute top-6 px-4 flex justify-end gap-2">
+                            <div className="absolute top-6 right-0 px-8 flex justify-end gap-2 z-20">
                                 {/* <div className="absolute top-6 right-6 flex flex-col gap-2 items-end"> */}
-                                {project.isFeatured && (
-                                    <div className="px-4 py-2 rounded-full bg-primary/90 backdrop-blur-md border border-primary/30 text-white font-semibold text-sm">
+                                {project.isSpotlight && (
+                                    <div className="px-4 py-2 rounded-full bg-amber-500 backdrop-blur-md border border-amber-400 text-white font-bold text-sm shadow-lg">
+                                        Spotlight
+                                    </div>
+                                )}
+                                {project.isFeatured && !project.isSpotlight && (
+                                    <div className="px-4 py-2 rounded-full bg-blue-600 backdrop-blur-md border border-blue-400 text-white font-bold text-sm shadow-lg">
                                         Featured
                                     </div>
                                 )}

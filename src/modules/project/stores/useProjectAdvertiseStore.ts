@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Media } from "@/modules/media/types/media.types";
+import { generateUUID } from "@/utils/uuid";
 
 // Floorplan type for step 5
 export interface FloorplanInput {
@@ -197,7 +198,7 @@ export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(
             // Floorplan methods
             addFloorplan: (floorplan) =>
                 set((state) => ({
-                    floorplans: [...state.floorplans, { ...floorplan, id: crypto.randomUUID() }],
+                    floorplans: [...state.floorplans, { ...floorplan, id: generateUUID() }],
                 })),
 
             removeFloorplan: (id) =>
@@ -215,7 +216,7 @@ export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(
             // Payment stage methods
             addPaymentStage: (stage) =>
                 set((state) => ({
-                    paymentPlan: [...state.paymentPlan, { ...stage, id: crypto.randomUUID() }],
+                    paymentPlan: [...state.paymentPlan, { ...stage, id: generateUUID() }],
                 })),
 
             removePaymentStage: (id) =>
@@ -228,7 +229,7 @@ export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(
                 set((state) => ({
                     nearbyAttractions: [
                         ...state.nearbyAttractions,
-                        { ...attraction, id: crypto.randomUUID() },
+                        { ...attraction, id: generateUUID() },
                     ],
                 })),
 
@@ -240,7 +241,7 @@ export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(
             // FAQ methods
             addFAQ: (faq) =>
                 set((state) => ({
-                    faqs: [...state.faqs, { ...faq, id: Math.random().toString(36).substr(2, 9) }],
+                    faqs: [...state.faqs, { ...faq, id: generateUUID() }],
                 })),
 
             removeFAQ: (id) =>
@@ -251,7 +252,7 @@ export const useProjectAdvertiseStore = create<ProjectAdvertiseFormState>()(
             // About Feature methods
             addAboutFeature: (feature) =>
                 set((state) => ({
-                    aboutFeatures: [...state.aboutFeatures, { ...feature, id: Math.random().toString(36).substr(2, 9) }],
+                    aboutFeatures: [...state.aboutFeatures, { ...feature, id: generateUUID() }],
                 })),
 
             removeAboutFeature: (id) =>

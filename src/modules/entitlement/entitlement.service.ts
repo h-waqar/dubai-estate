@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { GrantStatus, Prisma } from "@prisma/client";
+import { EntityType, GrantStatus, Prisma } from "@prisma/client";
 
 export type PrismaClientType = Prisma.TransactionClient | typeof prisma;
 
@@ -49,20 +49,23 @@ export class EntitlementService {
   /**
    * Aggregates all ACTIVE grants for the user and code and returns true if capacity > used.
    */
-  static async checkCapacity(userId: number, code: string, tx: PrismaClientType = prisma): Promise<boolean> {
-    const { totalCapacity, totalUsed } = await this.getQuotaStatus(userId, code, tx);
+  static async checkCapacity(userId: number, code: string, entityType?: EntityType, tx: PrismaClientType = prisma): Promise<boolean> {
+    const { totalCapacity, totalUsed } = await this.getQuotaStatus(userId, code, entityType, tx);
     return totalCapacity > totalUsed;
   }
 
   /**
    * Returns current usage vs total capacity for a user and code.
    */
-  static async getQuotaStatus(userId: number, code: string, tx: PrismaClientType = prisma) {
+  static async getQuotaStatus(userId: number, code: string, entityType?: EntityType, tx: PrismaClientType = prisma) {
     const grants = await tx.entitlementGrant.findMany({
       where: {
         userId,
         status: GrantStatus.ACTIVE,
-        definition: { code },
+        definition: { 
+          code,
+          applicableTo: entityType ? { in: [entityType, EntityType.ALL] } : undefined
+        },
       },
     });
 
@@ -75,12 +78,15 @@ export class EntitlementService {
   /**
    * Finds an active grant with available capacity and increments its 'used' count.
    */
-  static async consume(userId: number, code: string, tx: PrismaClientType = prisma) {
+  static async consume(userId: number, code: string, entityType?: EntityType, tx: PrismaClientType = prisma) {
     const grants = await tx.entitlementGrant.findMany({
       where: {
         userId,
         status: GrantStatus.ACTIVE,
-        definition: { code },
+        definition: { 
+          code,
+          applicableTo: entityType ? { in: [entityType, EntityType.ALL] } : undefined
+        },
       },
       orderBy: [
         { validTo: "asc" },
@@ -105,18 +111,21 @@ export class EntitlementService {
       }
     }
 
-    throw new Error(`Insufficient capacity for entitlement ${code}`);
+    throw new Error(`Insufficient capacity for entitlement ${code}${entityType ? ` for ${entityType}` : ''}`);
   }
 
   /**
    * Decrements the 'used' count of a grant.
    */
-  static async release(userId: number, code: string, tx: PrismaClientType = prisma) {
+  static async release(userId: number, code: string, entityType?: EntityType, tx: PrismaClientType = prisma) {
      const grants = await tx.entitlementGrant.findMany({
       where: {
         userId,
         status: GrantStatus.ACTIVE,
-        definition: { code },
+        definition: { 
+          code,
+          applicableTo: entityType ? { in: [entityType, EntityType.ALL] } : undefined
+        },
         used: { gt: 0 }
       },
       orderBy: { validFrom: "desc" }, // Release from newest grants first

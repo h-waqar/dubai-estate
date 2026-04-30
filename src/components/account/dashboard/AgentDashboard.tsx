@@ -198,10 +198,16 @@ export async function AgentDashboard({ session }: { session: any }) {
                                                                 <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                                                     <span className="line-clamp-1">{property.title}</span>
                                                                     {isSpotlight && (
-                                                                        <Badge className="bg-amber-500 text-white border-none text-[10px] h-4">Spotlight</Badge>
+                                                                        <Badge className="bg-amber-500 text-white border-none text-[10px] h-4 flex items-center gap-1">
+                                                                            <Zap className="w-2 h-2 fill-current" />
+                                                                            Spotlight
+                                                                        </Badge>
                                                                     )}
                                                                     {isFeatured && !isSpotlight && (
-                                                                        <Badge className="bg-blue-600 text-white border-none text-[10px] h-4">Featured</Badge>
+                                                                        <Badge className="bg-blue-600 text-white border-none text-[10px] h-4 flex items-center gap-1">
+                                                                            <Crown className="w-2 h-2 fill-current" />
+                                                                            Featured
+                                                                        </Badge>
                                                                     )}
                                                                 </div>
                                                                 <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
@@ -236,7 +242,7 @@ export async function AgentDashboard({ session }: { session: any }) {
                                                                     isFeatured: property.isFeatured,
                                                                     type: "PROPERTY"
                                                                 }}
-                                                                userRole={session.user.role}
+                                                                userRole={session.user.roles?.[0] || "USER"}
                                                             />
                                                             <Link href={`/properties/${property.slug}`} target="_blank">
                                                                 <Button variant="ghost" size="icon" title="View Public Listing">
@@ -324,10 +330,16 @@ export async function AgentDashboard({ session }: { session: any }) {
                                                                 <div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                                                                     <span className="line-clamp-1">{project.name}</span>
                                                                     {isSpotlight && (
-                                                                        <Badge className="bg-amber-500 text-white border-none text-[10px] h-4">Spotlight</Badge>
+                                                                        <Badge className="bg-amber-500 text-white border-none text-[10px] h-4 flex items-center gap-1">
+                                                                            <Zap className="w-2 h-2 fill-current" />
+                                                                            Spotlight
+                                                                        </Badge>
                                                                     )}
                                                                     {isFeatured && !isSpotlight && (
-                                                                        <Badge className="bg-blue-600 text-white border-none text-[10px] h-4">Featured</Badge>
+                                                                        <Badge className="bg-blue-600 text-white border-none text-[10px] h-4 flex items-center gap-1">
+                                                                            <Crown className="w-2 h-2 fill-current" />
+                                                                            Featured
+                                                                        </Badge>
                                                                     )}
                                                                 </div>
                                                                 <div className="text-muted-foreground text-xs flex items-center gap-1 mt-0.5">
@@ -362,7 +374,7 @@ export async function AgentDashboard({ session }: { session: any }) {
                                                                     isFeatured: project.isFeatured,
                                                                     type: "PROJECT"
                                                                 }}
-                                                                userRole={session.user.role}
+                                                                userRole={session.user.roles?.[0] || "USER"}
                                                             />
                                                             <Link href={`/projects/${project.slug}`} target="_blank">
                                                                 <Button variant="ghost" size="icon" title="View Public Listing">

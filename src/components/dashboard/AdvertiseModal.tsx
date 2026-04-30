@@ -108,7 +108,7 @@ export function AdvertiseModal({ listing, userRole, trigger }: AdvertiseModalPro
         {trigger || (
           <Button variant="outline" size="sm" className="h-8 gap-2 border-amber-200 hover:bg-amber-50 text-amber-700">
             <Megaphone className="w-3.5 h-3.5" />
-            Advertise
+            Advertise {listing.type === "PROPERTY" ? "Property" : "Project"}
           </Button>
         )}
       </DialogTrigger>
@@ -134,7 +134,8 @@ export function AdvertiseModal({ listing, userRole, trigger }: AdvertiseModalPro
 
           <div className="grid gap-4 py-4">
             {options.map((option) => {
-              const creditsData = entitlements ? entitlements[option.id === "BUMP_UP" ? "BUMP_UP_CREDIT" : (option.id + "_CREDIT")] : null;
+              const creditKey = (listing.type === "PROJECT" ? "PROJECT_" : "") + option.id + "_CREDIT";
+              const creditsData = entitlements ? entitlements[creditKey] : null;
               const credits = creditsData ? (creditsData.total - creditsData.used) : 0;
               const canApply = credits > 0;
 
@@ -178,11 +179,11 @@ export function AdvertiseModal({ listing, userRole, trigger }: AdvertiseModalPro
                           option.id === "BUMP_UP" && "bg-blue-500 hover:bg-blue-600"
                         )}
                       >
-                        {loading === option.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                        {loading === option.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply Credit"}
                       </Button>
                     ) : !option.disabled && (
                       <Button asChild size="sm" variant="outline" className="gap-2">
-                        <Link href="/pricing?tab=addons">
+                        <Link href={`/pricing?tab=addons&type=${listing.type.toLowerCase()}`}>
                           <ShoppingCart className="w-4 h-4" />
                           Buy Credits
                         </Link>
