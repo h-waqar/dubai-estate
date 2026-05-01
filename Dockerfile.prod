@@ -29,8 +29,7 @@ RUN pnpm run build
 RUN pnpm add -g esbuild
 RUN esbuild prisma/seed.ts \
     --bundle --platform=node --target=node20 \
-    --external:@prisma/client --external:bcryptjs \
-    --external:@prisma/adapter-pg --external:pg \
+    --external:@prisma/client \
     --outfile=prisma/seed.cjs
 
 # Bundle prisma.config.ts so runner needs NO node_modules
@@ -60,10 +59,6 @@ COPY --from=builder /app/package.json ./package.json
 
 # Copy bundled config (self-contained, no node_modules required)
 COPY --from=builder /app/prisma.config.bundled.js ./prisma.config.js
-
-# Copy bcryptjs and other externals so seed.cjs works at runtime
-# Standalone already has most of @prisma/client, but we'll ensure bcryptjs is there
-COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 
 EXPOSE 3000
 ENV PORT=3000
