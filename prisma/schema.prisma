@@ -199,7 +199,7 @@ model PricingPlan {
   slug            String            @unique
   description     String?
   type            PlanType          @default(SUBSCRIPTION)
-  rank            Int               @default(0)
+  sortOrder       Int               @default(0)
   priceMonthly    Decimal?          @db.Decimal(10, 2)
   priceYearly     Decimal?          @db.Decimal(10, 2)
   priceOneTime    Decimal?          @db.Decimal(10, 2)

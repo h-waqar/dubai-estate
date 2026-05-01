@@ -22,7 +22,7 @@ export default function PricingCard({ plan, userId, onSubscribe, activeSubscript
   const visibleEntitlements = plan.entitlements?.filter(e => e.amount > 0) || [];
 
   const isCurrentPlan = activeSubscription?.planId === plan.id;
-  const isUpgrade = activeSubscription && plan.rank > activeSubscription.plan.rank;
+  const isUpgrade = activeSubscription && plan.sortOrder > activeSubscription.plan.sortOrder;
 
   let buttonText = "Subscribe";
   if (isCurrentPlan) buttonText = "Current Plan";

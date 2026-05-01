@@ -7,7 +7,7 @@ import { createPayPalProduct, createPayPalPlan, deactivatePayPalPlan, getPayPalP
 export class PricingService {
   static async listPlans() {
     return prisma.pricingPlan.findMany({
-      orderBy: { rank: "asc" },
+      orderBy: { sortOrder: "asc" },
       include: {
         entitlements: { include: { definition: true } },
         _count: { select: { users: true } }
