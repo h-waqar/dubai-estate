@@ -25,6 +25,7 @@ export default async function EditPlanPage({ params }: EditPlanPageProps) {
     priceMonthly: plan.priceMonthly ? Number(plan.priceMonthly) : 0,
     priceYearly: plan.priceYearly ? Number(plan.priceYearly) : 0,
     priceOneTime: plan.priceOneTime ? Number(plan.priceOneTime) : 0,
+    sortOrder: plan.sortOrder || 0,
     isActive: plan.isActive,
     paypalPlanId: plan.paypalPlanId || undefined,
     paypalProductId: plan.paypalProductId || undefined,

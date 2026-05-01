@@ -49,6 +49,7 @@ export function PlanForm({ initialData, definitions = [], isEditing = false }: P
       priceMonthly: 0,
       priceYearly: 0,
       priceOneTime: 0,
+      sortOrder: 0,
       isActive: true,
       paypalPlanId: "",
       paypalProductId: "",
@@ -225,6 +226,29 @@ export function PlanForm({ initialData, definitions = [], isEditing = false }: P
             />
           </div>
         )}
+
+        <FormField
+          control={form.control}
+          name="sortOrder"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sort Order</FormLabel>
+              <FormControl>
+                <Input 
+                    type="number" 
+                    {...field} 
+                    value={field.value ?? ""}
+                    onChange={e => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                />
+              </FormControl>
+              <FormDescription>Higher numbers appear first in lists.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {definitions.length > 0 && (
           <div className="grid grid-cols-2 gap-4 border-t pt-8">

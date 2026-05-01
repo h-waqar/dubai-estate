@@ -38,6 +38,7 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
       description: initialData.description || "",
       priceMonthly: Number(initialData.priceMonthly),
       priceYearly: Number(initialData.priceYearly),
+      sortOrder: initialData.sortOrder || 0,
       isActive: initialData.isActive,
     } : {
       name: "",
@@ -45,6 +46,7 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
       description: "",
       priceMonthly: 0,
       priceYearly: 0,
+      sortOrder: 0,
       isActive: true,
     },
   });
@@ -140,6 +142,20 @@ export function PricingAdminForm({ initialData }: PricingAdminFormProps) {
                 <FormControl>
                   <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="sortOrder"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sort Order</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormDescription>Higher numbers appear first in lists.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

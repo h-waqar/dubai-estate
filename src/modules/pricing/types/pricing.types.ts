@@ -9,6 +9,7 @@ export interface PricingPlan {
   priceYearly: any; // Decimal
   priceOneTime?: any; // Decimal
   type?: any; // PlanType
+  sortOrder: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

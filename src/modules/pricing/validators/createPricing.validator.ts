@@ -8,6 +8,7 @@ export const createPricingSchema = z.object({
   priceMonthly: z.number().min(0, "Price cannot be negative").optional(),
   priceYearly: z.number().min(0, "Price cannot be negative").optional(),
   priceOneTime: z.number().min(0, "Price cannot be negative").optional(),
+  sortOrder: z.number().int().min(0, "Sort order must be a positive integer").optional().default(0),
   isActive: z.boolean(),
   paypalPlanId: z.string().optional(),
   paypalProductId: z.string().optional(),
