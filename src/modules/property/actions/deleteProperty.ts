@@ -39,7 +39,7 @@ export async function deletePropertyAction(propertyId: number) {
       const ownerIsAdmin = user?.roles.includes("ADMIN") || user?.roles.includes("SUPER_ADMIN");
 
       if (!ownerIsAdmin) {
-        await EntitlementService.release(property.createdById, "PROPERTY_SLOT", tx);
+        await EntitlementService.release(property.createdById, "PROPERTY_SLOT", "PROPERTY", tx);
       }
     });
 

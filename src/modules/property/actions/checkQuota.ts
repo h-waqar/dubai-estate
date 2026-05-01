@@ -19,7 +19,7 @@ export async function checkQuota() {
     return { allowed: true, isAdmin: true };
   }
 
-  const { totalCapacity, totalUsed } = await EntitlementService.getQuotaStatus(user.id, "PROPERTY_SLOT");
+  const { totalCapacity, totalUsed } = await EntitlementService.getQuotaStatus(user.id, "PROPERTY_SLOT", "PROPERTY");
 
   if (totalCapacity === 0) {
       return { allowed: false, error: "No active entitlements found. Buy a plan to start listing." };

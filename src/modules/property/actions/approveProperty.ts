@@ -42,7 +42,7 @@ export async function approvePropertyAction(
                 const user = await tx.user.findUnique({ where: { id: property.createdById } });
                 const ownerIsAdmin = user?.roles.includes("ADMIN") || user?.roles.includes("SUPER_ADMIN");
                 if (!ownerIsAdmin) {
-                    await EntitlementService.release(property.createdById, "PROPERTY_SLOT", tx);
+                    await EntitlementService.release(property.createdById, "PROPERTY_SLOT", "PROPERTY", tx);
                 }
             }
         });

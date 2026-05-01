@@ -110,7 +110,7 @@ export async function createProperty(
   const isAdmin = user?.roles.includes("ADMIN") || user?.roles.includes("SUPER_ADMIN");
 
   if (!isAdmin) {
-      await EntitlementService.consume(createdById, "PROPERTY_SLOT", tx);
+      await EntitlementService.consume(createdById, "PROPERTY_SLOT", "PROPERTY", tx);
   }
 
   return serializeDecimals(property);

@@ -175,7 +175,7 @@ export class ProjectService {
         }
 
         if (!isAdmin) {
-            await EntitlementService.consume(userId, "PROJECT_SLOT", tx);
+            await EntitlementService.consume(userId, "PROJECT_SLOT", "PROJECT", tx);
         }
 
         return serializeDecimals(project);

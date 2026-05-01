@@ -114,7 +114,7 @@ export async function createProjectAction(formData: FormData) {
 
         if (!isAdmin) {
              const { EntitlementService } = await import("@/modules/entitlement/entitlement.service");
-             const hasQuota = await EntitlementService.checkCapacity(user.id, "PROJECT_SLOT");
+             const hasQuota = await EntitlementService.checkCapacity(user.id, "PROJECT_SLOT", "PROJECT");
              if (!hasQuota) {
                   return { success: false, error: "You have reached your project limit. Please upgrade your plan." };
              }
