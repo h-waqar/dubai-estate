@@ -25,9 +25,16 @@ RUN pnpm exec prisma generate
 # Build Next.js app
 RUN pnpm run build
 
+# Bundle seed script (self-contained, handles its own dependencies)
+RUN pnpm add -g esbuild
+RUN esbuild prisma/seed.ts \
+    --bundle --platform=node --target=node20 \
+    --external:@prisma/client --external:bcryptjs \
+    --external:@prisma/adapter-pg --external:pg \
+    --outfile=prisma/seed.cjs
+
 # Bundle prisma.config.ts so runner needs NO node_modules
 # This inlines `prisma/config` so the runner's global prisma CLI can load it
-RUN pnpm add -g esbuild
 RUN esbuild prisma.config.ts \
     --bundle --platform=node --target=node20 --format=cjs \
     --outfile=prisma.config.bundled.js
@@ -42,19 +49,24 @@ ENV PATH="$PNPM_HOME:$PATH"
 WORKDIR /app
 
 ENV NODE_ENV=production
-RUN pnpm add -g prisma@7.5.0 tsx@4.21.0
+RUN pnpm add -g prisma@7.5.0
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma/seed.cjs ./prisma/seed.cjs
 COPY --from=builder /app/package.json ./package.json
 
 # Copy bundled config (self-contained, no node_modules required)
 COPY --from=builder /app/prisma.config.bundled.js ./prisma.config.js
 
+# Copy bcryptjs and other externals so seed.cjs works at runtime
+# Standalone already has most of @prisma/client, but we'll ensure bcryptjs is there
+COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
+
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "prisma migrate deploy && prisma db seed && node server.js"]
+CMD ["sh", "-c", "prisma migrate deploy && node prisma/seed.cjs && node server.js"]
