@@ -63,7 +63,10 @@ export default function StepEightReview() {
                 const handoverDate = store.handoverDate instanceof Date
                     ? store.handoverDate
                     : new Date(store.handoverDate);
-                formData.append("handoverDate", handoverDate.toISOString());
+                
+                if (!isNaN(handoverDate.getTime())) {
+                    formData.append("handoverDate", handoverDate.toISOString());
+                }
             }
 
             const result = await createProjectAction(formData);

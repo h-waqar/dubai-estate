@@ -64,7 +64,10 @@ export function AddonStore({ addonPlans, packs = [] }: AddonStoreProps) {
                     .filter(p => !p.planId || p.planId === plan.id)
                     .map((pack) => {
                     const basePrice = Number(plan.priceOneTime || 0);
-                    const discount = Number(pack.discount || 0);
+                    // Handle both decimal (0.1) and percentage (10) stored in DB
+                    let discount = Number(pack.discount || 0);
+                    if (discount > 1) discount = discount / 100;
+
                     const totalPrice = (basePrice * pack.qty * (1 - discount)).toFixed(2);
                     
                     return (

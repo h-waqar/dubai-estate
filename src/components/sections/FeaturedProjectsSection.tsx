@@ -4,22 +4,17 @@ import { serializeDecimals } from "@/lib/serializeDecimal";
 import { FeaturedProjectGrid } from "./FeaturedProjectGrid";
 
 export async function FeaturedProjectsSection() {
-    // 1. Fetch Projects (Prioritize Spotlight/Featured)
+    // 1. Fetch Projects (Prioritize Spotlight)
     const projects = await prisma.project.findMany({
         where: {
             ...GovernanceService.getPublicFilter(),
-            OR: [
-                { isFeatured: true },
-                {
-                    promotions: {
-                        some: {
-                            type: { in: ["SPOTLIGHT", "FEATURED"] },
-                            status: "ACTIVE",
-                            expiresAt: { gt: new Date() }
-                        }
-                    }
+            promotions: {
+                some: {
+                    type: "SPOTLIGHT",
+                    status: "ACTIVE",
+                    expiresAt: { gt: new Date() }
                 }
-            ]
+            }
         },
         take: 15,
         orderBy: [
@@ -61,22 +56,19 @@ export async function FeaturedProjectsSection() {
     // 3. Attach media and promotion info to projects
     const serializedProjects = projects.map((project: any) => {
         const isSpotlight = project.promotions?.some((p: any) => p.type === "SPOTLIGHT");
-        const isFeaturedPromotion = project.promotions?.some((p: any) => p.type === "FEATURED");
         
         return {
             ...project,
             isSpotlight,
-            isFeatured: project.isFeatured || isFeaturedPromotion,
+            isFeatured: project.isFeatured || project.promotions?.some((p: any) => p.type === "FEATURED"),
             mediaUsages: mediaUsages.filter((mu: { entityId: number }) => mu.entityId === project.id),
         };
     });
 
-    // 4. Sort: Spotlight > Featured > rest
+    // 4. Sort: Spotlight first (all are spotlight anyway based on query, but keeping for stability)
     serializedProjects.sort((a: any, b: any) => {
         if (a.isSpotlight && !b.isSpotlight) return -1;
         if (!a.isSpotlight && b.isSpotlight) return 1;
-        if (a.isFeatured && !b.isFeatured) return -1;
-        if (!a.isFeatured && b.isFeatured) return 1;
         return 0;
     });
 

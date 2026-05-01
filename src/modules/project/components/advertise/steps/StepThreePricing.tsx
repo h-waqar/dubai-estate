@@ -18,9 +18,11 @@ export default function StepThreePricing() {
             priceFrom: store.priceFrom,
             currency: store.currency,
             paymentPlanSummary: store.paymentPlanSummary,
-            handoverDate: store.handoverDate
-                ? new Date(store.handoverDate).toISOString().split("T")[0]
-                : "",
+            handoverDate: (() => {
+                if (!store.handoverDate) return "";
+                const d = new Date(store.handoverDate);
+                return isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+            })(),
         },
     });
 
