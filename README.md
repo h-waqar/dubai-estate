@@ -19,7 +19,7 @@ This is a full-stack real estate application built with Next.js, Prisma, and Nex
 ### Prerequisites
 
 - Node.js (v20.x or later recommended)
-- npm, yarn, pnpm, or bun
+- npm or yarn
 
 ### Installation
 

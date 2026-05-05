@@ -86,7 +86,7 @@ services:
       db:
         condition: service_healthy
     # Sync dependencies -> Generate Prisma Client -> Push DB Schema -> Seed -> Start Dev Server
-    command: sh -c "pnpm prisma generate && pnpm prisma db push --accept-data-loss && pnpm prisma db seed && pnpm dev"
+    command: sh -c "npx prisma generate && npx prisma db push --accept-data-loss && npx prisma db seed && npm run dev"
 
   # Service 3: Adminer (Database Viewer)
   # A lightweight GUI to view/edit your database tables.
