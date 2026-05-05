@@ -4,37 +4,6 @@ import bcrypt from "bcryptjs";
 export async function seedUsers(prisma: PrismaClient) {
   console.log("⏳ Seeding Users...");
 
-  // Admin
-  const adminEmail = "admin@test.com";
-  const adminUsername = "super_admin";
-  const hashedPassword = await bcrypt.hash("1122", 10);
-
-  // Remove any user with the same username but different email to avoid unique constraint errors
-  await prisma.user.deleteMany({
-    where: {
-      username: adminUsername,
-      NOT: { email: adminEmail },
-    },
-  });
-
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {
-      password: hashedPassword,
-      username: adminUsername,
-      emailVerified: new Date(),
-    },
-    create: {
-      email: adminEmail,
-      name: "Super Admin",
-      username: adminUsername,
-      roles: [Role.SUPER_ADMIN],
-      password: hashedPassword,
-      emailVerified: new Date(),
-    },
-  });
-  console.log(`   ✅ Admin User: ${admin.email}`);
-
   // Agent
   const agentEmail = "agent@test.com";
   const agentUsername = "john_agent";
@@ -95,5 +64,5 @@ export async function seedUsers(prisma: PrismaClient) {
   });
   console.log(`   ✅ Shadow Agent: ${shadowAgent.email}`);
 
-  return { admin, agent, shadowAgent };
+  return { agent, shadowAgent };
 }

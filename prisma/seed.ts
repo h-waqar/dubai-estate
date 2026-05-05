@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 // Import lookup seeds
+import { seedAdmin } from "./seeds/lookup/admin";
 import { seedEntitlements } from "./seeds/lookup/entitlements";
 import { seedRoles } from "./seeds/lookup/roles";
 import { seedPropertyTypes } from "./seeds/lookup/property-types";
@@ -34,6 +35,7 @@ async function main() {
 
   try {
     // 1. Mandatory Lookups (Safe for all environments)
+    await seedAdmin(prisma);
     await seedRoles(prisma);
     await seedEntitlements(prisma);
     await seedPropertyTypes(prisma);
