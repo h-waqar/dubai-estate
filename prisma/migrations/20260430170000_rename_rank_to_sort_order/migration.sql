@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "PricingPlan" RENAME COLUMN "rank" TO "sortOrder";
+ALTER TABLE "PricingPlan" ADD COLUMN "sortOrder" INTEGER NOT NULL DEFAULT 0;
