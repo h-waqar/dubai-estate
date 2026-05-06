@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 // Import lookup seeds
 import { seedAdmin } from "./seeds/lookup/admin";
@@ -22,9 +23,9 @@ import { seedUsers } from "./seeds/mock/users";
 import { seedProjects } from "./seeds/mock/projects";
 import { seedProperties } from "./seeds/mock/properties";
 
-const adapter = new PrismaPg({
-  connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL!,
-});
+const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL!;
+const pool = new pg.Pool({ connectionString });
+const adapter = new PrismaPg(pool as any);
 
 const prisma = new PrismaClient({ adapter });
 
